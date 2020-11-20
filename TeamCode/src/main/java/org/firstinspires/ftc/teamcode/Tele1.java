@@ -70,7 +70,7 @@ public class Tele1 extends OpMode {
             robot.toggleSpeed();
         }
 
-        //Mecanum wheel drive
+        //Mecanum yo wheel drive
         double r = Math.hypot(controller1.left_stick_x, controller1.left_stick_y);
         double robotAngle = Math.atan2(controller1.left_stick_y, controller1.left_stick_x) - Math.PI / 4;
         double rightX = controller1.right_stick_x;
