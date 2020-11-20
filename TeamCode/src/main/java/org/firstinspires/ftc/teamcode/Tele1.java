@@ -80,6 +80,8 @@ public class Tele1 extends OpMode {
         robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
         robot.updateDrive();
 
+        //Kai was here
+
         //@Imants, PRESS THE "a" BUTTON ON THE CONTROLLER TO TOGGLE THE INTAKE MOTOR
         if (controller1.a.equals("pressing")) {
             robot.toggleIntake();
