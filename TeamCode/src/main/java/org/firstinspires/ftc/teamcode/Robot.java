@@ -46,13 +46,15 @@ class Robot {
         this.telemetry = telemetry;
     }
 
-    void updateBallDrive() {
+    void updateDrive() {
+        //displays power of motors on phone
         telemetry.addData("leftFrontPower", "LF = " + leftFrontPower);
         telemetry.addData("rightFrontPower", "RF = " + rightFrontPower);
-        telemetry.addData("leftFrontPower", "LR = " + leftRearPower);
-        telemetry.addData("rightFrontPower", "RR = " + rightRearPower);
+        telemetry.addData("leftRearPower", "LR = " + leftRearPower);
+        telemetry.addData("rightRearPower", "RR = " + rightRearPower);
         telemetry.addData("intakePower", "intakePower = " + intakePower);
         telemetry.update();
+
         leftFrontDrive.setPower(speed * leftFrontPower);
         rightFrontDrive.setPower(speed * rightFrontPower);
         leftRearDrive.setPower(speed * leftRearPower);

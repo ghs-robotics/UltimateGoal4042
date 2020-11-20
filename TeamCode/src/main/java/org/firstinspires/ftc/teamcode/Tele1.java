@@ -70,7 +70,7 @@ public class Tele1 extends OpMode {
             robot.toggleSpeed();
         }
 
-        //Ball Drive
+        //Mecanum wheel drive
         double r = Math.hypot(controller1.left_stick_x, controller1.left_stick_y);
         double robotAngle = Math.atan2(controller1.left_stick_y, controller1.left_stick_x) - Math.PI / 4;
         double rightX = controller1.right_stick_x;
@@ -78,6 +78,7 @@ public class Tele1 extends OpMode {
         robot.rightFrontPower = r * Math.sin(robotAngle) - rightX;
         robot.leftRearPower = r * Math.sin(robotAngle) + rightX;
         robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
+        robot.updateDrive();
 
         //@Imants, PRESS THE "a" BUTTON ON THE CONTROLLER TO TOGGLE THE INTAKE MOTOR
         if (controller1.a.equals("pressing")) {
