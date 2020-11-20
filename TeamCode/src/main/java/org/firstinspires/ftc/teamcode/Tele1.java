@@ -48,7 +48,7 @@ public class Tele1 extends OpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
-
+    //kenny codes :)
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
     public void init_loop() {
