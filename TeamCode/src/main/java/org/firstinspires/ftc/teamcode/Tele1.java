@@ -84,6 +84,11 @@ public class Tele1 extends OpMode {
         if (controller1.a.equals("pressing")) {
             robot.toggleIntake();
         }
+
+        //grabby thing for wobble goals
+        if (controller1.b.equals("pressing")){
+            robot.toggleGrab();
+        }
     }
 
     //Code to run ONCE after the driver hits STOP

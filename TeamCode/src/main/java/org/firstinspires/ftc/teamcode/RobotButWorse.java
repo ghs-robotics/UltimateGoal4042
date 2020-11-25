@@ -1,16 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-
-class  Robot {
+//questions: what angle to set/move servos to
+class RobotButWorse {
     double leftFrontPower = 0;
     double rightFrontPower = 0;
     double leftRearPower = 0;
@@ -29,7 +26,7 @@ class  Robot {
     ElapsedTime elapsedTime;
     Telemetry telemetry;
 
-    Robot(HardwareMap hardwareMap, Telemetry telemetry) {
+    RobotButWorse(HardwareMap hardwareMap, Telemetry telemetry) {
         //@Imants, these are the names you should use in the config on the phones!!! (i.e. "leftFrontDrive" etc.)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
@@ -80,9 +77,8 @@ class  Robot {
         }
         intakeMotor.setPower(intakePower);
     }
-
-    //values need calibration
-    void toggleGrab() {
+//values need calibration
+     void toggleGrab() {
         if (grabAngle == 0) {
             grabAngle = 0.5;
         } else {
@@ -90,7 +86,6 @@ class  Robot {
         }
         grabServo.setPosition(grabAngle);
     }
-
 
     void resetElapsedTime() {
         elapsedTime.reset();
