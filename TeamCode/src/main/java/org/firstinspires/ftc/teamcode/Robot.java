@@ -18,6 +18,9 @@ class Robot {
     double intakePower = 0;
     double speed = 1;
 
+    static final double X_TICKS_PER_INCH = 54.000; // MUST BE CALIBRATED!!
+    static final double Y_TICKS_PER_INCH = 59.529; // MUST BE CALIBRATED!!
+
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
     DcMotor leftRearDrive;
@@ -25,6 +28,7 @@ class Robot {
     DcMotor intakeMotor;
 
     ElapsedTime elapsedTime;
+    Gyro gyro;
     Telemetry telemetry;
 
     Robot(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -41,9 +45,27 @@ class Robot {
         rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        gyro = new Gyro(hardwareMap);
+        gyro.resetAngle();
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         this.telemetry = telemetry;
+    }
+
+    void resetDrive() {
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftFrontPower = 0;
+        rightFrontPower = 0;
+        leftRearPower = 0;
+        rightRearPower = 0;
+        updateDrive();
     }
 
     void updateDrive() {
@@ -60,6 +82,28 @@ class Robot {
         leftRearDrive.setPower(speed * leftRearPower);
         rightRearDrive.setPower(speed * rightRearPower);
     }
+
+    //moves to the (x,y) position relative to current location
+    void move(double x, double y){
+        resetDrive();
+        double targetX = x * X_TICKS_PER_INCH;
+        double targetY = y * Y_TICKS_PER_INCH;
+        double forwardPower;
+        while (true) {
+            double dy = targetY - leftFrontDrive.getCurrentPosition();
+            forwardPower = 0.0013 * dy;
+            //do stuff
+            updateDrive();
+            if (dy < 20) {
+                break;
+            }
+        }
+        resetDrive();
+        wait(0.1);
+
+    }
+
+
 
     void toggleSpeed() {
         if (speed == 1) {
