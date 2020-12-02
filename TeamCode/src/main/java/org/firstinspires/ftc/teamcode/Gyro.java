@@ -10,8 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Gyro {
     BNO055IMU gyro;
-    Orientation lastAngles = new Orientation();
-    double globalAngle;
+    Orientation angles;
 
     Gyro(HardwareMap hardwareMap) {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -19,9 +18,15 @@ public class Gyro {
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = false;
-        gyro = hardwareMap.get(BNO055IMU.class, "imu");
+        gyro = hardwareMap.get(BNO055IMU.class, "gyro");
         gyro.initialize(parameters);
     }
 
+    public double getDirection() {
+        angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //first angle returns the angle the robot is facing perpendicular to the ground
+        // aka the direction the robot is looking at
+        return angles.firstAngle;
+    }
 
-}
+ }
