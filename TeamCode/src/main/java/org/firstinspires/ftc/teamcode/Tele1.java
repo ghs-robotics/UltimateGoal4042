@@ -63,12 +63,11 @@ public class Tele1 extends OpMode {
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
+        //Registers controller input
         controller1.update();
 
-        //PRESS THE "x" BUTTON ON THE CONTROLLER TO TOGGLE SPEED
-        if (controller1.x.equals("pressing")) {
-            robot.toggleSpeed();
-        }
+        //Press "x" to toggle speed between 100% and 30%
+        if (controller1.x.equals("pressing")) { robot.toggleSpeed(); }
 
         //Mecanum wheel drive
         double r = Math.hypot(controller1.left_stick_x, controller1.left_stick_y);
@@ -80,12 +79,11 @@ public class Tele1 extends OpMode {
         robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
         robot.updateDrive();
 
-        //Kai was here
+        //Press "a" to turn on/off the shooter motor
+        if (controller1.a.equals("pressing")) { robot.toggleShooter(); }
 
-        //@Imants, PRESS THE "a" BUTTON ON THE CONTROLLER TO TOGGLE THE INTAKE MOTOR
-        if (controller1.a.equals("pressing")) {
-            robot.toggleIntake();
-        }
+        //Press "b" to turn on/off the intake motor
+        if (controller1.b.equals("pressing")) { robot.toggleIntake(); }
     }
 
     //Code to run ONCE after the driver hits STOP

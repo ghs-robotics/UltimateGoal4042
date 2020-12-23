@@ -15,36 +15,41 @@ class Robot {
     double rightFrontPower = 0;
     double leftRearPower = 0;
     double rightRearPower = 0;
+    double shooterPower = 0;
     double intakePower = 0;
     double speed = 1;
-
-    static final double X_TICKS_PER_INCH = 54.000; // MUST BE CALIBRATED!!
-    static final double Y_TICKS_PER_INCH = 59.529; // MUST BE CALIBRATED!!
 
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
     DcMotor leftRearDrive;
     DcMotor rightRearDrive;
+    DcMotor shooterMotor;
     DcMotor intakeMotor;
 
     ElapsedTime elapsedTime;
     Gyro gyro;
     Telemetry telemetry;
 
+    //Creates a robot object with methods that we can use in both Auto and TeleOp
     Robot(HardwareMap hardwareMap, Telemetry telemetry) {
-        //@Imants, these are the names you should use in the config on the phones!!! (i.e. "leftFrontDrive" etc.)
+
+        //These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
+        intakeMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
 
+        //Defines the forward direction for each of our motors
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
 
+        //Declares some other useful tools for our robot (the gyroscope, the timer, etc.)
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
         elapsedTime = new ElapsedTime();
@@ -52,6 +57,7 @@ class Robot {
         this.telemetry = telemetry;
     }
 
+/*    //In case we actually need to use encoders on the drive motors
     void resetDrive() {
         leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -66,70 +72,54 @@ class Robot {
         leftRearPower = 0;
         rightRearPower = 0;
         updateDrive();
-    }
+    } */
 
+    //Updates the powers being sent to the drive motors
     void updateDrive() {
-        //displays power of motors on phone
-        telemetry.addData("leftFrontPower", "LF = " + leftFrontPower);
-        telemetry.addData("rightFrontPower", "RF = " + rightFrontPower);
-        telemetry.addData("leftRearPower", "LR = " + leftRearPower);
-        telemetry.addData("rightRearPower", "RR = " + rightRearPower);
-        telemetry.addData("intakePower", "intakePower = " + intakePower);
+        //Adjusts powers for speed
+        double LF = speed * leftFrontPower;
+        double RF = speed * rightFrontPower;
+        double LR = speed * leftRearPower;
+        double RR = speed * rightRearPower;
+
+        //Displays motor powers on the phone
+        telemetry.addData("leftFrontPower", "" + LF);
+        telemetry.addData("rightFrontPower", "" + RF);
+        telemetry.addData("leftRearPower", "" + LR);
+        telemetry.addData("rightRearPower", "" + RR);
+        telemetry.addData("shooterPower", "" + shooterPower);
+        telemetry.addData("intakePower", "" + intakePower);
         telemetry.update();
 
+        //Sends desired power to drive motors
         leftFrontDrive.setPower(speed * leftFrontPower);
         rightFrontDrive.setPower(speed * rightFrontPower);
         leftRearDrive.setPower(speed * leftRearPower);
         rightRearDrive.setPower(speed * rightRearPower);
     }
 
-    //moves to the (x,y) position relative to current location
-    void move(double x, double y){
-        resetDrive();
-        double targetX = x * X_TICKS_PER_INCH;
-        double targetY = y * Y_TICKS_PER_INCH;
-        double forwardPower;
-        while (true) {
-            double dy = targetY - leftFrontDrive.getCurrentPosition();
-            forwardPower = 0.0013 * dy;
-            //do stuff
-            updateDrive();
-            if (dy < 20) {
-                break;
-            }
-        }
-        resetDrive();
-        wait(0.1);
+    //Sets the drive speed to 30%
+    void toggleSpeed() { speed = (speed == 1 ? 0.3 : 1); }
 
+    //Turns the shooter motor on or off
+    void toggleShooter() {
+        shooterPower = (shooterPower == 0 ? 0.9 : 0);
+        shooterMotor.setPower(shooterPower);
     }
 
-
-
-    void toggleSpeed() {
-        if (speed == 1) {
-            speed = 0.3;
-        } else {
-            speed = 1;
-        }
-    }
-
+    //Turns the intake motor on or off
     void toggleIntake() {
-        if (intakePower == 0) {
-            intakePower = 1;
-        } else {
-            intakePower = 0;
-        }
+        intakePower = (intakePower == 0 ? 0.9 : 0);
         intakeMotor.setPower(intakePower);
     }
 
-    void resetElapsedTime() {
-        elapsedTime.reset();
-    }
+    //Resets the timer
+    void resetElapsedTime() { elapsedTime.reset(); }
 
-    double getElapsedTimeSeconds() {
-        return elapsedTime.seconds();
-    }
+    //Returns how many seconds have passed since the timer was last reset
+    double getElapsedTimeSeconds() { return elapsedTime.seconds(); }
 
+    //Makes the robot wait (i.e. do nothing) for a specified number of seconds
     void wait(double seconds) {
         double start = getElapsedTimeSeconds();
         while (getElapsedTimeSeconds() - start < seconds) {}
