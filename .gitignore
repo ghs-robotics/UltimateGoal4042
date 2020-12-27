@@ -3,6 +3,7 @@
 *.aar
 *.ap_
 *.aab
+.idea/*
 
 !libs/*.aar
 
