@@ -17,6 +17,8 @@ class Robot {
     double rightRearPower = 0;
     double shooterPower = 0;
     double intakePower = 0;
+    double grabAngle = 0;
+    double shooterAngle = 0;
     double speed = 1;
 
     DcMotor leftFrontDrive;
@@ -25,6 +27,8 @@ class Robot {
     DcMotor rightRearDrive;
     DcMotor shooterMotor;
     DcMotor intakeMotor;
+    Servo grabServo;
+    Servo shooterServo;
 
     ElapsedTime elapsedTime;
     Gyro gyro;
@@ -40,14 +44,18 @@ class Robot {
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
         intakeMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
+        grabServo = hardwareMap.get(Servo.class, "grabServo");
+        shooterServo = hardwareMap.get(Servo.class, "shooterServo");
 
-        //Defines the forward direction for each of our motors
+        //Defines the forward direction for each of our motors/servos
         leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
         rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        grabServo.setDirection(Servo.Direction.FORWARD);
+        shooterServo.setDirection(Servo.Direction.FORWARD);
 
         //Declares some other useful tools for our robot (the gyroscope, the timer, etc.)
         gyro = new Gyro(hardwareMap);
@@ -88,14 +96,15 @@ class Robot {
         telemetry.addData("leftRearPower", "" + LR);
         telemetry.addData("rightRearPower", "" + RR);
         telemetry.addData("shooterPower", "" + shooterPower);
-        telemetry.addData("intakePower", "" + intakePower);
+        telemetry.addData("grabServo", "" + grabAngle);
+        telemetry.addData("shooterAngle", "" + shooterAngle);
         telemetry.update();
 
         //Sends desired power to drive motors
-        leftFrontDrive.setPower(speed * leftFrontPower);
-        rightFrontDrive.setPower(speed * rightFrontPower);
-        leftRearDrive.setPower(speed * leftRearPower);
-        rightRearDrive.setPower(speed * rightRearPower);
+        leftFrontDrive.setPower(LF);
+        rightFrontDrive.setPower(RF);
+        leftRearDrive.setPower(LR);
+        rightRearDrive.setPower(RR);
     }
 
     //Sets the drive speed to 30%
@@ -111,6 +120,20 @@ class Robot {
     void toggleIntake() {
         intakePower = (intakePower == 0 ? 0.9 : 0);
         intakeMotor.setPower(intakePower);
+    }
+
+    //Toggles the wobble gripper
+    void toggleGrab() {
+        grabAngle = (grabAngle == 0 ? 0.5 : 0); //values need calibration!!!
+        grabServo.setPosition(grabAngle);
+    }
+
+    //Launches a ring by moving the shooterServo
+    void launchRing() {
+        shooterAngle = 0.5; //value needs calibration!!!
+        grabServo.setPosition(grabAngle);
+        shooterAngle = 0; //value needs calibration!!!
+        grabServo.setPosition(grabAngle);
     }
 
     //Resets the timer

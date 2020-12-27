@@ -84,6 +84,12 @@ public class Tele1 extends OpMode {
 
         //Press "b" to turn on/off the intake motor
         if (controller1.b.equals("pressing")) { robot.toggleIntake(); }
+
+        //Press "up" on the dpad to toggle the wobble gripper
+        if (controller1.dpad_up.equals("pressing")){ robot.toggleGrab(); }
+
+        //Press "y" to launch a ring
+        if (controller1.y.equals("pressing")){ robot.launchRing(); }
     }
 
     //Code to run ONCE after the driver hits STOP
