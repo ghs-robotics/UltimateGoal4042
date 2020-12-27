@@ -91,10 +91,10 @@ class Robot {
         double RR = speed * rightRearPower;
 
         //Displays motor powers on the phone
-        telemetry.addData("leftFrontPower", "" + LF);
-        telemetry.addData("rightFrontPower", "" + RF);
-        telemetry.addData("leftRearPower", "" + LR);
-        telemetry.addData("rightRearPower", "" + RR);
+//        telemetry.addData("leftFrontPower", "" + LF);
+//        telemetry.addData("rightFrontPower", "" + RF);
+//        telemetry.addData("leftRearPower", "" + LR);
+//        telemetry.addData("rightRearPower", "" + RR);
         telemetry.addData("shooterPower", "" + shooterPower);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
