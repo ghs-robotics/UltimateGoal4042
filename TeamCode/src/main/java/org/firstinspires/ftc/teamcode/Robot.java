@@ -17,8 +17,9 @@ class Robot {
     double rightRearPower = 0;
     double shooterPower = 0;
     double intakePower = 0;
-    double grabAngle = 0;
-    double shooterAngle = 0;
+    double armAngle = 0.2;
+    double grabAngle = 0.2;
+    double shooterAngle = 0.05;
     double speed = 1;
 
     DcMotor leftFrontDrive;
@@ -27,6 +28,7 @@ class Robot {
     DcMotor rightRearDrive;
     DcMotor shooterMotor;
     DcMotor intakeMotor;
+    Servo armServo;
     Servo grabServo;
     Servo shooterServo;
 
@@ -44,6 +46,7 @@ class Robot {
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
         intakeMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
+        armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
         shooterServo = hardwareMap.get(Servo.class, "shooterServo");
 
@@ -54,6 +57,7 @@ class Robot {
         rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        armServo.setDirection(Servo.Direction.FORWARD);
         grabServo.setDirection(Servo.Direction.FORWARD);
         shooterServo.setDirection(Servo.Direction.FORWARD);
 
@@ -82,6 +86,13 @@ class Robot {
         updateDrive();
     } */
 
+    //Sets servos to starting positions
+    void resetServos(){
+        armServo.setPosition(armAngle);
+        grabServo.setPosition(grabAngle);
+        shooterServo.setPosition(shooterAngle);
+    }
+
     //Updates the powers being sent to the drive motors
     void updateDrive() {
         //Adjusts powers for speed
@@ -96,6 +107,7 @@ class Robot {
 //        telemetry.addData("leftRearPower", "" + LR);
 //        telemetry.addData("rightRearPower", "" + RR);
         telemetry.addData("shooterPower", "" + shooterPower);
+        telemetry.addData("armServo", "" + armAngle);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
         telemetry.update();
@@ -122,18 +134,35 @@ class Robot {
         intakeMotor.setPower(intakePower);
     }
 
+    //Turns the arm
+    void turnArm() {
+        armAngle = (armAngle == 0.2 ? 1 : 0.2); //values need calibration!!!
+        armServo.setPosition(armAngle);
+    }
+
     //Toggles the wobble gripper
     void toggleGrab() {
-        grabAngle = (grabAngle == 0 ? 0.5 : 0); //values need calibration!!!
+        grabAngle = (grabAngle == 0.25 ? 0 : 0.25);
         grabServo.setPosition(grabAngle);
     }
 
     //Launches a ring by moving the shooterServo
     void launchRing() {
-        shooterAngle = 0.5; //value needs calibration!!!
-        grabServo.setPosition(grabAngle);
-        shooterAngle = 0; //value needs calibration!!!
-        grabServo.setPosition(grabAngle);
+        shooterAngle = 0.25; //value needs calibration!!!
+        shooterServo.setPosition(shooterAngle);
+        wait(0.5);
+        shooterAngle = 0.05; //value needs calibration!!!
+        shooterServo.setPosition(shooterAngle);
+    }
+
+    void increaseArmAngle(){
+        armAngle += 0.05;
+        armServo.setPosition(armAngle);
+    }
+
+    void decreaseArmAngle(){
+        armAngle -= 0.05;
+        armServo.setPosition(armAngle);
     }
 
     //Resets the timer

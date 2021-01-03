@@ -45,6 +45,7 @@ public class Tele1 extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
+        robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -56,9 +57,7 @@ public class Tele1 extends OpMode {
 
     //Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() {
-        robot.resetElapsedTime();
-    }
+    public void start() { robot.resetElapsedTime();}
 
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
@@ -67,7 +66,9 @@ public class Tele1 extends OpMode {
         controller1.update();
 
         //Press "x" to toggle speed between 100% and 30%
-        if (controller1.x.equals("pressing")) { robot.toggleSpeed(); }
+        if (controller1.x.equals("pressing")) {
+            robot.toggleSpeed();
+        }
 
         //Mecanum wheel drive
         double r = Math.hypot(controller1.left_stick_x, controller1.left_stick_y);
@@ -79,21 +80,41 @@ public class Tele1 extends OpMode {
         robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
         robot.updateDrive();
 
-        //Press "a" to turn on/off the shooter motor
-        if (controller1.a.equals("pressing")) { robot.toggleShooter(); }
+        //Press left bumper to turn on/off the shooter motor
+        if (controller1.left_bumper.equals("pressing")) {
+            robot.toggleShooter();
+        }
 
-        //Press "b" to turn on/off the intake motor
-        if (controller1.b.equals("pressing")) { robot.toggleIntake(); }
+        //Press right bumper to launch a ring
+        if (controller1.right_bumper.equals("pressing")) {
+            robot.launchRing();
+        }
 
-        //Press left_bumper to toggle the wobble gripper
-        if (controller1.left_bumper.equals("pressing")){ robot.toggleGrab(); }
+        //Press "y" to turn on/off the intake motor
+        if (controller1.y.equals("pressing")) {
+            robot.toggleIntake();
+        }
 
-        //Press "y" to launch a ring
-        if (controller1.y.equals("pressing")){ robot.launchRing(); }
+        //Press "b" to toggle the wobble gripper
+        if (controller1.b.equals("pressing")) {
+            robot.toggleGrab();
+        }
+
+        //Press "a" to turn the arm
+        if (controller1.a.equals("pressing")) {
+            robot.turnArm();
+        }
+
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.increaseArmAngle();
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.decreaseArmAngle();
+        }
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop () {
+    public void stop(){
     }
 }
