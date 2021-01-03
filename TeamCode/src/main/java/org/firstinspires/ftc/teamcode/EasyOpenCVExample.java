@@ -42,6 +42,7 @@ public class EasyOpenCVExample extends LinearOpMode
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
 
+
     @Override
     public void runOpMode()
     {
