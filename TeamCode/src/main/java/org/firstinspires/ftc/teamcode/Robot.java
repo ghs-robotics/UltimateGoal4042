@@ -22,6 +22,7 @@ class Robot {
     double shooterAngle = 0.05;
     double speed = 1;
 
+
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
     DcMotor leftRearDrive;
