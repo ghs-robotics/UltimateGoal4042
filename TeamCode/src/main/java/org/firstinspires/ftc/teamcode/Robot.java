@@ -17,7 +17,7 @@ class Robot {
     double rightRearPower = 0;
     double shooterPower = 0;
     double intakePower = 0;
-    double armAngle = 0.2;
+    double armAngle = 0.5;
     double grabAngle = 0.2;
     double shooterAngle = 0.05;
     double speed = 1;
@@ -46,7 +46,7 @@ class Robot {
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
-        intakeMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
+        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
         shooterServo = hardwareMap.get(Servo.class, "shooterServo");
@@ -121,11 +121,11 @@ class Robot {
     }
 
     //Sets the drive speed to 30%
-    void toggleSpeed() { speed = (speed == 1 ? 0.3 : 1); }
+    void toggleSpeed() { speed = (speed == 1 ? 0.5 : 1); }
 
     //Turns the shooter motor on or off
     void toggleShooter() {
-        shooterPower = (shooterPower == 0 ? 0.9 : 0);
+        shooterPower = (shooterPower == 0 ? 1.0 : 0);
         shooterMotor.setPower(shooterPower);
     }
 
@@ -137,7 +137,7 @@ class Robot {
 
     //Turns the arm
     void turnArm() {
-        armAngle = (armAngle == 0.2 ? 1 : 0.2); //values need calibration!!!
+        armAngle = (armAngle == 0.88 ? 0.5 : 0.88);
         armServo.setPosition(armAngle);
     }
 
@@ -149,20 +149,20 @@ class Robot {
 
     //Launches a ring by moving the shooterServo
     void launchRing() {
-        shooterAngle = 0.25; //value needs calibration!!!
+        shooterAngle = 0.25;
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
-        shooterAngle = 0.05; //value needs calibration!!!
+        shooterAngle = 0.05;
         shooterServo.setPosition(shooterAngle);
     }
 
     void increaseArmAngle(){
-        armAngle += 0.05;
+        armAngle += 0.1;
         armServo.setPosition(armAngle);
     }
 
     void decreaseArmAngle(){
-        armAngle -= 0.05;
+        armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
 
