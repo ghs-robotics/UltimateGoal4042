@@ -26,15 +26,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @TeleOp
 public class FindRings extends LinearOpMode
@@ -46,6 +51,8 @@ public class FindRings extends LinearOpMode
     @Override
     public void runOpMode()
     {
+        int ringX;
+        int ringY;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
@@ -70,8 +77,12 @@ public class FindRings extends LinearOpMode
 
         while (opModeIsActive())
         {
+            ringX = RingDeterminationPipeline.ringX;
+            ringY = RingDeterminationPipeline.ringY;
+
             telemetry.addData("Analysis", pipeline.getAnalysis());
             telemetry.addData("Position", pipeline.position);
+            telemetry.addData("ringX, ringY", "( " + ringX + ", " + ringY + " )");
             telemetry.update();
 
             // Don't burn CPU cycles busy-looping in this sample
@@ -81,6 +92,10 @@ public class FindRings extends LinearOpMode
 
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
+
+        public static int ringX = 0;
+        public static int ringY = 0;
+
         /*
          * An enum to define the ring position
          */
@@ -162,13 +177,18 @@ public class FindRings extends LinearOpMode
             position = RingPosition.FOUR; // Record our analysis
             if(avg1 > FOUR_RING_THRESHOLD){
                 position = RingPosition.FOUR;
-            }else if (avg1 > ONE_RING_THRESHOLD){
+            } else if (avg1 > ONE_RING_THRESHOLD){
                 position = RingPosition.ONE;
-            }else{
+            } else {
                 position = RingPosition.NONE;
             }
 
+            //update ring coordinates
             int[] coords = RingDetector.getRingCoordinates(input);
+            ringX = coords[0];
+            ringY = coords[1];
+//            int[] coords = new int[]{50,50,50,50};
+
             Imgproc.rectangle(
                     input, // Buffer to draw on
                     new Point(coords[0],coords[1]), // First point which defines the rectangle
@@ -183,5 +203,56 @@ public class FindRings extends LinearOpMode
         {
             return avg1;
         }
+
+        public int[] getRingCoordinates(Mat input) {
+            Scalar GREEN = new Scalar(0, 255, 0);
+
+            Mat src = input;
+            Imgproc.resize(src, src, new Size(320, 240));
+            Mat dst = new Mat();
+
+            Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2HSV);
+            Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
+
+            //adding a mask to the dst mat
+            Scalar lowerHSV = new Scalar(103, 146, 164);
+            Scalar upperHSV = new Scalar(112, 242, 255);
+            Core.inRange(dst, lowerHSV, upperHSV, dst);
+
+            //dilate the ring to make it easier to detect
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+            Imgproc.dilate(dst, dst, kernel);
+
+            //get the contours of the ring
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            //draw a contour on the src image
+            Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                //dont draw a square around a spot that's too small
+                //to avoid false detections
+                if (rect.area() > 7_000) {
+                    Imgproc.rectangle(src, rect, GREEN, 5);
+                }
+            }
+
+            Rect largest = new Rect();
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                if (largest.area() < rect.area()) largest = rect;
+            }
+
+            //draws largest rect
+            Imgproc.rectangle(src, largest, new Scalar(0, 0, 255), 5);
+
+            return new int[]{largest.x,largest.y, largest.width, largest.height};
+        }
     }
+
 }
