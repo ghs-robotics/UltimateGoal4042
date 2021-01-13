@@ -51,11 +51,11 @@ public class FindRings extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        int ringX;
-        int ringY;
+        int ringX = 0;
+        int ringY = 0;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new RingDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
 
@@ -92,7 +92,7 @@ public class FindRings extends LinearOpMode
 
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
-
+        public Mat mask;
         public static int ringX = 0;
         public static int ringY = 0;
 
@@ -167,12 +167,12 @@ public class FindRings extends LinearOpMode
 
             avg1 = (int) Core.mean(region1_Cb).val[0];
 
-            Imgproc.rectangle(
-                    input, // Buffer to draw on
-                    region1_pointA, // First point which defines the rectangle
-                    region1_pointB, // Second point which defines the rectangle
-                    BLUE, // The color the rectangle is drawn in
-                    2); // Thickness of the rectangle lines
+//            Imgproc.rectangle(
+//                    input, // Buffer to draw on
+//                    region1_pointA, // First point which defines the rectangle
+//                    region1_pointB, // Second point which defines the rectangle
+//                    BLUE, // The color the rectangle is drawn in
+//                    2); // Thickness of the rectangle lines
 
             position = RingPosition.FOUR; // Record our analysis
             if(avg1 > FOUR_RING_THRESHOLD){
@@ -184,10 +184,9 @@ public class FindRings extends LinearOpMode
             }
 
             //update ring coordinates
-            int[] coords = RingDetector.getRingCoordinates(input);
+            int[] coords = getRingCoordinates(input);
             ringX = coords[0];
             ringY = coords[1];
-//            int[] coords = new int[]{50,50,50,50};
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
@@ -196,7 +195,7 @@ public class FindRings extends LinearOpMode
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
 
-            return input;
+            return mask;
         }
 
         public int getAnalysis()
@@ -215,8 +214,8 @@ public class FindRings extends LinearOpMode
             Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
 
             //adding a mask to the dst mat
-            Scalar lowerHSV = new Scalar(103, 146, 164);
-            Scalar upperHSV = new Scalar(112, 242, 255);
+            Scalar lowerHSV = new Scalar(50, 100, 0); //74, 153, 144
+            Scalar upperHSV = new Scalar(200, 255, 255); //112, 242, 255
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //dilate the ring to make it easier to detect
@@ -251,6 +250,7 @@ public class FindRings extends LinearOpMode
             //draws largest rect
             Imgproc.rectangle(src, largest, new Scalar(0, 0, 255), 5);
 
+            mask = dst;
             return new int[]{largest.x,largest.y, largest.width, largest.height};
         }
     }
