@@ -118,6 +118,7 @@ public class EasyOpenCVExample extends LinearOpMode
         /*
          * Working variables
          */
+
         Mat region1_Cb;
         Mat YCrCb = new Mat();
         Mat Cb = new Mat();
