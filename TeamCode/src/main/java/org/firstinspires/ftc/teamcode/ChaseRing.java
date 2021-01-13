@@ -22,7 +22,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -36,19 +36,25 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-@TeleOp
-public class EasyOpenCVExample extends LinearOpMode
+@Autonomous(name="ChaseRing", group="Linear Opmode")
+public class ChaseRing extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
+
+    //Declare OpMode members
+    Robot robot;
 
 
     @Override
     public void runOpMode()
     {
+        robot = new Robot(hardwareMap, telemetry);
+        int ringX = 0;
+        int ringY = 0;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
         pipeline = new RingDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
 
@@ -74,6 +80,9 @@ public class EasyOpenCVExample extends LinearOpMode
             telemetry.addData("Position", pipeline.position);
             telemetry.update();
 
+            ringX = RingDeterminationPipeline.ringX;
+            ringY = RingDeterminationPipeline.ringY;
+
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
         }
@@ -81,6 +90,9 @@ public class EasyOpenCVExample extends LinearOpMode
 
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
+        public static int ringX = 0;
+        public static int ringY = 0;
+
         /*
          * An enum to define the ring position
          */
@@ -168,10 +180,15 @@ public class EasyOpenCVExample extends LinearOpMode
                 position = RingPosition.NONE;
             }
 
+            //update ring coordinates
+            int[] coords = RingDetector.getRingCoordinates(input);
+            ringX = coords[0];
+            ringY = coords[1];
+
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    region1_pointA, // First point which defines the rectangle
-                    region1_pointB, // Second point which defines the rectangle
+                    new Point(ringX, ringY), // First point which defines the rectangle
+                    new Point(ringX + coords[2],ringY + coords[3]), // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
 
