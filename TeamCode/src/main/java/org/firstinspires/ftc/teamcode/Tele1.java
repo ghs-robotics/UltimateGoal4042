@@ -46,6 +46,7 @@ public class Tele1 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.resetServos();
+        robot.resetShooterMotor();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -112,6 +113,7 @@ public class Tele1 extends OpMode {
         if (controller1.dpad_down.equals("pressing")) {
             robot.decreaseArmAngle();
         }
+
     }
 
     //Code to run ONCE after the driver hits STOP

@@ -21,6 +21,9 @@ class Robot {
     double grabAngle = 0.2;
     double shooterAngle = 0.05;
     double speed = 1;
+    double previousShooterMotorTicks = 0;
+    double DeltaShooterMotorTicks = 0;
+    double CurrentElapsedTime = 0;
 
 
     DcMotor leftFrontDrive;
@@ -93,6 +96,10 @@ class Robot {
         grabServo.setPosition(grabAngle);
         shooterServo.setPosition(shooterAngle);
     }
+    void resetShooterMotor() {
+        shooterMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
 
     //Updates the powers being sent to the drive motors
     void updateDrive() {
@@ -111,6 +118,7 @@ class Robot {
         telemetry.addData("armServo", "" + armAngle);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
+        telemetry.addData("shooterVelocity", "" + findShooterVelocity());
         telemetry.update();
 
         //Sends desired power to drive motors
@@ -125,6 +133,7 @@ class Robot {
 
     //Turns the shooter motor on or off
     void toggleShooter() {
+        elapsedTime.reset();
         shooterPower = (shooterPower == 0 ? 1.0 : 0);
         shooterMotor.setPower(shooterPower);
     }
@@ -165,6 +174,15 @@ class Robot {
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
+    double findShooterVelocity() {
+        //Finds the number of ticks since the last time we ran the function
+        DeltaShooterMotorTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        previousShooterMotorTicks = shooterMotor.getCurrentPosition();
+        CurrentElapsedTime = elapsedTime.seconds();
+        elapsedTime.reset();
+        return (DeltaShooterMotorTicks / CurrentElapsedTime);
+
+    }
 
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
@@ -178,5 +196,5 @@ class Robot {
         while (getElapsedTimeSeconds() - start < seconds) {}
     }
 }
-
+//Velocity== DeltaShooterMotorTicks/Elapsed time when the motor is running
 //https://ftctechnh.github.io/ftc_app/doc/javadoc/index.html
