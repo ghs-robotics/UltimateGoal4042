@@ -219,12 +219,12 @@ public class FindRings extends LinearOpMode
             Imgproc.resize(src, src, new Size(320, 240));
             Mat dst = new Mat();
 
-            Imgproc.cvtColor(src, dst, Imgproc.COLOR_RGB2HSV);
+            Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
             Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
 
             //adding a mask to the dst mat
-            Scalar lowerHSV = new Scalar(50, 100, 0); //74, 153, 144
-            Scalar upperHSV = new Scalar(200, 255, 255); //112, 242, 255
+            Scalar lowerHSV = new Scalar(74, 153, 144); //74, 153, 144
+            Scalar upperHSV = new Scalar(112, 242, 255); //112, 242, 255
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //dilate the ring to make it easier to detect

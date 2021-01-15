@@ -95,6 +95,14 @@ public class ChaseTowerGoal extends LinearOpMode
             telemetry.update();
 
             if(controller1.y.equals("pressed")){
+                double robotAngle = Math.atan2(controller1.left_stick_y, controller1.left_stick_x) - Math.PI / 4;
+                double rightX = controller1.right_stick_x;
+                robot.leftFrontPower = Math.cos(robotAngle) + rightX;
+                robot.rightFrontPower = Math.sin(robotAngle) - rightX;
+                robot.leftRearPower = Math.sin(robotAngle) + rightX;
+                robot.rightRearPower = Math.cos(robotAngle) - rightX;
+                robot.updateDrive();
+            } else {
 
             }
 

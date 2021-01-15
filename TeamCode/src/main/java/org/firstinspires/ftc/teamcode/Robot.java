@@ -22,6 +22,9 @@ class Robot {
     double shooterAngle = 0.05;
     double speed = 1;
 
+    double deltaShooterMotorTicks = 0;
+    double previousShooterMotorTicks = 0;
+    double currentElapsedTime = 0;
 
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
@@ -165,6 +168,14 @@ class Robot {
     void decreaseArmAngle(){
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
+    }
+    double findShooterVelocity() {
+        //Finds the number of ticks since the last time we ran the function
+        deltaShooterMotorTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        previousShooterMotorTicks = shooterMotor.getCurrentPosition();
+        currentElapsedTime = elapsedTime.seconds();
+        elapsedTime.reset();
+        return (deltaShooterMotorTicks / currentElapsedTime);
     }
 
     //Resets the timer
