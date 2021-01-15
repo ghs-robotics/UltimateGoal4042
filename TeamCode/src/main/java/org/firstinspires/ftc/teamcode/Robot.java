@@ -114,7 +114,36 @@ class Robot {
         telemetry.addData("armServo", "" + armAngle);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
-        telemetry.addData("motor speed", "");
+        telemetry.update();
+
+        //Sends desired power to drive motors
+        leftFrontDrive.setPower(LF);
+        rightFrontDrive.setPower(RF);
+        leftRearDrive.setPower(LR);
+        rightRearDrive.setPower(RR);
+    }
+
+    void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight){
+        double robotAngle = Math.atan2(y, x) - Math.PI / 4;
+        double rotate = 0;
+        leftFrontPower = Math.cos(robotAngle) + rotate;
+        rightFrontPower = Math.sin(robotAngle) - rotate;
+        leftRearPower = Math.sin(robotAngle) + rotate;
+        rightRearPower = Math.cos(robotAngle) - rotate;
+
+        //Adjusts powers for speed
+        double LF = speed * leftFrontPower;
+        double RF = speed * rightFrontPower;
+        double LR = speed * leftRearPower;
+        double RR = speed * rightRearPower;
+
+        //Displays motor powers on the phone
+        telemetry.addData("leftFrontPower", "" + LF);
+        telemetry.addData("rightFrontPower", "" + RF);
+        telemetry.addData("leftRearPower", "" + LR);
+        telemetry.addData("rightRearPower", "" + RR);
+        telemetry.addData("ringX, ringY", "( " + ringX + ", " + ringY + " )");
+        telemetry.addData("width, height", "( " + ringWidth + ", " + ringHeight + " )");
         telemetry.update();
 
         //Sends desired power to drive motors
