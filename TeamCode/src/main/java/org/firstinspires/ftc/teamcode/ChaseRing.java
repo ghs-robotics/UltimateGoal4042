@@ -60,8 +60,8 @@ public class ChaseRing extends LinearOpMode
         int ringY = 0;
         int ringWidth = 0;
         int ringHeight = 0;
-        int targetX = 100;
-        int targetY = 100;
+        int targetX = 60;
+        int targetY = 160;
         double y = 0;
         double x = 0;
 
@@ -93,12 +93,25 @@ public class ChaseRing extends LinearOpMode
             ringWidth = RingDeterminationPipeline.ringWidth;
             ringHeight = RingDeterminationPipeline.ringHeight;
 
-            robot.speed = 0.4;
-//            y += (ringY < targetY) ? -0.01 : 0.01;
-            x += (ringX < targetX) ? -0.03 : 0.03;
-            y = Range.clip(ringY, -1.0, 1.0);
-            x = Range.clip(ringX, -1.0, 1.0);
-            robot.startMoving(x, 0, ringX, ringY, ringWidth, ringHeight);
+            double dy = targetY - ringY;
+            double dx = targetX - ringX;
+
+            if (Math.abs(dx) < 10){
+                x = 0;
+            } else {
+                dx = Range.clip(dx / 500.0, -0.2, 0.2);
+                x += dx;
+            }
+            if (Math.abs(dy) < 10){
+                y = 0;
+            } else {
+                dy = Range.clip(dy / 500.0, -0.2, 0.2);
+                y -= dy;
+            }
+
+            y = Range.clip(y, -0.6, 0.6);
+            x = Range.clip(x, -0.6, 0.6);
+            robot.startMoving(x, y, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
 
 
             // Don't burn CPU cycles busy-looping in this sample
