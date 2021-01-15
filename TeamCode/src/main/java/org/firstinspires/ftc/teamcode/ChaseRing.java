@@ -111,6 +111,12 @@ public class ChaseRing extends LinearOpMode
 
             y = Range.clip(y, -0.6, 0.6);
             x = Range.clip(x, -0.6, 0.6);
+            double r = 1.0 * ringWidth / ringHeight;
+
+            if ( !(ringHeight > 10 && ringHeight < 40 && ringWidth > 15 && ringWidth < 60 && r > 1 && r < 4)){
+                x = 0;
+                y = 0;
+            }
             robot.startMoving(x, y, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
 
 
