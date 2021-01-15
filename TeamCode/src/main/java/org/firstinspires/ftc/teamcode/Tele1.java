@@ -45,10 +45,12 @@ public class Tele1 extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
+        robot.resetServos();
+        robot.resetShooterMotor();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
-    //kenny codes :) fksdhfkl
+
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
     public void init_loop() {
@@ -56,16 +58,15 @@ public class Tele1 extends OpMode {
 
     //Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() {
-        robot.resetElapsedTime();
-    }
+    public void start() { robot.resetElapsedTime();}
 
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
+        //Registers controller input
         controller1.update();
 
-        //PRESS THE "x" BUTTON ON THE CONTROLLER TO TOGGLE SPEED
+        //Press "x" to toggle speed between 100% and 30%
         if (controller1.x.equals("pressing")) {
             robot.toggleSpeed();
         }
@@ -79,20 +80,44 @@ public class Tele1 extends OpMode {
         robot.leftRearPower = r * Math.sin(robotAngle) + rightX;
         robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
         robot.updateDrive();
+        //Eli's Branch
 
-        //@Imants, PRESS THE "a" BUTTON ON THE CONTROLLER TO TOGGLE THE INTAKE MOTOR
-        if (controller1.a.equals("pressing")) {
+        //Press left bumper to turn on/off the shooter motor
+        if (controller1.left_bumper.equals("pressing")) {
+            robot.toggleShooter();
+        }
+
+        //Press right bumper to launch a ring
+        if (controller1.right_bumper.equals("pressing")) {
+            robot.launchRing();
+        }
+
+        //Press "y" to turn on/off the intake motor
+        if (controller1.y.equals("pressing")) {
             robot.toggleIntake();
         }
 
-        //grabby thing for wobble goals
-        if (controller1.b.equals("pressing")){
+        //Press "b" to toggle the wobble gripper
+        if (controller1.b.equals("pressing")) {
             robot.toggleGrab();
         }
+
+        //Press "a" to turn the arm
+        if (controller1.a.equals("pressing")) {
+            robot.turnArm();
+        }
+
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.increaseArmAngle();
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.decreaseArmAngle();
+        }
+
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop () {
+    public void stop(){
     }
 }
