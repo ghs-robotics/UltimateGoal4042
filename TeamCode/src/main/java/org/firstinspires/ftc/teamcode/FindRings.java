@@ -44,9 +44,9 @@ import java.util.List;
 @TeleOp
 public class FindRings extends LinearOpMode
 {
-    OpenCvInternalCamera phoneCam;
-    RingDeterminationPipeline pipeline;
-
+    private OpenCvInternalCamera phoneCam;
+    private RingDeterminationPipeline pipeline;
+    private static int TopBoxHeight = 110;
 
     @Override
     public void runOpMode()
@@ -118,6 +118,7 @@ public class FindRings extends LinearOpMode
          */
         static final Scalar BLUE = new Scalar(0, 0, 255);
         static final Scalar GREEN = new Scalar(0, 255, 0);
+        static final Scalar BLACK = new Scalar(0, 0, 0);
 
         /*
          * The core values which define the location and size of the sample regions
@@ -213,10 +214,11 @@ public class FindRings extends LinearOpMode
         }
 
         public int[] getRingCoordinates(Mat input) {
-            Scalar GREEN = new Scalar(0, 255, 0);
 
             Mat src = input;
             Imgproc.resize(src, src, new Size(320, 240));
+            Imgproc.rectangle(src, new Point(0,0), new Point(320, FindRings.TopBoxHeight), BLACK, -1);
+
             Mat dst = new Mat();
 
             Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
@@ -237,7 +239,7 @@ public class FindRings extends LinearOpMode
             Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
             //draw a contour on the src image
-            Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+            //Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
 
             for (int i = 0; i < contours.size(); i++) {
                 Rect rect = Imgproc.boundingRect(contours.get(i));
@@ -263,5 +265,4 @@ public class FindRings extends LinearOpMode
             return new int[]{largest.x,largest.y, largest.width, largest.height};
         }
     }
-
 }
