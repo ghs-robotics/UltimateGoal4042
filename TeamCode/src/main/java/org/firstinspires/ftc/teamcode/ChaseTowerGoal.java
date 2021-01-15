@@ -42,15 +42,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-public class FindRings extends LinearOpMode
+public class ChaseTowerGoal extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
 
+    Robot robot;
+    Controller controller1;
 
     @Override
     public void runOpMode()
     {
+        robot = new Robot(hardwareMap, telemetry);
+        controller1 = new Controller(gamepad1);
         int ringX = 0;
         int ringY = 0;
         int ringWidth = 0;
@@ -89,6 +93,10 @@ public class FindRings extends LinearOpMode
             telemetry.addData("ringX, ringY", "( " + ringX + ", " + ringY + " )");
             telemetry.addData("width, height", "( " + ringWidth + ", " + ringHeight + " )");
             telemetry.update();
+
+            if(controller1.y.equals("pressed")){
+
+            }
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
