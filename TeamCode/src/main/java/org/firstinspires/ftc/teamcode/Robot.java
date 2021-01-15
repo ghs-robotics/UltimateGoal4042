@@ -24,6 +24,7 @@ class Robot {
     double previousShooterMotorTicks = 0;
     double DeltaShooterMotorTicks = 0;
     double CurrentElapsedTime = 0;
+    double TargetMotorSpeed = 1500;
 
 
     DcMotor leftFrontDrive;
@@ -175,7 +176,8 @@ class Robot {
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
-    double findShooterVelocity() {
+
+    double findShooterVelocity(){
         //Finds the number of ticks since the last time we ran the function
         DeltaShooterMotorTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
         previousShooterMotorTicks = shooterMotor.getCurrentPosition();
@@ -183,6 +185,14 @@ class Robot {
         elapsedTime.reset();
         return (DeltaShooterMotorTicks / CurrentElapsedTime);
 
+    }
+
+    void adjustShooterVelocity(){
+        if (findShooterVelocity() > TargetMotorSpeed){
+           shooterPower -= 0.1;
+        } else if (findShooterVelocity() < TargetMotorSpeed){
+            shooterPower += 0.1;
+        }
     }
 
     //Resets the timer
