@@ -23,6 +23,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -92,9 +93,13 @@ public class ChaseRing extends LinearOpMode
             ringWidth = RingDeterminationPipeline.ringWidth;
             ringHeight = RingDeterminationPipeline.ringHeight;
 
+            robot.speed = 0.4;
+//            y += (ringY < targetY) ? -0.01 : 0.01;
+            x += (ringX < targetX) ? -0.03 : 0.03;
+            y = Range.clip(ringY, -1.0, 1.0);
+            x = Range.clip(ringX, -1.0, 1.0);
+            robot.startMoving(x, 0, ringX, ringY, ringWidth, ringHeight);
 
-            y += (ringY < targetY) ? -0.01 : 0.01;
-            x += (ringX < targetX) ? -0.01 : 0.01;
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

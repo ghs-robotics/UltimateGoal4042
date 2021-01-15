@@ -143,7 +143,7 @@ class Robot {
         telemetry.addData("leftRearPower", "" + LR);
         telemetry.addData("rightRearPower", "" + RR);
         telemetry.addData("ringX, ringY", "( " + ringX + ", " + ringY + " )");
-        telemetry.addData("width, height", "( " + ringWidth + ", " + ringHeight + " )");
+        telemetry.addData("x", "( " + x + " )");
         telemetry.update();
 
         //Sends desired power to drive motors
