@@ -123,13 +123,14 @@ class Robot {
         rightRearDrive.setPower(RR);
     }
 
-    void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight){
+    void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight, int targetX, int targetY){
+        double r = Math.hypot(x, y);
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
         double rotate = 0;
-        leftFrontPower = Math.cos(robotAngle) + rotate;
-        rightFrontPower = Math.sin(robotAngle) - rotate;
-        leftRearPower = Math.sin(robotAngle) + rotate;
-        rightRearPower = Math.cos(robotAngle) - rotate;
+        leftFrontPower = r * Math.cos(robotAngle) + rotate;
+        rightFrontPower = r * Math.sin(robotAngle) - rotate;
+        leftRearPower = r * Math.sin(robotAngle) + rotate;
+        rightRearPower = r * Math.cos(robotAngle) - rotate;
 
         //Adjusts powers for speed
         double LF = speed * leftFrontPower;
@@ -142,8 +143,9 @@ class Robot {
         telemetry.addData("rightFrontPower", "" + RF);
         telemetry.addData("leftRearPower", "" + LR);
         telemetry.addData("rightRearPower", "" + RR);
-        telemetry.addData("ringX, ringY", "( " + ringX + ", " + ringY + " )");
-        telemetry.addData("width, height", "( " + ringWidth + ", " + ringHeight + " )");
+        telemetry.addData("ringX, targetX", "( " + ringX + ", " + targetX + " )");
+        telemetry.addData("ringY, targetY", "( " + ringY + ", " + targetY + " )");
+        telemetry.addData("x, y", "( " + x + ", " + y + " )");
         telemetry.update();
 
         //Sends desired power to drive motors
