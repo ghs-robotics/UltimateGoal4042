@@ -22,9 +22,8 @@ class Robot {
     double shooterAngle = 0.05;
     double speed = 1;
 
-    double deltaShooterMotorTicks = 0;
     double previousShooterMotorTicks = 0;
-    double currentElapsedTime = 0;
+    double previousElapsedTime = 0;
 
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
@@ -150,7 +149,7 @@ class Robot {
 
     //Turns the intake motor on or off
     void toggleIntake() {
-        intakePower = (intakePower == 0 ? 0.9 : 0);
+        intakePower = (intakePower == 0 ? 1 : 0);
         intakeMotor.setPower(intakePower);
     }
 
@@ -184,13 +183,14 @@ class Robot {
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
+
+    //Calculates shooter motor speed in ticks per second
     double findShooterVelocity() {
-        //Finds the number of ticks since the last time we ran the function
-        deltaShooterMotorTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        double deltaTime = elapsedTime.seconds() - previousElapsedTime;
         previousShooterMotorTicks = shooterMotor.getCurrentPosition();
-        currentElapsedTime = elapsedTime.seconds();
-        elapsedTime.reset();
-        return (deltaShooterMotorTicks / currentElapsedTime);
+        previousElapsedTime = elapsedTime.seconds();
+        return (deltaTicks / deltaTime);
     }
 
     //Resets the timer

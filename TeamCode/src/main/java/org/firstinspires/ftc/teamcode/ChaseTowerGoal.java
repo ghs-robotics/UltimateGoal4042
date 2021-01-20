@@ -60,8 +60,8 @@ public class ChaseTowerGoal extends LinearOpMode
         int towerY = 0;
         int towerWidth = 0;
         int towerHeight = 0;
-        int targetX = 60;
-        int targetWidth = 90;
+        int targetX = 95;
+        int targetWidth = 75;
         int shots = 0;
         double y = 0;
         double x = 0;
@@ -85,7 +85,10 @@ public class ChaseTowerGoal extends LinearOpMode
             }
         });
 
+        robot.resetServos();
+
         waitForStart();
+        robot.resetElapsedTime();
 
         while (opModeIsActive())
         {
@@ -97,37 +100,42 @@ public class ChaseTowerGoal extends LinearOpMode
             double dw = targetWidth - towerWidth;
             double dx = targetX - towerX;
 
-            if (Math.abs(dx) < 5){
+            if (Math.abs(dx) < 3) {
                 x = 0;
             } else {
-                dx = Range.clip(dx / 500.0, -0.2, 0.2);
+                dx = Range.clip(dx / 250.0, -0.2, 0.2);
                 x += dx;
             }
-            if (Math.abs(dw) < 5){
+            if (Math.abs(dw) < 3) {
                 y = 0;
             } else {
-                dw = Range.clip(dw / 500.0, -0.2, 0.2);
+                dw = Range.clip(dw / 140.0, -0.2, 0.2);
                 y -= dw;
             }
 
             y = Range.clip(y, -0.6, 0.6);
             x = Range.clip(x, -0.6, 0.6);
 
-            if ( !(towerWidth > 80 && towerWidth < 200)){
+            if (!(towerWidth > 60 && towerWidth < 220)) {
                 x = 0;
                 y = 0;
             }
-            if (x == 0 && y == 0 && shots < 3){
-                robot.toggleGrab();
-                robot.wait(0.8);
+            robot.startMoving(x, y, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+            if (robot.elapsedTime.seconds() > 6 && shots < 3){
+                robot.startMoving(0, 0, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+                robot.toggleShooter();
+                robot.wait(1.5);
                 robot.launchRing();
-                shots++;
-            } else {
-                robot.startMoving(x, y, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+                robot.wait(0.5);
+                robot.launchRing();
+                robot.wait(0.5);
+                robot.launchRing();
+                shots += 3;
+                robot.toggleShooter();
             }
 
             // Don't burn CPU cycles busy-looping in this sample
-            sleep(100);
+            sleep(50);
         }
     }
 
@@ -260,7 +268,7 @@ public class ChaseTowerGoal extends LinearOpMode
 
             //adding a mask to the dst mat
             Scalar lowerHSV = new Scalar(0, 0, 0);
-            Scalar upperHSV = new Scalar(255, 255, 30);
+            Scalar upperHSV = new Scalar(255, 255, 10);
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //dilate the ring to make it easier to detect
