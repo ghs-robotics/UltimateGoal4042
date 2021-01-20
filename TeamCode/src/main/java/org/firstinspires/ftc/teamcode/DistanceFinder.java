@@ -25,15 +25,9 @@ public class DistanceFinder extends LinearOpMode {
 
     private OpenCvInternalCamera phoneCam;
     private FindRings.RingDeterminationPipeline pipeline;
-    private static int TopBoxHeight = 110;
 
     @Override
     public void runOpMode() {
-        int ringX = 0;
-        int ringY = 0;
-        int ringWidth = 0;
-        int ringHeight = 0;
-
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new FindRings.RingDeterminationPipeline();
@@ -94,7 +88,9 @@ public class DistanceFinder extends LinearOpMode {
             Mat dst = new Mat();
 
             Imgproc.GaussianBlur(src, dst, new Size(3, 3), 100, 100);
-            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_BGR2HSV);
+
+            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_BGR2RGB);
+            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGB2HSV);
 
             //adding a mask to the dst mat
             Scalar lowerHSV = new Scalar(0, 167, 109);
