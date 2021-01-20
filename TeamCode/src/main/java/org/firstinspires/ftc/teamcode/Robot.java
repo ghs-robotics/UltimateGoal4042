@@ -73,23 +73,6 @@ class Robot {
         this.telemetry = telemetry;
     }
 
-/*    //In case we actually need to use encoders on the drive motors
-    void resetDrive() {
-        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFrontPower = 0;
-        rightFrontPower = 0;
-        leftRearPower = 0;
-        rightRearPower = 0;
-        updateDrive();
-    } */
-
     //Sets servos to starting positions
     void resetServos(){
         armServo.setPosition(armAngle);
@@ -139,10 +122,11 @@ class Robot {
         double RR = speed * rightRearPower;
 
         //Displays motor powers on the phone
-        telemetry.addData("leftFrontPower", "" + LF);
-        telemetry.addData("rightFrontPower", "" + RF);
-        telemetry.addData("leftRearPower", "" + LR);
-        telemetry.addData("rightRearPower", "" + RR);
+//        telemetry.addData("leftFrontPower", "" + LF);
+//        telemetry.addData("rightFrontPower", "" + RF);
+//        telemetry.addData("leftRearPower", "" + LR);
+//        telemetry.addData("rightRearPower", "" + RR);
+        telemetry.addData("ringWidth, ringHeight", "( " + ringWidth + ", " + ringHeight + " )");
         telemetry.addData("ringX, targetX", "( " + ringX + ", " + targetX + " )");
         telemetry.addData("ringY, targetY", "( " + ringY + ", " + targetY + " )");
         telemetry.addData("x, y", "( " + x + ", " + y + " )");

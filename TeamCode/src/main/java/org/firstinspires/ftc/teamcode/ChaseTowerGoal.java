@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-public class ChaseRing extends LinearOpMode
+public class ChaseTowerGoal extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
@@ -60,8 +60,8 @@ public class ChaseRing extends LinearOpMode
         int ringY = 0;
         int ringWidth = 0;
         int ringHeight = 0;
-        int targetX = 60;
-        int targetY = 160;
+        int targetX = 68;
+        int targetY = 0;
         double y = 0;
         double x = 0;
 
@@ -111,13 +111,12 @@ public class ChaseRing extends LinearOpMode
 
             y = Range.clip(y, -0.6, 0.6);
             x = Range.clip(x, -0.6, 0.6);
-            double r = 1.0 * ringWidth / ringHeight;
 
-            if ( !(ringHeight > 10 && ringHeight < 45 && ringWidth > 22 && ringWidth < 65 && r > 1.2 && r < 2.5)){
+            if ( !(ringWidth > 80 && ringWidth < 200)){
                 x = 0;
                 y = 0;
             }
-            robot.startMoving(x, y, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
+            robot.startMoving(x, 0, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(100);
@@ -252,8 +251,8 @@ public class ChaseRing extends LinearOpMode
             Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
 
             //adding a mask to the dst mat
-            Scalar lowerHSV = new Scalar(74, 153, 144); //50, 100, 0
-            Scalar upperHSV = new Scalar(112, 242, 255); //200, 255, 255
+            Scalar lowerHSV = new Scalar(0, 0, 0);
+            Scalar upperHSV = new Scalar(255, 255, 30);
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //dilate the ring to make it easier to detect
