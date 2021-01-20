@@ -25,7 +25,7 @@ class Robot {
     double DeltaShooterMotorTicks = 0;
     double CurrentElapsedTime = 0;
     double TargetMotorSpeed = 1500;
-
+    public static boolean ShooterMotorPowered = false;
 
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
@@ -137,7 +137,13 @@ class Robot {
     void toggleShooter() {
         elapsedTime.reset();
         shooterPower = (shooterPower == 0 ? 1.0 : 0);
+        if (ShooterMotorPowered = true){
+            ShooterMotorPowered = false;
+        }else {
+            ShooterMotorPowered = true;
+        }
         shooterMotor.setPower(shooterPower);
+
     }
 
     //Turns the intake motor on or off
