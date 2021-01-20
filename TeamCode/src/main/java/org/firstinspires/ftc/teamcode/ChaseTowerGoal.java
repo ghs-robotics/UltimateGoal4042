@@ -56,12 +56,12 @@ public class ChaseTowerGoal extends LinearOpMode
     {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        int ringX = 0;
-        int ringY = 0;
-        int ringWidth = 0;
-        int ringHeight = 0;
+        int towerX = 0;
+        int towerY = 0;
+        int towerWidth = 0;
+        int towerHeight = 0;
         int targetX = 68;
-        int targetY = 0;
+        int targetWidth = 85;
         double y = 0;
         double x = 0;
 
@@ -88,13 +88,13 @@ public class ChaseTowerGoal extends LinearOpMode
 
         while (opModeIsActive())
         {
-            ringX = RingDeterminationPipeline.ringX;
-            ringY = RingDeterminationPipeline.ringY;
-            ringWidth = RingDeterminationPipeline.ringWidth;
-            ringHeight = RingDeterminationPipeline.ringHeight;
+            towerX = RingDeterminationPipeline.towerX;
+            towerY = RingDeterminationPipeline.towerY;
+            towerWidth = RingDeterminationPipeline.towerWidth;
+            towerHeight = RingDeterminationPipeline.towerHeight;
 
-            double dy = targetY - ringY;
-            double dx = targetX - ringX;
+            double dw = targetWidth - towerWidth;
+            double dx = targetX - towerX;
 
             if (Math.abs(dx) < 10){
                 x = 0;
@@ -102,21 +102,21 @@ public class ChaseTowerGoal extends LinearOpMode
                 dx = Range.clip(dx / 500.0, -0.2, 0.2);
                 x += dx;
             }
-            if (Math.abs(dy) < 10){
+            if (Math.abs(dw) < 10){
                 y = 0;
             } else {
-                dy = Range.clip(dy / 500.0, -0.2, 0.2);
-                y -= dy;
+                dw = Range.clip(dw / 500.0, -0.2, 0.2);
+                y -= dw;
             }
 
             y = Range.clip(y, -0.6, 0.6);
             x = Range.clip(x, -0.6, 0.6);
 
-            if ( !(ringWidth > 80 && ringWidth < 200)){
+            if ( !(towerWidth > 80 && towerWidth < 200)){
                 x = 0;
                 y = 0;
             }
-            robot.startMoving(x, 0, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
+            robot.startMoving(0, y, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(100);
@@ -126,10 +126,10 @@ public class ChaseTowerGoal extends LinearOpMode
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
         public Mat mask;
-        public static int ringX = 0;
-        public static int ringY = 0;
-        public static int ringWidth = 0;
-        public static int ringHeight = 0;
+        public static int towerX = 0;
+        public static int towerY = 0;
+        public static int towerWidth = 0;
+        public static int towerHeight = 0;
 
         /*
          * An enum to define the ring position
@@ -220,15 +220,15 @@ public class ChaseTowerGoal extends LinearOpMode
 
             //update ring coordinates
             int[] coords = getRingCoordinates(input);
-            ringX = coords[0];
-            ringY = coords[1];
-            ringWidth = coords[2];
-            ringHeight = coords[3];
+            towerX = coords[0];
+            towerY = coords[1];
+            towerWidth = coords[2];
+            towerHeight = coords[3];
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    new Point(ringX,ringY), // First point which defines the rectangle
-                    new Point(ringX + ringWidth,ringY + ringHeight), // Second point which defines the rectangle
+                    new Point(towerX,towerY), // First point which defines the rectangle
+                    new Point(towerX + towerWidth,towerY + towerHeight), // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
 
