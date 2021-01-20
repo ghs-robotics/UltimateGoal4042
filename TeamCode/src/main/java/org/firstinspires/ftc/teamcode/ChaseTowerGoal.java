@@ -60,8 +60,9 @@ public class ChaseTowerGoal extends LinearOpMode
         int towerY = 0;
         int towerWidth = 0;
         int towerHeight = 0;
-        int targetX = 68;
-        int targetWidth = 85;
+        int targetX = 60;
+        int targetWidth = 90;
+        int shots = 0;
         double y = 0;
         double x = 0;
 
@@ -96,13 +97,13 @@ public class ChaseTowerGoal extends LinearOpMode
             double dw = targetWidth - towerWidth;
             double dx = targetX - towerX;
 
-            if (Math.abs(dx) < 10){
+            if (Math.abs(dx) < 5){
                 x = 0;
             } else {
                 dx = Range.clip(dx / 500.0, -0.2, 0.2);
                 x += dx;
             }
-            if (Math.abs(dw) < 10){
+            if (Math.abs(dw) < 5){
                 y = 0;
             } else {
                 dw = Range.clip(dw / 500.0, -0.2, 0.2);
@@ -116,7 +117,14 @@ public class ChaseTowerGoal extends LinearOpMode
                 x = 0;
                 y = 0;
             }
-            robot.startMoving(0, y, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+            if (x == 0 && y == 0 && shots < 3){
+                robot.toggleGrab();
+                robot.wait(0.8);
+                robot.launchRing();
+                shots++;
+            } else {
+                robot.startMoving(x, y, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+            }
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(100);

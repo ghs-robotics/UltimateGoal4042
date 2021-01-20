@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-class DistanceFinder extends LinearOpMode {
+public class DistanceFinder extends LinearOpMode {
 
     private OpenCvInternalCamera phoneCam;
     private FindRings.RingDeterminationPipeline pipeline;
