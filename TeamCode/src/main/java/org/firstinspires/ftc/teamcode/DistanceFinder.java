@@ -28,7 +28,7 @@ class DistanceFinder {
      * @return
      */
     public void getDistance(Mat src) {
-        //Scalar GREEN = new Scalar(0, 255, 0);
+        Scalar GREEN = new Scalar(0, 255, 0);
 
         //these values represents various of the yellow chair I need to calculate the distance
         //https://www.pyimagesearch.com/2015/01/19/find-distance-camera-objectmarker-using-python-opencv/
