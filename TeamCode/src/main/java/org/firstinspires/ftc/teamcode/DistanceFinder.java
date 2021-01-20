@@ -19,25 +19,26 @@ import java.util.List;
 
 class DistanceFinder {
 
+    public Mat image;
     /**
-     * remember that this function has not been tested on an actual field goal in Kai's basement so
+     * this function has not been tested onto the phone yet so beware
      * many adjustments have to be made in order to make this functional
      *
      * @param src
      * @return
      */
-    public double getDistance(Mat src) {
-        Scalar GREEN = new Scalar(0, 255, 0);
+    public void getDistance(Mat src) {
+        //Scalar GREEN = new Scalar(0, 255, 0);
 
         //these values represents various of the yellow chair I need to calculate the distance
         //https://www.pyimagesearch.com/2015/01/19/find-distance-camera-objectmarker-using-python-opencv/
-        double KNOWN_WIDTH = 4;
-        double KNOWN_DIST = 24;
-        double KNOWN_PIXELS = 85;
+        double KNOWN_WIDTH = 24;
+        double KNOWN_DIST = 72;
+        double KNOWN_PIXELS = 162;
 
         //the function will spit out different values depending on how large the src mat
         //I found that a 610 x 610 image was most accurate
-        double MAT_SIZE = 610;
+        double MAT_SIZE = 650;
 
         Imgproc.resize(src, src, new Size(MAT_SIZE,MAT_SIZE));
         Mat dst = new Mat();
@@ -65,30 +66,15 @@ class DistanceFinder {
             if (largest.area() < rect.area()) largest = rect;
         }
         //draws largest rect
-        //Imgproc.rectangle(src, largest, GREEN);
+        Imgproc.rectangle(src, largest, GREEN);
 
         //I am not smart enough to make this from scratch, I used a formula from the internet to calculate the distance
         //https://www.pyimagesearch.com/2015/01/19/find-distance-camera-objectmarker-using-python-opencv/
         double focus = (KNOWN_PIXELS * KNOWN_DIST) / (double) KNOWN_WIDTH;
         double distance = Double.valueOf(String.format("%.1f", (KNOWN_WIDTH * focus) / largest.width));
-        distance += Double.valueOf(String.format("%.1f", getWeight(distance)));
 
-        //Imgproc.putText(src, distance + " inches", new Point(200, 450), Imgproc.FONT_HERSHEY_COMPLEX, 1, GREEN, 2);
-        return distance;
-    }
-
-    //adding extra weights because the values become lower than the actual distance the farther away the chair is
-    //so we are adding extra weight to midigate this
-    //also I forgot to mention that this is an absolutely terrible solution but I am too lazy to make something better
-    public static double getWeight(double dist) {
-        double weight = 0;
-        double i = (int)dist / 12;
-        while(i % 12 != 0) {
-            i--;
-        }
-        int x = (int)Math.abs((int)dist/12 - i);
-
-        weight = (x*Math.pow(1.3,x))/15;
-        return weight;
+        Imgproc.putText(src, distance + " inches", new Point(200, 450), Imgproc.FONT_HERSHEY_COMPLEX, 1, GREEN, 2);
+        image = src;
+        //return distance;
     }
 }
