@@ -80,21 +80,17 @@ public class DistanceFinder extends LinearOpMode {
             double KNOWN_DIST = 72;
             double KNOWN_PIXELS = 162;
 
-            //the function will spit out different values depending on how large the src mat
-            //I found that a 610 x 610 image was most accurate
             double MAT_SIZE = 650;
 
             Imgproc.resize(src, src, new Size(MAT_SIZE, MAT_SIZE));
             Mat dst = new Mat();
 
+            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_BGR2HSV);
             Imgproc.GaussianBlur(src, dst, new Size(3, 3), 100, 100);
 
-            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_BGR2RGB);
-            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGB2HSV);
-
             //adding a mask to the dst mat
-            Scalar lowerHSV = new Scalar(0, 167, 109);
-            Scalar upperHSV = new Scalar(108, 255, 255);
+            Scalar lowerHSV = new Scalar(0, 135, 112);
+            Scalar upperHSV = new Scalar(67, 196, 155);
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //get the contours of the ring
