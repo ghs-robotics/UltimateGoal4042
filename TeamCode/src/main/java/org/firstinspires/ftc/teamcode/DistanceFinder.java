@@ -115,8 +115,9 @@ public class DistanceFinder extends LinearOpMode {
             double focus = (KNOWN_PIXELS * KNOWN_DIST) / (double) KNOWN_WIDTH;
             double distance = Double.valueOf(String.format("%.1f", (KNOWN_WIDTH * focus) / largest.width));
 
-            Imgproc.putText(src, distance + " inches", new Point(200, 450), Imgproc.FONT_HERSHEY_COMPLEX, 1, GREEN, 2);
-            return dst;
+            Imgproc.resize(src, src,new Size(320, 240));
+            Imgproc.putText(src, distance + " inches", new Point(100, 150), Imgproc.FONT_HERSHEY_COMPLEX, 1, GREEN, 2);
+            return src;
             //return distance;
         }
 
