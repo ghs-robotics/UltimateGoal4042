@@ -22,9 +22,8 @@ class Robot {
     double shooterAngle = 0.05;
     double speed = 1;
 
-    double deltaShooterMotorTicks = 0;
     double previousShooterMotorTicks = 0;
-    double currentElapsedTime = 0;
+    double previousElapsedTime = 0;
 
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
@@ -72,23 +71,6 @@ class Robot {
         elapsedTime.reset();
         this.telemetry = telemetry;
     }
-
-/*    //In case we actually need to use encoders on the drive motors
-    void resetDrive() {
-        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFrontPower = 0;
-        rightFrontPower = 0;
-        leftRearPower = 0;
-        rightRearPower = 0;
-        updateDrive();
-    } */
 
     //Sets servos to starting positions
     void resetServos(){
@@ -139,10 +121,11 @@ class Robot {
         double RR = speed * rightRearPower;
 
         //Displays motor powers on the phone
-        telemetry.addData("leftFrontPower", "" + LF);
-        telemetry.addData("rightFrontPower", "" + RF);
-        telemetry.addData("leftRearPower", "" + LR);
-        telemetry.addData("rightRearPower", "" + RR);
+//        telemetry.addData("leftFrontPower", "" + LF);
+//        telemetry.addData("rightFrontPower", "" + RF);
+//        telemetry.addData("leftRearPower", "" + LR);
+//        telemetry.addData("rightRearPower", "" + RR);
+        telemetry.addData("ringWidth, ringHeight", "( " + ringWidth + ", " + ringHeight + " )");
         telemetry.addData("ringX, targetX", "( " + ringX + ", " + targetX + " )");
         telemetry.addData("ringY, targetY", "( " + ringY + ", " + targetY + " )");
         telemetry.addData("x, y", "( " + x + ", " + y + " )");
@@ -166,7 +149,7 @@ class Robot {
 
     //Turns the intake motor on or off
     void toggleIntake() {
-        intakePower = (intakePower == 0 ? 0.9 : 0);
+        intakePower = (intakePower == 0 ? 1 : 0);
         intakeMotor.setPower(intakePower);
     }
 
@@ -200,13 +183,14 @@ class Robot {
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
+
+    //Calculates shooter motor speed in ticks per second
     double findShooterVelocity() {
-        //Finds the number of ticks since the last time we ran the function
-        deltaShooterMotorTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        double deltaTime = elapsedTime.seconds() - previousElapsedTime;
         previousShooterMotorTicks = shooterMotor.getCurrentPosition();
-        currentElapsedTime = elapsedTime.seconds();
-        elapsedTime.reset();
-        return (deltaShooterMotorTicks / currentElapsedTime);
+        previousElapsedTime = elapsedTime.seconds();
+        return (deltaTicks / deltaTime);
     }
 
     //Resets the timer
