@@ -17,11 +17,13 @@ class Robot {
     double rightRearPower = 0;
     double shooterPower = 0;
     double intakePower = 0;
-    double armAngle = 0.2;
+    double armAngle = 0.5;
     double grabAngle = 0.2;
     double shooterAngle = 0.05;
     double speed = 1;
 
+    double previousShooterMotorTicks = 0;
+    double previousElapsedTime = 0;
 
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
@@ -46,7 +48,7 @@ class Robot {
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
-        intakeMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
+        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
         shooterServo = hardwareMap.get(Servo.class, "shooterServo");
@@ -69,23 +71,6 @@ class Robot {
         elapsedTime.reset();
         this.telemetry = telemetry;
     }
-
-/*    //In case we actually need to use encoders on the drive motors
-    void resetDrive() {
-        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightRearDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightRearDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftFrontPower = 0;
-        rightFrontPower = 0;
-        leftRearPower = 0;
-        rightRearPower = 0;
-        updateDrive();
-    } */
 
     //Sets servos to starting positions
     void resetServos(){
@@ -120,24 +105,57 @@ class Robot {
         rightRearDrive.setPower(RR);
     }
 
+    void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight, int targetX, int targetY){
+        double r = Math.hypot(x, y);
+        double robotAngle = Math.atan2(y, x) - Math.PI / 4;
+        double rotate = 0;
+        leftFrontPower = r * Math.cos(robotAngle) + rotate;
+        rightFrontPower = r * Math.sin(robotAngle) - rotate;
+        leftRearPower = r * Math.sin(robotAngle) + rotate;
+        rightRearPower = r * Math.cos(robotAngle) - rotate;
+
+        //Adjusts powers for speed
+        double LF = speed * leftFrontPower;
+        double RF = speed * rightFrontPower;
+        double LR = speed * leftRearPower;
+        double RR = speed * rightRearPower;
+
+        //Displays motor powers on the phone
+//        telemetry.addData("leftFrontPower", "" + LF);
+//        telemetry.addData("rightFrontPower", "" + RF);
+//        telemetry.addData("leftRearPower", "" + LR);
+//        telemetry.addData("rightRearPower", "" + RR);
+        telemetry.addData("ringWidth, ringHeight", "( " + ringWidth + ", " + ringHeight + " )");
+        telemetry.addData("ringX, targetX", "( " + ringX + ", " + targetX + " )");
+        telemetry.addData("ringY, targetY", "( " + ringY + ", " + targetY + " )");
+        telemetry.addData("x, y", "( " + x + ", " + y + " )");
+        telemetry.update();
+
+        //Sends desired power to drive motors
+        leftFrontDrive.setPower(LF);
+        rightFrontDrive.setPower(RF);
+        leftRearDrive.setPower(LR);
+        rightRearDrive.setPower(RR);
+    }
+
     //Sets the drive speed to 30%
-    void toggleSpeed() { speed = (speed == 1 ? 0.3 : 1); }
+    void toggleSpeed() { speed = (speed == 1 ? 0.5 : 1); }
 
     //Turns the shooter motor on or off
     void toggleShooter() {
-        shooterPower = (shooterPower == 0 ? 0.9 : 0);
+        shooterPower = (shooterPower == 0 ? 1.0 : 0);
         shooterMotor.setPower(shooterPower);
     }
 
     //Turns the intake motor on or off
     void toggleIntake() {
-        intakePower = (intakePower == 0 ? 0.9 : 0);
+        intakePower = (intakePower == 0 ? 1 : 0);
         intakeMotor.setPower(intakePower);
     }
 
     //Turns the arm
     void turnArm() {
-        armAngle = (armAngle == 0.2 ? 1 : 0.2); //values need calibration!!!
+        armAngle = (armAngle == 0.88 ? 0.5 : 0.88);
         armServo.setPosition(armAngle);
     }
 
@@ -149,21 +167,30 @@ class Robot {
 
     //Launches a ring by moving the shooterServo
     void launchRing() {
-        shooterAngle = 0.25; //value needs calibration!!!
+        shooterAngle = 0.25;
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
-        shooterAngle = 0.05; //value needs calibration!!!
+        shooterAngle = 0.05;
         shooterServo.setPosition(shooterAngle);
     }
 
     void increaseArmAngle(){
-        armAngle += 0.05;
+        armAngle += 0.1;
         armServo.setPosition(armAngle);
     }
 
     void decreaseArmAngle(){
-        armAngle -= 0.05;
+        armAngle -= 0.1;
         armServo.setPosition(armAngle);
+    }
+
+    //Calculates shooter motor speed in ticks per second
+    double findShooterVelocity() {
+        double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
+        double deltaTime = elapsedTime.seconds() - previousElapsedTime;
+        previousShooterMotorTicks = shooterMotor.getCurrentPosition();
+        previousElapsedTime = elapsedTime.seconds();
+        return (deltaTicks / deltaTime);
     }
 
     //Resets the timer

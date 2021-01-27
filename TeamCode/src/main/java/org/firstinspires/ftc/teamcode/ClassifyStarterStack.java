@@ -37,7 +37,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 @TeleOp
-public class EasyOpenCVExample extends LinearOpMode
+public class ClassifyStarterStack extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
@@ -118,6 +118,7 @@ public class EasyOpenCVExample extends LinearOpMode
         /*
          * Working variables
          */
+
         Mat region1_Cb;
         Mat YCrCb = new Mat();
         Mat Cb = new Mat();
