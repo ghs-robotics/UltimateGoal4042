@@ -104,6 +104,9 @@ class Robot {
         leftRearDrive.setPower(LR);
         rightRearDrive.setPower(RR);
     }
+    void startMoving(double x, double y){
+        startMoving(x,y,0,0,0,0,0,0);
+    }
 
     void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight, int targetX, int targetY){
         double r = Math.hypot(x, y);
@@ -192,6 +195,16 @@ class Robot {
         previousElapsedTime = elapsedTime.seconds();
         return (deltaTicks / deltaTime);
     }
+
+    void pickUpWobbleGoal() {
+        startMoving(-0.2,0);
+        wait(1.0);
+        startMoving(0,0.2);
+        wait(1.0);
+
+    }
+
+
 
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
