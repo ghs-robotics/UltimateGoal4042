@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-public class ChaseTowerGoal extends LinearOpMode
+public class ChaseWobbleGoal extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
@@ -92,10 +92,10 @@ public class ChaseTowerGoal extends LinearOpMode
 
         while (opModeIsActive())
         {
-            towerX = RingDeterminationPipeline.towerX;
-            towerY = RingDeterminationPipeline.towerY;
-            towerWidth = RingDeterminationPipeline.towerWidth;
-            towerHeight = RingDeterminationPipeline.towerHeight;
+            towerX = RingDeterminationPipeline.wobbleX;
+            towerY = RingDeterminationPipeline.wobbleY;
+            towerWidth = RingDeterminationPipeline.wobbleWidth;
+            towerHeight = RingDeterminationPipeline.wobbleHeight;
 
             double dw = targetWidth - towerWidth;
             double dx = targetX - towerX;
@@ -142,11 +142,17 @@ public class ChaseTowerGoal extends LinearOpMode
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
         public Mat mask;
-        public static int towerX = 0;
-        public static int towerY = 0;
-        public static int towerWidth = 0;
-        public static int towerHeight = 0;
-        Scalar GREEN = new Scalar(0, 255, 0);
+        public static int wobbleX = 0;
+        public static int wobbleY = 0;
+        public static int wobbleWidth = 0;
+        public static int wobbleHeight = 0;
+
+        /*
+         * Some color constants
+         */
+        static final Scalar BLUE = new Scalar(0, 123, 0);
+        static final Scalar GREEN = new Scalar(28, 255,880);
+
 
         @Override
         public void init(Mat firstFrame)
@@ -156,36 +162,30 @@ public class ChaseTowerGoal extends LinearOpMode
         @Override
         public Mat processFrame(Mat input)
         {
+
             //update ring coordinates
-            int[] coords = getRingCoordinates(input);
-            towerX = coords[0];
-            towerY = coords[1];
-            towerWidth = coords[2];
-            towerHeight = coords[3];
+            int[] coords = getWobbleCoordinates(input);
+            wobbleX = coords[0];
+            wobbleY = coords[1];
+            wobbleWidth = coords[2];
+            wobbleHeight = coords[3];
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    new Point(towerX,towerY), // First point which defines the rectangle
-                    new Point(towerX + towerWidth,towerY + towerHeight), // Second point which defines the rectangle
+                    new Point(wobbleX, wobbleY), // First point which defines the rectangle
+                    new Point(wobbleX + wobbleWidth, wobbleY + wobbleHeight), // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
 
             return input;
         }
 
-        public int[] getRingCoordinates(Mat input) {
+        public int[] getWobbleCoordinates(Mat input) {
             Scalar GREEN = new Scalar(0, 255, 0);
 
             Mat src = input;
-            Mat dst = new Mat();
             Imgproc.resize(src, src, new Size(320, 240));
-
-            Imgproc.rectangle(
-                    src,
-                    new Point(0,0),
-                    new Point(320, 180),
-                    GREEN,
-                    -1);
+            Mat dst = new Mat();
 
             Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
             Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
@@ -209,12 +209,6 @@ public class ChaseTowerGoal extends LinearOpMode
 
             for (int i = 0; i < contours.size(); i++) {
                 Rect rect = Imgproc.boundingRect(contours.get(i));
-
-                //dont draw a square around a spot that's too small
-                //to avoid false detections
-                if (rect.area() > 7_000) {
-                    Imgproc.rectangle(src, rect, GREEN, 5);
-                }
             }
 
             Rect largest = new Rect();
