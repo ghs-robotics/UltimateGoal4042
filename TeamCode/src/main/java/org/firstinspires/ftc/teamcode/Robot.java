@@ -9,6 +9,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class Robot {
     double leftFrontPower = 0;
@@ -169,7 +180,7 @@ class Robot {
     }
 
     //Launches a ring by moving the shooterServo
-    void launchRing() {
+    public void launchRing() {
         shooterAngle = 0.25;
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
@@ -177,18 +188,18 @@ class Robot {
         shooterServo.setPosition(shooterAngle);
     }
 
-    void increaseArmAngle(){
+    public void increaseArmAngle(){
         armAngle += 0.1;
         armServo.setPosition(armAngle);
     }
 
-    void decreaseArmAngle(){
+    public void decreaseArmAngle(){
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
 
     //Calculates shooter motor speed in ticks per second
-    double findShooterVelocity() {
+    public double findShooterVelocity() {
         double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
         double deltaTime = elapsedTime.seconds() - previousElapsedTime;
         previousShooterMotorTicks = shooterMotor.getCurrentPosition();
@@ -196,7 +207,7 @@ class Robot {
         return (deltaTicks / deltaTime);
     }
 
-    void pickUpWobbleGoal() {
+    public void pickUpWobbleGoal() {
         startMoving(-0.2,0);
         wait(1.0);
         startMoving(0,0.2);
@@ -205,15 +216,63 @@ class Robot {
     }
 
     //Resets the timer
-    void resetElapsedTime() { elapsedTime.reset(); }
+    public void resetElapsedTime() { elapsedTime.reset(); }
 
     //Returns how many seconds have passed since the timer was last reset
-    double getElapsedTimeSeconds() { return elapsedTime.seconds(); }
+    public double getElapsedTimeSeconds() { return elapsedTime.seconds(); }
 
     //Makes the robot wait (i.e. do nothing) for a specified number of seconds
-    void wait(double seconds) {
+    public void wait(double seconds) {
         double start = getElapsedTimeSeconds();
         while (getElapsedTimeSeconds() - start < seconds) {}
+    }
+
+    public int[] getObjectOnScreen(Mat src, Scalar lower, Scalar upper) {
+        Scalar GREEN = new Scalar(0, 255, 0);
+
+        Mat dst = new Mat();
+        Imgproc.resize(src, src, new Size(320, 240));
+
+        Imgproc.rectangle(
+                src,
+                new Point(0,0),
+                new Point(320, 72),
+                GREEN,
+                -1);
+
+        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
+
+        //adding a mask to the dst mat
+        Core.inRange(dst, lower, upper, dst);
+
+        //dilate the ring to make it easier to detect
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+        Imgproc.dilate(dst, dst, kernel);
+
+        //get the contours of the ring
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        //draw a contour on the src image
+        //Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+
+        for (int i = 0; i < contours.size(); i++) {
+            Rect rect = Imgproc.boundingRect(contours.get(i));
+        }
+
+        Rect largest = new Rect();
+        for (int i = 0; i < contours.size(); i++) {
+            Rect rect = Imgproc.boundingRect(contours.get(i));
+
+            if (largest.area() < rect.area()) largest = rect;
+        }
+
+        //draws largest rect
+        Imgproc.rectangle(src, largest,GREEN, 5);
+
+        return new int[]{largest.x,largest.y, largest.width, largest.height};
     }
 }
 
