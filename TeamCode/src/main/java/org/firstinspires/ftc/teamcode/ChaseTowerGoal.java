@@ -183,7 +183,7 @@ public class ChaseTowerGoal extends LinearOpMode
             Imgproc.rectangle(
                     src,
                     new Point(0,0),
-                    new Point(320, 180),
+                    new Point(320, 72),
                     GREEN,
                     -1);
 
@@ -192,7 +192,7 @@ public class ChaseTowerGoal extends LinearOpMode
 
             //adding a mask to the dst mat
             Scalar lowerHSV = new Scalar(0, 0, 0);
-            Scalar upperHSV = new Scalar(255, 255, 10);
+            Scalar upperHSV = new Scalar(255, 255, 20);
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //dilate the ring to make it easier to detect
