@@ -23,6 +23,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -42,19 +43,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-public class FindRings extends LinearOpMode
+public class ChaseTowerGoal extends LinearOpMode
 {
-    private OpenCvInternalCamera phoneCam;
-    private RingDeterminationPipeline pipeline;
-    private static int TopBoxHeight = 110;
+    OpenCvInternalCamera phoneCam;
+    RingDeterminationPipeline pipeline;
+
+    Robot robot;
+    Controller controller1;
 
     @Override
     public void runOpMode()
     {
-        int ringX = 0;
-        int ringY = 0;
-        int ringWidth = 0;
-        int ringHeight = 0;
+        robot = new Robot(hardwareMap, telemetry);
+        controller1 = new Controller(gamepad1);
+        int towerX = 0;
+        int towerY = 0;
+        int towerWidth = 0;
+        int towerHeight = 0;
+        int targetX = 95;
+        int targetWidth = 75;
+        int shots = 0;
+        double y = 0;
+        double x = 0;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
@@ -75,20 +85,54 @@ public class FindRings extends LinearOpMode
             }
         });
 
+        robot.resetServos();
+
         waitForStart();
+        robot.resetElapsedTime();
 
         while (opModeIsActive())
         {
-            ringX = RingDeterminationPipeline.ringX;
-            ringY = RingDeterminationPipeline.ringY;
-            ringWidth = RingDeterminationPipeline.ringWidth;
-            ringHeight = RingDeterminationPipeline.ringHeight;
+            towerX = RingDeterminationPipeline.towerX;
+            towerY = RingDeterminationPipeline.towerY;
+            towerWidth = RingDeterminationPipeline.towerWidth;
+            towerHeight = RingDeterminationPipeline.towerHeight;
 
-            telemetry.addData("Analysis", pipeline.getAnalysis());
-            telemetry.addData("Position", pipeline.position);
-            telemetry.addData("ringX, ringY", "( " + ringX + ", " + ringY + " )");
-            telemetry.addData("width, height", "( " + ringWidth + ", " + ringHeight + " )");
-            telemetry.update();
+            double dw = targetWidth - towerWidth;
+            double dx = targetX - towerX;
+
+            if (Math.abs(dx) < 3) {
+                x = 0;
+            } else {
+                dx = Range.clip(dx / 250.0, -0.2, 0.2);
+                x += dx;
+            }
+            if (Math.abs(dw) < 3) {
+                y = 0;
+            } else {
+                dw = Range.clip(dw / 140.0, -0.2, 0.2);
+                y -= dw;
+            }
+
+            y = Range.clip(y, -0.6, 0.6);
+            x = Range.clip(x, -0.6, 0.6);
+
+            if (!(towerWidth > 60 && towerWidth < 220)) {
+                x = 0;
+                y = 0;
+            }
+            robot.startMoving(x, y, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+            if (robot.elapsedTime.seconds() > 6 && shots < 3){
+                robot.startMoving(0, 0, towerX, towerY, towerWidth, towerHeight, targetX, targetWidth);
+                robot.toggleShooter();
+                robot.wait(1.5);
+                robot.launchRing();
+                robot.wait(0.5);
+                robot.launchRing();
+                robot.wait(0.5);
+                robot.launchRing();
+                shots += 3;
+                robot.toggleShooter();
+            }
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
@@ -98,10 +142,10 @@ public class FindRings extends LinearOpMode
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
         public Mat mask;
-        public static int ringX = 0;
-        public static int ringY = 0;
-        public static int ringWidth = 0;
-        public static int ringHeight = 0;
+        public static int towerX = 0;
+        public static int towerY = 0;
+        public static int towerWidth = 0;
+        public static int towerHeight = 0;
 
         /*
          * An enum to define the ring position
@@ -118,7 +162,6 @@ public class FindRings extends LinearOpMode
          */
         static final Scalar BLUE = new Scalar(0, 0, 255);
         static final Scalar GREEN = new Scalar(0, 255, 0);
-        static final Scalar BLACK = new Scalar(0, 0, 0);
 
         /*
          * The core values which define the location and size of the sample regions
@@ -193,15 +236,15 @@ public class FindRings extends LinearOpMode
 
             //update ring coordinates
             int[] coords = getRingCoordinates(input);
-            ringX = coords[0];
-            ringY = coords[1];
-            ringWidth = coords[2];
-            ringHeight = coords[3];
+            towerX = coords[0];
+            towerY = coords[1];
+            towerWidth = coords[2];
+            towerHeight = coords[3];
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    new Point(ringX,ringY), // First point which defines the rectangle
-                    new Point(ringX + ringWidth,ringY + ringHeight), // Second point which defines the rectangle
+                    new Point(towerX,towerY), // First point which defines the rectangle
+                    new Point(towerX + towerWidth,towerY + towerHeight), // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
 
@@ -214,19 +257,18 @@ public class FindRings extends LinearOpMode
         }
 
         public int[] getRingCoordinates(Mat input) {
+            Scalar GREEN = new Scalar(0, 255, 0);
 
             Mat src = input;
             Imgproc.resize(src, src, new Size(320, 240));
-            Imgproc.rectangle(src, new Point(0,0), new Point(320, FindRings.TopBoxHeight), BLACK, -1);
-
             Mat dst = new Mat();
 
             Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
             Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
 
             //adding a mask to the dst mat
-            Scalar lowerHSV = new Scalar(74, 153, 144); //74, 153, 144
-            Scalar upperHSV = new Scalar(112, 242, 255); //112, 242, 255
+            Scalar lowerHSV = new Scalar(0, 0, 0);
+            Scalar upperHSV = new Scalar(255, 255, 10);
             Core.inRange(dst, lowerHSV, upperHSV, dst);
 
             //dilate the ring to make it easier to detect
@@ -239,7 +281,7 @@ public class FindRings extends LinearOpMode
             Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
             //draw a contour on the src image
-            //Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+            Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
 
             for (int i = 0; i < contours.size(); i++) {
                 Rect rect = Imgproc.boundingRect(contours.get(i));
@@ -265,4 +307,5 @@ public class FindRings extends LinearOpMode
             return new int[]{largest.x,largest.y, largest.width, largest.height};
         }
     }
+
 }

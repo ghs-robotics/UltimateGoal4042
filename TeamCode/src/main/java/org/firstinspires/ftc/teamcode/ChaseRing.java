@@ -22,13 +22,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -36,25 +39,34 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-@Autonomous(name="ChaseRing", group="Linear Opmode")
+import java.util.ArrayList;
+import java.util.List;
+
+@TeleOp
 public class ChaseRing extends LinearOpMode
 {
     OpenCvInternalCamera phoneCam;
     RingDeterminationPipeline pipeline;
 
-    //Declare OpMode members
     Robot robot;
-
+    Controller controller1;
 
     @Override
     public void runOpMode()
     {
         robot = new Robot(hardwareMap, telemetry);
+        controller1 = new Controller(gamepad1);
         int ringX = 0;
         int ringY = 0;
+        int ringWidth = 0;
+        int ringHeight = 0;
+        int targetX = 60;
+        int targetY = 160;
+        double y = 0;
+        double x = 0;
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new RingDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
 
@@ -68,7 +80,7 @@ public class ChaseRing extends LinearOpMode
             @Override
             public void onOpened()
             {
-                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
             }
         });
 
@@ -76,22 +88,49 @@ public class ChaseRing extends LinearOpMode
 
         while (opModeIsActive())
         {
-            telemetry.addData("Analysis", pipeline.getAnalysis());
-            telemetry.addData("Position", pipeline.position);
-            telemetry.update();
-
             ringX = RingDeterminationPipeline.ringX;
             ringY = RingDeterminationPipeline.ringY;
+            ringWidth = RingDeterminationPipeline.ringWidth;
+            ringHeight = RingDeterminationPipeline.ringHeight;
+
+            double dy = targetY - ringY;
+            double dx = targetX - ringX;
+
+            if (Math.abs(dx) < 10){
+                x = 0;
+            } else {
+                dx = Range.clip(dx / 500.0, -0.2, 0.2);
+                x += dx;
+            }
+            if (Math.abs(dy) < 10){
+                y = 0;
+            } else {
+                dy = Range.clip(dy / 500.0, -0.2, 0.2);
+                y -= dy;
+            }
+
+            y = Range.clip(y, -0.6, 0.6);
+            x = Range.clip(x, -0.6, 0.6);
+            double r = 1.0 * ringWidth / ringHeight;
+
+            if ( !(ringHeight > 10 && ringHeight < 45 && ringWidth > 22 && ringWidth < 65 && r > 1.2 && r < 2.5)){
+                x = 0;
+                y = 0;
+            }
+            robot.startMoving(x, y, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
 
             // Don't burn CPU cycles busy-looping in this sample
-            sleep(50);
+            sleep(100);
         }
     }
 
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
+        public Mat mask;
         public static int ringX = 0;
         public static int ringY = 0;
+        public static int ringWidth = 0;
+        public static int ringHeight = 0;
 
         /*
          * An enum to define the ring position
@@ -164,31 +203,33 @@ public class ChaseRing extends LinearOpMode
 
             avg1 = (int) Core.mean(region1_Cb).val[0];
 
-            Imgproc.rectangle(
-                    input, // Buffer to draw on
-                    region1_pointA, // First point which defines the rectangle
-                    region1_pointB, // Second point which defines the rectangle
-                    BLUE, // The color the rectangle is drawn in
-                    2); // Thickness of the rectangle lines
+//            Imgproc.rectangle(
+//                    input, // Buffer to draw on
+//                    region1_pointA, // First point which defines the rectangle
+//                    region1_pointB, // Second point which defines the rectangle
+//                    BLUE, // The color the rectangle is drawn in
+//                    2); // Thickness of the rectangle lines
 
             position = RingPosition.FOUR; // Record our analysis
             if(avg1 > FOUR_RING_THRESHOLD){
                 position = RingPosition.FOUR;
-            }else if (avg1 > ONE_RING_THRESHOLD){
+            } else if (avg1 > ONE_RING_THRESHOLD){
                 position = RingPosition.ONE;
-            }else{
+            } else {
                 position = RingPosition.NONE;
             }
 
             //update ring coordinates
-            int[] coords = RingDetector.getRingCoordinates(input);
+            int[] coords = getRingCoordinates(input);
             ringX = coords[0];
             ringY = coords[1];
+            ringWidth = coords[2];
+            ringHeight = coords[3];
 
             Imgproc.rectangle(
                     input, // Buffer to draw on
-                    new Point(ringX, ringY), // First point which defines the rectangle
-                    new Point(ringX + coords[2],ringY + coords[3]), // Second point which defines the rectangle
+                    new Point(ringX,ringY), // First point which defines the rectangle
+                    new Point(ringX + ringWidth,ringY + ringHeight), // Second point which defines the rectangle
                     GREEN, // The color the rectangle is drawn in
                     -1); // Negative thickness means solid fill
 
@@ -199,5 +240,57 @@ public class ChaseRing extends LinearOpMode
         {
             return avg1;
         }
+
+        public int[] getRingCoordinates(Mat input) {
+            Scalar GREEN = new Scalar(0, 255, 0);
+
+            Mat src = input;
+            Imgproc.resize(src, src, new Size(320, 240));
+            Mat dst = new Mat();
+
+            Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+            Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
+
+            //adding a mask to the dst mat
+            Scalar lowerHSV = new Scalar(74, 153, 144); //50, 100, 0
+            Scalar upperHSV = new Scalar(112, 242, 255); //200, 255, 255
+            Core.inRange(dst, lowerHSV, upperHSV, dst);
+
+            //dilate the ring to make it easier to detect
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+            Imgproc.dilate(dst, dst, kernel);
+
+            //get the contours of the ring
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            //draw a contour on the src image
+            Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                //dont draw a square around a spot that's too small
+                //to avoid false detections
+                if (rect.area() > 7_000) {
+                    Imgproc.rectangle(src, rect, GREEN, 5);
+                }
+            }
+
+            Rect largest = new Rect();
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                if (largest.area() < rect.area()) largest = rect;
+            }
+
+            //draws largest rect
+            Imgproc.rectangle(src, largest, new Scalar(0, 0, 255), 5);
+
+            mask = dst;
+            return new int[]{largest.x,largest.y, largest.width, largest.height};
+        }
     }
+
 }
