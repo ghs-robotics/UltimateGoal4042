@@ -204,8 +204,6 @@ class Robot {
 
     }
 
-
-
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
 

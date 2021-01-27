@@ -151,8 +151,7 @@ public class ChaseWobbleGoal extends LinearOpMode
          * Some color constants
          */
         static final Scalar BLUE = new Scalar(0, 123, 0);
-        static final Scalar GREEN = new Scalar(28, 255,880);
-
+        static final Scalar GREEN = new Scalar(28, 255,88);
 
         @Override
         public void init(Mat firstFrame)
