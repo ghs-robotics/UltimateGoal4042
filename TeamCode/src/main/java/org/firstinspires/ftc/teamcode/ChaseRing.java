@@ -117,13 +117,17 @@ public class ChaseRing extends LinearOpMode
                 x = 0;
                 y = 0;
             }
+
             robot.startMoving(x, y, ringX, ringY, ringWidth, ringHeight, targetX, targetY);
+
+
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(100);
         }
     }
 
+    //OpenCV stuff--don't mess with this
     public static class RingDeterminationPipeline extends OpenCvPipeline
     {
         public Mat mask;
