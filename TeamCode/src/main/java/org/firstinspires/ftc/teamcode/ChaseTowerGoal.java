@@ -149,9 +149,7 @@ public class ChaseTowerGoal extends LinearOpMode
         Scalar GREEN = new Scalar(0, 255, 0);
 
         @Override
-        public void init(Mat firstFrame)
-        {
-        }
+        public void init(Mat firstFrame){}
 
         @Override
         public Mat processFrame(Mat input)
