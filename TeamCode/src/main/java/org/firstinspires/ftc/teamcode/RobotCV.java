@@ -69,7 +69,7 @@ class RobotCV {
 
     //CV objects
     OpenCvInternalCamera phoneCam;
-    ChaseWobbleGoal.RingDeterminationPipeline pipeline;
+    RingDeterminationPipeline pipeline;
 
     //Creates a robot object with methods that we can use in both Auto and TeleOp
     RobotCV(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -106,29 +106,28 @@ class RobotCV {
         //initiating some CV variables/objects
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        pipeline = new ChaseWobbleGoal.RingDeterminationPipeline();
+        pipeline = new RingDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
     }
 
     void initCamera(){
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-
         phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
-            public void onOpened()
-            {
-                phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-            }
+            public void onOpened() { startStreaming(); }
         });
     }
 
-    void startStreaming(){
-        phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-    }
+    void startStreaming(){ phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_RIGHT); }
 
-    void stopStreaming(){
-        phoneCam.stopStreaming();
+    void stopStreaming(){ phoneCam.stopStreaming(); }
+
+    void updateObjectValues(){
+        objectX = pipeline.objectX;
+        objectY = pipeline.objectY;
+        objectWidth = pipeline.objectWidth;
+        objectHeight = pipeline.objectHeight;
     }
 
     //Sets servos to starting positions
@@ -164,7 +163,7 @@ class RobotCV {
         rightRearDrive.setPower(RR);
     }
 
-    void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight, int targetX, int targetY){
+    void chaseObject(double x, double y, int targetX, int targetY){
         double r = Math.hypot(x, y);
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
         double rotate = 0;
@@ -184,9 +183,10 @@ class RobotCV {
 //        telemetry.addData("rightFrontPower", "" + RF);
 //        telemetry.addData("leftRearPower", "" + LR);
 //        telemetry.addData("rightRearPower", "" + RR);
-        telemetry.addData("ringWidth, ringHeight", "( " + ringWidth + ", " + ringHeight + " )");
-        telemetry.addData("ringX, targetX", "( " + ringX + ", " + targetX + " )");
-        telemetry.addData("ringY, targetY", "( " + ringY + ", " + targetY + " )");
+        updateObjectValues();
+        telemetry.addData("width, height", "( " + objectWidth + ", " + objectHeight + " )");
+        telemetry.addData("objectX, targetX", "( " + objectX + ", " + targetX + " )");
+        telemetry.addData("objectY, targetY", "( " + objectY + ", " + targetY + " )");
         telemetry.addData("x, y", "( " + x + ", " + y + " )");
         telemetry.update();
 
@@ -263,98 +263,100 @@ class RobotCV {
         double start = getElapsedTimeSeconds();
         while (getElapsedTimeSeconds() - start < seconds) {}
     }
-}
 
-class RingDeterminationPipeline extends OpenCvPipeline
-{
-    public static final Scalar GREEN = new Scalar(0, 255, 0);
-    public static final int SCREEN_HEIGHT = 240;
-    public static final int SCREEN_WIDTH = 320;
-
-    public Mat mask;
-    public int objectX = 0;
-    public int objectY = 0;
-    public int objectWidth = 0;
-    public int objectHeight = 0;
-
-    @Override
-    public void init(Mat firstFrame) {}
-
-    @Override
-    public Mat processFrame(Mat input)
+    public static class RingDeterminationPipeline extends OpenCvPipeline
     {
-        //update ring coordinates
-        int[] coords = getObjectCoordinates(input);
-        objectX = coords[0];
-        objectY = coords[1];
-        objectWidth = coords[2];
-        objectHeight = coords[3];
+        //HSV constants
+        public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144);
+        public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255);
+        public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
+        public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 20);
+        public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 123, 25);
+        public static final Scalar UPPER_WOBBLE_HSV = new Scalar(25, 210, 101);
 
-        Imgproc.rectangle(
-                input, // Buffer to draw on
-                new Point(objectX, objectY), // First point which defines the rectangle
-                new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
-                GREEN, // The color the rectangle is drawn in
-                -1); // Negative thickness means solid fill
+        public static final Scalar GREEN = new Scalar(0, 255, 0);
+        public static final int SCREEN_HEIGHT = 240;
+        public static final int SCREEN_WIDTH = 320;
 
-        return input;
-    }
+        public Mat mask;
+        public int objectX = 0;
+        public int objectY = 0;
+        public int objectWidth = 0;
+        public int objectHeight = 0;
 
-    public int[] getObjectCoordinates(Mat input)
-    {
-        Mat src = input;
-        Mat dst = new Mat();
-        Imgproc.resize(src, src, new Size(320, 240));
+        @Override
+        public void init(Mat firstFrame) {}
 
-        Imgproc.rectangle(
-                src,
-                new Point(0,0),
-                new Point(320, 72),
-                GREEN,
-                -1);
-
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
-
-        //adding a mask to the dst mat
-        Scalar lowerHSV = new Scalar(0, 0, 0);
-        Scalar upperHSV = new Scalar(255, 255, 20);
-        Core.inRange(dst, lowerHSV, upperHSV, dst);
-
-        //dilate the ring to make it easier to detect
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(dst, dst, kernel);
-
-        //get the contours of the ring
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        //draw a contour on the src image
-        Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
-
-        for (int i = 0; i < contours.size(); i++)
+        @Override
+        public Mat processFrame(Mat input)
         {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
+            //update ring coordinates
+            int[] coords = getObjectCoordinates(input);
+            objectX = coords[0];
+            objectY = coords[1];
+            objectWidth = coords[2];
+            objectHeight = coords[3];
 
-            //dont draw a square around a spot that's too small
-            //to avoid false detections
-            if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    new Point(objectX, objectY), // First point which defines the rectangle
+                    new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
+                    GREEN, // The color the rectangle is drawn in
+                    -1); // Negative thickness means solid fill
+
+            return input;
         }
 
-        Rect largest = new Rect();
-        for (int i = 0; i < contours.size(); i++)
-        {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
+        public int[] getObjectCoordinates(Mat input) {
+            Scalar GREEN = new Scalar(0, 255, 0);
 
-            if (largest.area() < rect.area()){ largest = rect; }
+            Mat src = input;
+            Imgproc.resize(src, src, new Size(320, 240));
+            Mat dst = new Mat();
+
+            Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+            Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
+
+            //adding a mask to the dst mat
+            Scalar lowerHSV = new Scalar(74, 153, 144);
+            Scalar upperHSV = new Scalar(112, 242, 255);
+            Core.inRange(dst, lowerHSV, upperHSV, dst);
+
+            //dilate the ring to make it easier to detect
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+            Imgproc.dilate(dst, dst, kernel);
+
+            //get the contours of the ring
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            //draw a contour on the src image
+            Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                //dont draw a square around a spot that's too small
+                //to avoid false detections
+                if (rect.area() > 7_000) {
+                    Imgproc.rectangle(src, rect, GREEN, 5);
+                }
+            }
+
+            Rect largest = new Rect();
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                if (largest.area() < rect.area()) largest = rect;
+            }
+
+            //draws largest rect
+            Imgproc.rectangle(src, largest, new Scalar(0, 0, 255), 5);
+
+            mask = dst;
+            return new int[]{largest.x,largest.y, largest.width, largest.height};
         }
-
-        //draws largest rect
-        Imgproc.rectangle(src, largest, new Scalar(0, 0, 255), 5);
-
-        mask = dst;
-        return new int[]{largest.x,largest.y, largest.width, largest.height};
     }
 }
 
