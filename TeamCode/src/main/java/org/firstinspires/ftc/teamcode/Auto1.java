@@ -17,7 +17,6 @@ import org.openftc.easyopencv.OpenCvPipeline;
 @Autonomous
 public class Auto1 extends LinearOpMode {
 
-
     private OpenCvInternalCamera phoneCam;
     private OpenCVProcess pipeline;
 
