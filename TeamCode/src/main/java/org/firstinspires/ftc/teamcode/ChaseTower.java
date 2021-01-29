@@ -23,30 +23,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
-
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.easyopencv.OpenCvPipeline;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @TeleOp
-public class ChaseRing extends LinearOpMode
+public class ChaseTower extends LinearOpMode
 {
     RobotCV robot;
     Controller controller1;
+    int shots = 0;
 
     @Override
     public void runOpMode()
@@ -59,7 +42,19 @@ public class ChaseRing extends LinearOpMode
 
         while (opModeIsActive())
         {
-            robot.chaseRing();
+            robot.chaseTower();
+//            if (robot.elapsedTime.seconds() > 6 && shots < 3){
+//                robot.stopDrive();
+//                robot.toggleShooter();
+//                robot.wait(1.5);
+//                robot.launchRing();
+//                robot.wait(0.5);
+//                robot.launchRing();
+//                robot.wait(0.5);
+//                robot.launchRing();
+//                shots += 3;
+//                robot.toggleShooter();
+//            }
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

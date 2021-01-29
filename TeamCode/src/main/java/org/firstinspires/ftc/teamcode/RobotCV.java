@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
@@ -28,17 +29,28 @@ class RobotCV {
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144);
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255);
     public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
-    public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 20);
-    public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 123, 25);
-    public static final Scalar UPPER_WOBBLE_HSV = new Scalar(25, 210, 101);
+    public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 12);
+    public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0,117,0);
+    public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77,255,97);
 
     //CV detection variables
+    public static Scalar lower = LOWER_RING_HSV;
+    public static Scalar upper = UPPER_RING_HSV;
+    public static double cover = 0;
+
+    int targetX = 60;
+    int targetY = 160;
+    int targetWidth = 75;
     int objectX = 0;
     int objectY = 0;
     int objectWidth = 0;
     int objectHeight = 0;
+    double x = 0;
+    double y = 0;
 
-    //robot variables
+    String currentTargetObject = "ring";
+
+    //robot variables and objects
     double leftFrontPower = 0;
     double rightFrontPower = 0;
     double leftRearPower = 0;
@@ -110,7 +122,15 @@ class RobotCV {
         phoneCam.setPipeline(pipeline);
     }
 
+    void init(){
+        resetServos();
+        initCamera();
+    }
+
     void initCamera(){
+        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
+        // out when the RC activity is in portrait. We do our actual image processing assuming
+        // landscape orientation, though.
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
@@ -123,11 +143,35 @@ class RobotCV {
 
     void stopStreaming(){ phoneCam.stopStreaming(); }
 
+    //Updates the coordinates of the object being detected on the screen
     void updateObjectValues(){
         objectX = pipeline.objectX;
         objectY = pipeline.objectY;
         objectWidth = pipeline.objectWidth;
         objectHeight = pipeline.objectHeight;
+    }
+
+    //Switches the object that the robot is trying to detect with computer vision
+    void setTargetTo(String s){
+        currentTargetObject = s;
+        cover = 0;
+        if (s.equals("ring")){
+            lower = LOWER_RING_HSV;
+            upper = UPPER_RING_HSV;
+            targetX = 60;
+            targetY = 160;
+        } else if (s.equals("tower")) {
+            lower = LOWER_TOWER_HSV;
+            upper = UPPER_TOWER_HSV;
+            targetX = 95;
+            targetWidth = 75;
+            cover = 0.23;
+        } else if (s.equals("wobble")) {
+            lower = LOWER_WOBBLE_HSV;
+            upper = UPPER_WOBBLE_HSV;
+            targetX = 60;
+            targetY = 160;
+        }
     }
 
     //Sets servos to starting positions
@@ -137,64 +181,152 @@ class RobotCV {
         shooterServo.setPosition(shooterAngle);
     }
 
+    //Makes the robot stop driving
+    void stopDrive(){
+        leftFrontPower = 0;
+        rightFrontPower = 0;
+        leftRearPower = 0;
+        leftRearPower = 0;
+        leftFrontDrive.setPower(leftFrontPower);
+        rightFrontDrive.setPower(rightFrontPower);
+        leftRearDrive.setPower(leftRearPower);
+        rightRearDrive.setPower(rightRearPower);
+    }
+
+    //Calculates powers for mecanum wheel drive
+    void calculateDrivePowers(double x, double y, double rotation){
+        double r = Math.hypot(x, y);
+        double robotAngle = Math.atan2(y, x) - Math.PI / 4;
+        leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
+        rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rotation, -1.0, 1.0) * speed;
+        leftRearPower = Range.clip(r * Math.sin(robotAngle) + rotation, -1.0, 1.0) * speed;
+        rightRearPower = Range.clip(r * Math.cos(robotAngle) - rotation, -1.0, 1.0) * speed;
+    }
+
+    //Sends desired power to drive motors
+    void sendDrivePowers() {
+        leftFrontDrive.setPower(leftFrontPower);
+        rightFrontDrive.setPower(rightFrontPower);
+        leftRearDrive.setPower(leftRearPower);
+        rightRearDrive.setPower(rightRearPower);
+    }
+
     //Updates the powers being sent to the drive motors
     void updateDrive() {
-        //Adjusts powers for speed
-        double LF = speed * leftFrontPower;
-        double RF = speed * rightFrontPower;
-        double LR = speed * leftRearPower;
-        double RR = speed * rightRearPower;
-
         //Displays motor powers on the phone
-//        telemetry.addData("leftFrontPower", "" + LF);
-//        telemetry.addData("rightFrontPower", "" + RF);
-//        telemetry.addData("leftRearPower", "" + LR);
-//        telemetry.addData("rightRearPower", "" + RR);
         telemetry.addData("shooterPower", "" + shooterPower);
         telemetry.addData("armServo", "" + armAngle);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
         telemetry.update();
-
-        //Sends desired power to drive motors
-        leftFrontDrive.setPower(LF);
-        rightFrontDrive.setPower(RF);
-        leftRearDrive.setPower(LR);
-        rightRearDrive.setPower(RR);
+        sendDrivePowers();
     }
 
-    void chaseObject(double x, double y, int targetX, int targetY){
-        double r = Math.hypot(x, y);
-        double robotAngle = Math.atan2(y, x) - Math.PI / 4;
-        double rotate = 0;
-        leftFrontPower = r * Math.cos(robotAngle) + rotate;
-        rightFrontPower = r * Math.sin(robotAngle) - rotate;
-        leftRearPower = r * Math.sin(robotAngle) + rotate;
-        rightRearPower = r * Math.cos(robotAngle) - rotate;
+    void chaseObject(double x, double y)
+    {
+        calculateDrivePowers(x, y, 0);
+        sendDrivePowers();
 
-        //Adjusts powers for speed
-        double LF = speed * leftFrontPower;
-        double RF = speed * rightFrontPower;
-        double LR = speed * leftRearPower;
-        double RR = speed * rightRearPower;
+        String t = currentTargetObject;
 
-        //Displays motor powers on the phone
-//        telemetry.addData("leftFrontPower", "" + LF);
-//        telemetry.addData("rightFrontPower", "" + RF);
-//        telemetry.addData("leftRearPower", "" + LR);
-//        telemetry.addData("rightRearPower", "" + RR);
-        updateObjectValues();
-        telemetry.addData("width, height", "( " + objectWidth + ", " + objectHeight + " )");
-        telemetry.addData("objectX, targetX", "( " + objectX + ", " + targetX + " )");
-        telemetry.addData("objectY, targetY", "( " + objectY + ", " + targetY + " )");
-        telemetry.addData("x, y", "( " + x + ", " + y + " )");
+        if (t.equals("tower")){
+            telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
+            telemetry.addData("towerY = ", objectY);
+            telemetry.addData("towerWidth = ", objectWidth + " (target = " + targetWidth + ")");
+            telemetry.addData("towerHeight = ", objectHeight);
+        } else {
+            telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
+            telemetry.addData(t + "Y = ", objectY + " (target = " + targetY + ")");
+            telemetry.addData("width = ", objectWidth);
+            telemetry.addData("height = ", objectHeight);
+        }
+
+        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
+        telemetry.addData("cover: ", cover);
         telemetry.update();
+    }
 
-        //Sends desired power to drive motors
-        leftFrontDrive.setPower(LF);
-        rightFrontDrive.setPower(RF);
-        leftRearDrive.setPower(LR);
-        rightRearDrive.setPower(RR);
+    void chaseRing()
+    {
+        if (!currentTargetObject.equals("ring")) { setTargetTo("ring"); }
+        updateObjectValues();
+
+        double dy = targetY - objectY;
+        double dx = targetX - objectX;
+
+        //Adjust x and y values according to how far away the robot is from the target
+        if (Math.abs(dx) < 10) { x = 0; } else { x += Range.clip(dx / 400.0, -0.2, 0.2); }
+        if (Math.abs(dy) < 10) { y = 0; } else { y -= Range.clip(dy / 400.0, -0.2, 0.2); }
+
+        //Make sure the robot doesn't go too fast
+        y = Range.clip(y, -0.6, 0.6);
+        x = Range.clip(x, -0.6, 0.6);
+
+        double h = objectHeight;
+        double w = objectWidth;
+        double r = 1.0 * w / h;
+
+        //Testing to make sure the detected object is a ring
+        if ( !(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5) ) {
+            x = 0;
+            y = 0;
+        }
+
+        chaseObject(x, y);
+    }
+
+    void chaseWobble()
+    {
+        if (!currentTargetObject.equals("wobble")) { setTargetTo("wobble"); }
+        updateObjectValues();
+
+        double dy = targetY - objectY;
+        double dx = targetX - objectX;
+
+        //Adjust x and y values according to how far away the robot is from the target
+        if (Math.abs(dx) < 10) { x = 0; } else { x += Range.clip(dx / 400.0, -0.2, 0.2); }
+        if (Math.abs(dy) < 10) { y = 0; } else { y -= Range.clip(dy / 400.0, -0.2, 0.2); }
+
+        //Make sure the robot doesn't go too fast
+        y = Range.clip(y, -0.6, 0.6);
+        x = Range.clip(x, -0.6, 0.6);
+
+        double h = objectHeight;
+        double w = objectWidth;
+
+        //Testing to make sure the detected object is a wobble goal
+        if ( !(h > 10 && h < 200 && w > 10 && w < 200)){
+            x = 0;
+            y = 0;
+        }
+
+        chaseObject(x, y);
+    }
+
+    void chaseTower()
+    {
+        if (!currentTargetObject.equals("tower")) { setTargetTo("tower"); }
+        updateObjectValues();
+//        if (objectHeight < 10 && cover > 0) { cover -= 0.004; }
+//        else if (objectHeight > 15) { cover += 0.004; }
+//        if (cover > 0.5) { cover = 0.2; }
+
+        double dw = targetWidth - objectWidth;
+        double dx = targetX - objectX;
+
+        if (Math.abs(dx) < 3) { x = 0; } else { x += Range.clip(dx / 400.0, -0.2, 0.2); }
+        if (Math.abs(dw) < 3) { y = 0; } else { y -= Range.clip(dw / 240.0, -0.2, 0.2); }
+
+        y = Range.clip(y, -0.6, 0.6);
+        x = Range.clip(x, -0.6, 0.6);
+
+        if (!(objectWidth > 60 && objectWidth < 220)) {
+            x = 0;
+            y = 0;
+        }
+
+        chaseObject(x, y);
     }
 
     //Sets the drive speed to 30%
@@ -264,14 +396,15 @@ class RobotCV {
         while (getElapsedTimeSeconds() - start < seconds) {}
     }
 
-    public static int[] getObjectCoordinates(Mat input, Scalar lower, Scalar upper) {
+    public static int[] getObjectCoordinates(Mat input) {
         Scalar GREEN = new Scalar(0, 255, 0);
 
         Mat dst = new Mat();
         Mat src = input;
         Imgproc.resize(src, src, new Size(320, 240));
 
-        Imgproc.rectangle(src, new Point(0,0), new Point(320, 0), GREEN, -1);
+        //Cover up background noise
+        Imgproc.rectangle(src, new Point(0,0), new Point(320, (int) (RobotCV.cover * 240)), GREEN, -1);
 
         Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
         Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
@@ -314,14 +447,6 @@ class RobotCV {
 
     public static class ObjectDeterminationPipeline extends OpenCvPipeline
     {
-        //HSV constants
-        public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144);
-        public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255);
-        public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
-        public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 20);
-        public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 123, 25);
-        public static final Scalar UPPER_WOBBLE_HSV = new Scalar(25, 210, 101);
-
         public static final Scalar GREEN = new Scalar(0, 255, 0);
         public static final int SCREEN_HEIGHT = 240;
         public static final int SCREEN_WIDTH = 320;
@@ -338,7 +463,7 @@ class RobotCV {
         public Mat processFrame(Mat input)
         {
             //update ring coordinates
-            int[] coords = RobotCV.getObjectCoordinates(input, LOWER_RING_HSV, UPPER_RING_HSV);
+            int[] coords = RobotCV.getObjectCoordinates(input);
             objectX = coords[0];
             objectY = coords[1];
             objectWidth = coords[2];

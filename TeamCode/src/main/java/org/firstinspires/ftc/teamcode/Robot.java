@@ -103,11 +103,11 @@ class Robot {
 //        telemetry.addData("rightFrontPower", "" + RF);
 //        telemetry.addData("leftRearPower", "" + LR);
 //        telemetry.addData("rightRearPower", "" + RR);
-        telemetry.addData("shooterPower", "" + shooterPower);
-        telemetry.addData("armServo", "" + armAngle);
-        telemetry.addData("grabServo", "" + grabAngle);
-        telemetry.addData("shooterAngle", "" + shooterAngle);
-        telemetry.addData("Heading",""+gyro.getDirection());
+//        telemetry.addData("shooterPower", "" + shooterPower);
+//        telemetry.addData("armServo", "" + armAngle);
+//        telemetry.addData("grabServo", "" + grabAngle);
+//        telemetry.addData("shooterAngle", "" + shooterAngle);
+        telemetry.addData("Angles","" + gyro.getAngles());
         telemetry.update();
 
         //Sends desired power to drive motors

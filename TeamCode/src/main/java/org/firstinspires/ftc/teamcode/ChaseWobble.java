@@ -43,7 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TeleOp
-public class ChaseRing2 extends LinearOpMode
+public class ChaseWobble extends LinearOpMode
 {
     RobotCV robot;
     Controller controller1;
@@ -53,53 +53,16 @@ public class ChaseRing2 extends LinearOpMode
     {
         robot = new RobotCV(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        int targetX = 60;
-        int targetY = 160;
-        double y = 0;
-        double x = 0;
-
-        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        robot.initCamera();
+        robot.init();
 
         waitForStart();
 
         while (opModeIsActive())
         {
-            robot.updateObjectValues();
-            double dy = targetY - robot.objectY;
-            double dx = targetX - robot.objectX;
-
-            if (Math.abs(dx) < 10){
-                x = 0;
-            } else {
-                dx = Range.clip(dx / 500.0, -0.2, 0.2);
-                x += dx;
-            }
-            if (Math.abs(dy) < 10){
-                y = 0;
-            } else {
-                dy = Range.clip(dy / 500.0, -0.2, 0.2);
-                y -= dy;
-            }
-
-            y = Range.clip(y, -0.6, 0.6);
-            x = Range.clip(x, -0.6, 0.6);
-
-            double h = robot.objectHeight;
-            double w = robot.objectWidth;
-            double r = 1.0 * w / h;
-
-            if ( !(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5)){
-                x = 0;
-                y = 0;
-            }
-
-            robot.chaseObject(x, y, targetX, targetY);
+            robot.chaseWobble();
 
             // Don't burn CPU cycles busy-looping in this sample
-            sleep(100);
+            sleep(50);
         }
     }
 

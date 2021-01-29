@@ -40,12 +40,12 @@ public class Gyro {
         return globalAngle;
     }
 
-    public double getDirection() {
-        angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        //first angle returns the angle the robot is facing perpendicular to the ground
-        // aka the direction the robot is looking at
-        return angles.firstAngle;
-    }
+//    public double getDirection() {
+//        angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//        //first angle returns the angle the robot is facing perpendicular to the ground
+//        // aka the direction the robot is looking at
+//        return angles.firstAngle;
+//    }
 
     /*
     public void addGyroData() {
