@@ -107,6 +107,7 @@ class Robot {
         telemetry.addData("armServo", "" + armAngle);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
+        telemetry.addData("Heading",""+gyro.getDirection());
         telemetry.update();
 
         //Sends desired power to drive motors

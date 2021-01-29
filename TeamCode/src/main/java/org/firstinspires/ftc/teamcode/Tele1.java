@@ -111,9 +111,6 @@ public class Tele1 extends OpMode {
         if (controller1.dpad_down.equals("pressing")) {
             robot.decreaseArmAngle();
         }
-
-        telemetry.addData("Heading",""+gyro.getDirection());
-        telemetry.update();
     }
 
     //Code to run ONCE after the driver hits STOP
