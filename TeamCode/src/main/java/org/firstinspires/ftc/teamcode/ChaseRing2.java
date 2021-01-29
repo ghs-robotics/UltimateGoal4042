@@ -67,9 +67,9 @@ public class ChaseRing2 extends LinearOpMode
 
         while (opModeIsActive())
         {
-
-            double dy = targetY - robot.pipeline.objectY;
-            double dx = targetX - robot.pipeline.objectX;
+            robot.updateObjectValues();
+            double dy = targetY - robot.objectY;
+            double dx = targetX - robot.objectX;
 
             if (Math.abs(dx) < 10){
                 x = 0;
@@ -87,8 +87,8 @@ public class ChaseRing2 extends LinearOpMode
             y = Range.clip(y, -0.6, 0.6);
             x = Range.clip(x, -0.6, 0.6);
 
-            double h = robot.pipeline.objectHeight;
-            double w = robot.pipeline.objectWidth;
+            double h = robot.objectHeight;
+            double w = robot.objectWidth;
             double r = 1.0 * w / h;
 
             if ( !(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5)){
