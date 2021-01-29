@@ -123,6 +123,25 @@ class RobotCV {
 
     void stopStreaming(){ phoneCam.stopStreaming(); }
 
+    //Sets servos to starting positions
+
+    void resetServos(){
+        armServo.setPosition(armAngle);
+        grabServo.setPosition(grabAngle);
+        shooterServo.setPosition(shooterAngle);
+    }
+
+    String identifyRingConfig() {
+        updateObjectValues();
+        if (objectWidth != 0) {
+            return "" + Math.round((6.7 * objectHeight) / objectWidth);
+        } else {
+            return "0";
+        }
+    }
+
+    //Updates the powers being sent to the drive motors
+
     void updateObjectValues(){
         objectX = pipeline.objectX;
         objectY = pipeline.objectY;
@@ -130,14 +149,6 @@ class RobotCV {
         objectHeight = pipeline.objectHeight;
     }
 
-    //Sets servos to starting positions
-    void resetServos(){
-        armServo.setPosition(armAngle);
-        grabServo.setPosition(grabAngle);
-        shooterServo.setPosition(shooterAngle);
-    }
-
-    //Updates the powers being sent to the drive motors
     void updateDrive() {
         //Adjusts powers for speed
         double LF = speed * leftFrontPower;
@@ -291,7 +302,7 @@ class RobotCV {
         public Mat processFrame(Mat input)
         {
             //update ring coordinates
-            int[] coords = getObjectCoordinates(input);
+            int[] coords = getObjectCoordinates(input, LOWER_RING_HSV, UPPER_RING_HSV);
             objectX = coords[0];
             objectY = coords[1];
             objectWidth = coords[2];
@@ -307,20 +318,20 @@ class RobotCV {
             return input;
         }
 
-        public int[] getObjectCoordinates(Mat input) {
+        public int[] getObjectCoordinates(Mat input, Scalar lower, Scalar upper) {
             Scalar GREEN = new Scalar(0, 255, 0);
 
+            Mat dst = new Mat();
             Mat src = input;
             Imgproc.resize(src, src, new Size(320, 240));
-            Mat dst = new Mat();
+
+            Imgproc.rectangle(src, new Point(0,0), new Point(320, 0), GREEN, -1);
 
             Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
             Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
 
             //adding a mask to the dst mat
-            Scalar lowerHSV = new Scalar(74, 153, 144);
-            Scalar upperHSV = new Scalar(112, 242, 255);
-            Core.inRange(dst, lowerHSV, upperHSV, dst);
+            Core.inRange(dst, lower, upper, dst);
 
             //dilate the ring to make it easier to detect
             Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
@@ -337,24 +348,21 @@ class RobotCV {
             for (int i = 0; i < contours.size(); i++) {
                 Rect rect = Imgproc.boundingRect(contours.get(i));
 
-                //dont draw a square around a spot that's too small
+                //don't draw a square around a spot that's too small
                 //to avoid false detections
-                if (rect.area() > 7_000) {
-                    Imgproc.rectangle(src, rect, GREEN, 5);
-                }
+                if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
             }
 
             Rect largest = new Rect();
             for (int i = 0; i < contours.size(); i++) {
                 Rect rect = Imgproc.boundingRect(contours.get(i));
 
-                if (largest.area() < rect.area()) largest = rect;
+                if (largest.area() < rect.area()) { largest = rect; }
             }
 
             //draws largest rect
-            Imgproc.rectangle(src, largest, new Scalar(0, 0, 255), 5);
+            Imgproc.rectangle(src, largest,GREEN, 5);
 
-            mask = dst;
             return new int[]{largest.x,largest.y, largest.width, largest.height};
         }
     }
