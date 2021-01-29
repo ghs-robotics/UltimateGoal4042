@@ -31,13 +31,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Tele1", group="Iterative Opmode")
 public class Tele1 extends OpMode {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
+    Gyro gyro = new Gyro(hardwareMap);
     //Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
