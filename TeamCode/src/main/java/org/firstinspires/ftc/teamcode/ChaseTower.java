@@ -27,14 +27,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class ChaseTower extends LinearOpMode
 {
-    RobotCV robot;
+    Robot robot;
     Controller controller1;
     int shots = 0;
 
     @Override
     public void runOpMode()
     {
-        robot = new RobotCV(hardwareMap, telemetry);
+        robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
 

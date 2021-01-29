@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Gyro {
     BNO055IMU gyro;
-    Orientation angles;
+    Orientation lastAngles = new Orientation ();
     double globalAngle;
 
     Gyro(HardwareMap hardwareMap) {
@@ -24,32 +24,17 @@ public class Gyro {
     }
 
     public void resetAngle () {
-        angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        lastAngles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         globalAngle = 0;
     }
 
-    public double getAngles() {
+    public double getAngle () {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        double deltaAngle = angles.firstAngle - this.angles.firstAngle;
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        if (deltaAngle > 180)
-            deltaAngle -= 360;
+        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
+        if (deltaAngle < -180) { deltaAngle += 360; }
+        if (deltaAngle > 180) { deltaAngle -= 360; }
         globalAngle += deltaAngle;
-        this.angles = angles;
+        lastAngles = angles;
         return globalAngle;
     }
-
-//    public double getDirection() {
-//        angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-//        //first angle returns the angle the robot is facing perpendicular to the ground
-//        // aka the direction the robot is looking at
-//        return angles.firstAngle;
-//    }
-
-    /*
-    public void addGyroData() {
-        telemetry.addData("Heading = ", getDirection());
-    }
-     */
 }

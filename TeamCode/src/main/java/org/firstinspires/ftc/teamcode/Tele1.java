@@ -33,16 +33,17 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode {
+public class Tele1 extends OpMode
+{
     //Declare OpMode members
-    RobotCV robot;
+    Robot robot;
     Controller controller1;
     //Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
-        robot = new RobotCV(hardwareMap, telemetry);
+        robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.resetServos();
         telemetry.addData("Status", "Initialized");
@@ -51,8 +52,7 @@ public class Tele1 extends OpMode {
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {
-    }
+    public void init_loop() {}
 
     //Code to run ONCE when the driver hits PLAY
     @Override
@@ -112,6 +112,5 @@ public class Tele1 extends OpMode {
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){
-    }
+    public void stop(){}
 }

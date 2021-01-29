@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name="Tele2", group="Iterative Opmode")
 public class Tele2 extends OpMode {
     //Declare OpMode members
-    RobotCV robot;
+    Robot robot;
     Controller controller1;
     //Controller controller2;
     String target = "none";
@@ -43,9 +43,9 @@ public class Tele2 extends OpMode {
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
-        robot = new RobotCV(hardwareMap, telemetry);
+        robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.resetServos();
+        robot.init();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -79,10 +79,10 @@ public class Tele2 extends OpMode {
         //Press right bumper to launch a ring
         if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
 
-        if (controller1.x.equals("pressing")) { target = "none"; }
-        if (controller1.a.equals("pressing")) { target = "ring"; }
-        if (controller1.b.equals("pressing")) { target = "wobble"; }
-        if (controller1.y.equals("pressing")) { target = "tower"; }
+        if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
+        if (controller1.a.equals("pressing")) { stream(); target = "ring"; }
+        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
+        if (controller1.y.equals("pressing")) { stream(); target = "tower"; }
 
         if(target.equals("ring")){ robot.chaseRing(); }
         if(target.equals("wobble")){ robot.chaseWobble(); }
@@ -93,4 +93,6 @@ public class Tele2 extends OpMode {
     @Override
     public void stop(){
     }
+
+    public void stream(){ if (target.equals("none")){ robot.startStreaming(); } }
 }
