@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
@@ -17,11 +14,31 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvInternalCamera;
+import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class Robot {
+class RobotCV {
+    //HSV constants
+    public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144);
+    public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255);
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
+    public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 20);
+    public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 123, 25);
+    public static final Scalar UPPER_WOBBLE_HSV = new Scalar(25, 210, 101);
+
+    //CV detection variables
+    int objectX = 0;
+    int objectY = 0;
+    int objectWidth = 0;
+    int objectHeight = 0;
+
+    //robot variables
     double leftFrontPower = 0;
     double rightFrontPower = 0;
     double leftRearPower = 0;
@@ -50,8 +67,12 @@ class Robot {
     Gyro gyro;
     Telemetry telemetry;
 
+    //CV objects
+    OpenCvInternalCamera phoneCam;
+    RingDeterminationPipeline pipeline;
+
     //Creates a robot object with methods that we can use in both Auto and TeleOp
-    Robot(HardwareMap hardwareMap, Telemetry telemetry) {
+    RobotCV(HardwareMap hardwareMap, Telemetry telemetry) {
 
         //These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
@@ -81,6 +102,32 @@ class Robot {
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         this.telemetry = telemetry;
+
+        //initiating some CV variables/objects
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        pipeline = new RingDeterminationPipeline();
+        phoneCam.setPipeline(pipeline);
+    }
+
+    void initCamera(){
+        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened() { startStreaming(); }
+        });
+    }
+
+    void startStreaming(){ phoneCam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_RIGHT); }
+
+    void stopStreaming(){ phoneCam.stopStreaming(); }
+
+    void updateObjectValues(){
+        objectX = pipeline.objectX;
+        objectY = pipeline.objectY;
+        objectWidth = pipeline.objectWidth;
+        objectHeight = pipeline.objectHeight;
     }
 
     //Sets servos to starting positions
@@ -115,11 +162,8 @@ class Robot {
         leftRearDrive.setPower(LR);
         rightRearDrive.setPower(RR);
     }
-    void startMoving(double x, double y){
-        startMoving(x,y,0,0,0,0,0,0);
-    }
 
-    void startMoving(double x, double y, int ringX, int ringY, int ringWidth, int ringHeight, int targetX, int targetY){
+    void chaseObject(double x, double y, int targetX, int targetY){
         double r = Math.hypot(x, y);
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
         double rotate = 0;
@@ -139,9 +183,10 @@ class Robot {
 //        telemetry.addData("rightFrontPower", "" + RF);
 //        telemetry.addData("leftRearPower", "" + LR);
 //        telemetry.addData("rightRearPower", "" + RR);
-        telemetry.addData("ringWidth, ringHeight", "( " + ringWidth + ", " + ringHeight + " )");
-        telemetry.addData("ringX, targetX", "( " + ringX + ", " + targetX + " )");
-        telemetry.addData("ringY, targetY", "( " + ringY + ", " + targetY + " )");
+        updateObjectValues();
+        telemetry.addData("width, height", "( " + objectWidth + ", " + objectHeight + " )");
+        telemetry.addData("objectX, targetX", "( " + objectX + ", " + targetX + " )");
+        telemetry.addData("objectY, targetY", "( " + objectY + ", " + targetY + " )");
         telemetry.addData("x, y", "( " + x + ", " + y + " )");
         telemetry.update();
 
@@ -180,7 +225,7 @@ class Robot {
     }
 
     //Launches a ring by moving the shooterServo
-    public void launchRing() {
+    void launchRing() {
         shooterAngle = 0.25;
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
@@ -188,18 +233,18 @@ class Robot {
         shooterServo.setPosition(shooterAngle);
     }
 
-    public void increaseArmAngle(){
+    void increaseArmAngle(){
         armAngle += 0.1;
         armServo.setPosition(armAngle);
     }
 
-    public void decreaseArmAngle(){
+    void decreaseArmAngle(){
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
     }
 
     //Calculates shooter motor speed in ticks per second
-    public double findShooterVelocity() {
+    double findShooterVelocity() {
         double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
         double deltaTime = elapsedTime.seconds() - previousElapsedTime;
         previousShooterMotorTicks = shooterMotor.getCurrentPosition();
@@ -207,72 +252,108 @@ class Robot {
         return (deltaTicks / deltaTime);
     }
 
-    public void pickUpWobbleGoal() {
-        startMoving(-0.2,0);
-        wait(1.0);
-        startMoving(0,0.2);
-        wait(1.0);
-
-    }
-
     //Resets the timer
-    public void resetElapsedTime() { elapsedTime.reset(); }
+    void resetElapsedTime() { elapsedTime.reset(); }
 
     //Returns how many seconds have passed since the timer was last reset
-    public double getElapsedTimeSeconds() { return elapsedTime.seconds(); }
+    double getElapsedTimeSeconds() { return elapsedTime.seconds(); }
 
     //Makes the robot wait (i.e. do nothing) for a specified number of seconds
-    public void wait(double seconds) {
+    void wait(double seconds) {
         double start = getElapsedTimeSeconds();
         while (getElapsedTimeSeconds() - start < seconds) {}
     }
 
-    public int[] getObjectOnScreen(Mat src, Scalar lower, Scalar upper) {
-        Scalar GREEN = new Scalar(0, 255, 0);
+    public static class RingDeterminationPipeline extends OpenCvPipeline
+    {
+        //HSV constants
+        public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144);
+        public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255);
+        public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
+        public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 20);
+        public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 123, 25);
+        public static final Scalar UPPER_WOBBLE_HSV = new Scalar(25, 210, 101);
 
-        Mat dst = new Mat();
-        Imgproc.resize(src, src, new Size(320, 240));
+        public static final Scalar GREEN = new Scalar(0, 255, 0);
+        public static final int SCREEN_HEIGHT = 240;
+        public static final int SCREEN_WIDTH = 320;
 
-        Imgproc.rectangle(
-                src,
-                new Point(0,0),
-                new Point(320, 72),
-                GREEN,
-                -1);
+        public Mat mask;
+        public int objectX = 0;
+        public int objectY = 0;
+        public int objectWidth = 0;
+        public int objectHeight = 0;
 
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
+        @Override
+        public void init(Mat firstFrame) {}
 
-        //adding a mask to the dst mat
-        Core.inRange(dst, lower, upper, dst);
+        @Override
+        public Mat processFrame(Mat input)
+        {
+            //update ring coordinates
+            int[] coords = getObjectCoordinates(input, LOWER_RING_HSV, UPPER_RING_HSV);
+            objectX = coords[0];
+            objectY = coords[1];
+            objectWidth = coords[2];
+            objectHeight = coords[3];
 
-        //dilate the ring to make it easier to detect
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(dst, dst, kernel);
+            Imgproc.rectangle(
+                    input, // Buffer to draw on
+                    new Point(objectX, objectY), // First point which defines the rectangle
+                    new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
+                    GREEN, // The color the rectangle is drawn in
+                    -1); // Negative thickness means solid fill
 
-        //get the contours of the ring
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        //draw a contour on the src image
-        //Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
-
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
+            return input;
         }
 
-        Rect largest = new Rect();
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
+        public int[] getObjectCoordinates(Mat input, Scalar lower, Scalar upper) {
+            Scalar GREEN = new Scalar(0, 255, 0);
 
-            if (largest.area() < rect.area()) largest = rect;
+            Mat dst = new Mat();
+            Mat src = input;
+            Imgproc.resize(src, src, new Size(320, 240));
+
+            Imgproc.rectangle(src, new Point(0,0), new Point(320, 0), GREEN, -1);
+
+            Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+            Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
+
+            //adding a mask to the dst mat
+            Core.inRange(dst, lower, upper, dst);
+
+            //dilate the ring to make it easier to detect
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+            Imgproc.dilate(dst, dst, kernel);
+
+            //get the contours of the ring
+            List<MatOfPoint> contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+            //draw a contour on the src image
+            Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                //don't draw a square around a spot that's too small
+                //to avoid false detections
+                if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
+            }
+
+            Rect largest = new Rect();
+            for (int i = 0; i < contours.size(); i++) {
+                Rect rect = Imgproc.boundingRect(contours.get(i));
+
+                if (largest.area() < rect.area()) { largest = rect; }
+            }
+
+            //draws largest rect
+            Imgproc.rectangle(src, largest,GREEN, 5);
+
+            return new int[]{largest.x,largest.y, largest.width, largest.height};
         }
-
-        //draws largest rect
-        Imgproc.rectangle(src, largest,GREEN, 5);
-
-        return new int[]{largest.x,largest.y, largest.width, largest.height};
     }
 }
 
