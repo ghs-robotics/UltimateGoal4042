@@ -137,6 +137,15 @@ class RobotCV {
         shooterServo.setPosition(shooterAngle);
     }
 
+    String identifyRingConfig() {
+        updateObjectValues();
+        if (!(objectWidth == 0)) {
+            return "" + Math.round((6.7 * objectHeight) / objectWidth);
+        } else {
+            return "0";
+        }
+    }
+
     //Updates the powers being sent to the drive motors
     void updateDrive() {
         //Adjusts powers for speed

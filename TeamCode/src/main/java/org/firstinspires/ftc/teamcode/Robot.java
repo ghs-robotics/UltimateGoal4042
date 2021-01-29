@@ -212,7 +212,6 @@ class Robot {
         wait(1.0);
         startMoving(0,0.2);
         wait(1.0);
-
     }
 
     //Resets the timer
