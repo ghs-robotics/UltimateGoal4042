@@ -42,7 +42,7 @@ public class ChaseRing extends LinearOpMode
 
         while (opModeIsActive())
         {
-            robot.chaseRingPID();
+            robot.chaseRing();
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

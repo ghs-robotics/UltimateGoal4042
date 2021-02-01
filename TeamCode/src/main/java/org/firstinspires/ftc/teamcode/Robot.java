@@ -27,7 +27,7 @@ import java.util.List;
 class Robot
 {
     //HSV constants
-    public static final Scalar LOWER_RING_HSV = new Scalar(74, 143, 134); //original values: 74, 153, 144
+    public static final Scalar LOWER_RING_HSV = new Scalar(74, 133, 130); //original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
     public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
     public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 12);
@@ -39,8 +39,8 @@ class Robot
     public static Scalar upper = UPPER_RING_HSV;
     public static double cover = 0;
 
-    int targetX = 60;
-    int targetY = 160;
+    int targetX = 100;
+    int targetY = 140;
     int targetWidth = 75;
     int objectX = 0;
     int objectY = 0;
@@ -122,7 +122,7 @@ class Robot
         this.telemetry = telemetry;
 
         //Initiating PID objects
-        xPID = new PIDController(0, 0, 0, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
+        xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
 
         //Initiating some CV variables/objects
@@ -179,13 +179,13 @@ class Robot
         if (s.equals("ring")){
             lower = LOWER_RING_HSV;
             upper = UPPER_RING_HSV;
-            targetX = 60;
-            targetY = 160;
+            targetX = 100;
+            targetY = 140;
         } else if (s.equals("tower")) {
             lower = LOWER_TOWER_HSV;
             upper = UPPER_TOWER_HSV;
-            targetX = 95;
-            targetWidth = 75;
+            targetX = 65; //95
+            targetWidth = 95; //75
             cover = 0.23;
         } else if (s.equals("wobble")) {
             lower = LOWER_WOBBLE_HSV;
@@ -282,35 +282,6 @@ class Robot
         if (!currentTargetObject.equals("ring")) { setTargetTo("ring"); }
         updateObjectValues();
 
-        double dy = targetY - objectY;
-        double dx = targetX - objectX;
-
-        //Adjust x and y values according to how far away the robot is from the target
-        if (Math.abs(dx) < 10) { x = 0; } else { x += Range.clip(dx / 400.0, -0.2, 0.2); }
-        if (Math.abs(dy) < 10) { y = 0; } else { y -= Range.clip(dy / 400.0, -0.2, 0.2); }
-
-        //Make sure the robot doesn't go too fast
-        y = Range.clip(y, -0.6, 0.6);
-        x = Range.clip(x, -0.6, 0.6);
-
-        double h = objectHeight;
-        double w = objectWidth;
-        double r = 1.0 * w / h;
-
-        //Testing to make sure the detected object is a ring
-        if ( !(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5) ) {
-            x = 0;
-            y = 0;
-        }
-
-        chaseObject(x, y);
-    }
-
-    void chaseRingPID()
-    {
-        if (!currentTargetObject.equals("ring")) { setTargetTo("ring"); }
-        updateObjectValues();
-
         x = xPID.calcVal(targetX - objectX);
         y = -yPID.calcVal(targetY - objectY);
 
@@ -370,8 +341,24 @@ class Robot
         chaseObject(x, y);
     }
 
+    public void chaseTower()
+    {
+        if (!currentTargetObject.equals("tower")) { setTargetTo("tower"); }
+        updateObjectValues();
+
+        x = xPID.calcVal(targetX - objectX);
+        y = -yPID.calcVal(targetWidth - objectWidth);
+
+        if (!(objectWidth > 60 && objectWidth < 220)) {
+            x = 0;
+            y = 0;
+        }
+
+        chaseObject(x, y);
+    }
+
     //Makes the robot align with the tower goal
-    void chaseTower()
+    void chaseTower2()
     {
         if (!currentTargetObject.equals("tower")) { setTargetTo("tower"); }
         updateObjectValues();
@@ -593,16 +580,6 @@ class Robot
             this.max = max;
             time = new ElapsedTime();
             resetValues();
-        }
-
-        public PIDController(double Kp, double Ki, double Kd, double tolerance)
-        {
-            new PIDController(Kp, Ki, Kd, tolerance, -1.0, 1.0);
-        }
-
-        public PIDController(double Kp, double Ki, double Kd)
-        {
-            new PIDController(Kp, Ki, Kd, 0, -1.0, 1.0);
         }
 
         public void resetValues(){
