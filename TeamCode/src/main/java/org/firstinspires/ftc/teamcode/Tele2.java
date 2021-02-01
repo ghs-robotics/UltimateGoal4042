@@ -80,11 +80,19 @@ public class Tele2 extends OpMode {
         if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
 
         if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
-        if (controller1.a.equals("pressing")) { stream(); target = "ring"; }
-        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
-        if (controller1.y.equals("pressing")) { stream(); target = "tower"; }
+        if (controller1.a.equals("pressing"))
+        {
+            stream();
+            target = "ring";
+            robot.setTargetTo("ring");
+        }
+//        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
+//        if (controller1.y.equals("pressing")) { stream(); target = "tower"; }
 
-        if(target.equals("ring")){ robot.chaseRing(); }
+        if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_D -= 0.0001; }
+        if (controller1.dpad_up.equals("pressing")) { robot.yPID.k_D += 0.0001; }
+
+        if(target.equals("ring")){ robot.chaseRingPID(); }
         if(target.equals("wobble")){ robot.chaseWobble(); }
         if(target.equals("tower")){ robot.chaseTower(); }
     }

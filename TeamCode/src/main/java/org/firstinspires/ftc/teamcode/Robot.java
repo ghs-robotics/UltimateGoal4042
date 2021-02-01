@@ -27,8 +27,8 @@ import java.util.List;
 class Robot
 {
     //HSV constants
-    public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144);
-    public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255);
+    public static final Scalar LOWER_RING_HSV = new Scalar(74, 143, 134); //original values: 74, 153, 144
+    public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
     public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
     public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 12);
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0,117,0);
@@ -81,6 +81,10 @@ class Robot
     Gyro gyro;
     Telemetry telemetry;
 
+    //PID controllers
+    PIDController xPID;
+    PIDController yPID;
+
     //CV objects
     OpenCvInternalCamera phoneCam;
     ObjectDeterminationPipeline pipeline;
@@ -117,7 +121,11 @@ class Robot
         elapsedTime.reset();
         this.telemetry = telemetry;
 
-        //initiating some CV variables/objects
+        //Initiating PID objects
+        xPID = new PIDController(0, 0, 0, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
+        yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
+
+        //Initiating some CV variables/objects
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new ObjectDeterminationPipeline();
@@ -165,6 +173,8 @@ class Robot
     {
         currentTargetObject = s;
         cover = 0;
+        xPID.resetValues();
+        yPID.resetValues();
 
         if (s.equals("ring")){
             lower = LOWER_RING_HSV;
@@ -240,7 +250,7 @@ class Robot
         sendDrivePowers();
     }
 
-    //Displays important values on the phone screen; don't ever call this method alone
+    //Displays important values on the phone screen; don't ever call this method from another class
     void chaseObject(double x, double y)
     {
         calculateDrivePowers(x, y, 0);
@@ -294,6 +304,41 @@ class Robot
         }
 
         chaseObject(x, y);
+    }
+
+    void chaseRingPID()
+    {
+        if (!currentTargetObject.equals("ring")) { setTargetTo("ring"); }
+        updateObjectValues();
+
+        x = xPID.calcVal(targetX - objectX);
+        y = -yPID.calcVal(targetY - objectY);
+
+        double h = objectHeight;
+        double w = objectWidth;
+        double r = 1.0 * w / h;
+
+        //Testing to make sure the detected object is a ring
+        if ( !(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5) ) {
+            x = 0;
+            y = 0;
+        }
+
+        calculateDrivePowers(x, y, 0);
+        sendDrivePowers();
+
+        String t = currentTargetObject;
+
+        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+        telemetry.addData("Kd_x: ", xPID.k_D);
+        telemetry.addData("Kd_y: ", yPID.k_D);
+        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
+        telemetry.addData(t + "Y = ", objectY + " (target = " + targetY + ")");
+        telemetry.addData("width = ", objectWidth);
+        telemetry.addData("height = ", objectHeight);
+        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
+        telemetry.addData("cover: ", cover);
+        telemetry.update();
     }
 
     //Makes the robot chase the wobble goal
@@ -471,7 +516,7 @@ class Robot
 
             //don't draw a square around a spot that's too small
             //to avoid false detections
-            if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
+            //if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
         }
 
         Rect largest = new Rect();
@@ -520,6 +565,72 @@ class Robot
                     -1); // Negative thickness means solid fill
 
             return input;
+        }
+    }
+
+    public class PIDController
+    {
+        public double k_P; //change to private later
+        public double k_I;
+        public double k_D;
+        private double p_error;
+        private double i_error;
+        private double d_error;
+        private double toleranceRadius; //PID won't adjust within this range
+        private double min;
+        private double max;
+        private double prevError;
+        private double prevTime; //measured in seconds!
+        private ElapsedTime time;
+
+        public PIDController(double Kp, double Ki, double Kd, double tolerance, double min, double max)
+        {
+            k_P = Kp;
+            k_I = Ki;
+            k_D = Kd;
+            toleranceRadius = tolerance;
+            this.min = min;
+            this.max = max;
+            time = new ElapsedTime();
+            resetValues();
+        }
+
+        public PIDController(double Kp, double Ki, double Kd, double tolerance)
+        {
+            new PIDController(Kp, Ki, Kd, tolerance, -1.0, 1.0);
+        }
+
+        public PIDController(double Kp, double Ki, double Kd)
+        {
+            new PIDController(Kp, Ki, Kd, 0, -1.0, 1.0);
+        }
+
+        public void resetValues(){
+            p_error = 0;
+            i_error = 0;
+            d_error = 0;
+            prevError = 0;
+            prevTime = 0;
+            time.reset();
+        }
+
+        public double calcVal(double error)
+        {
+            //If the error is small enough, the robot won't adjust
+            if (Math.abs(error) < toleranceRadius) { return 0; }
+
+            //Calculate the different errors
+            double deltaTime = time.seconds() - prevTime;
+            p_error = error;
+            i_error += error * deltaTime;
+            d_error = (error - prevError) / deltaTime;
+
+            //Update the "prev" variables for the next loop
+            prevError = error;
+            prevTime = time.seconds();
+
+            //Return the PID value
+            return (k_P * p_error + k_I * i_error + k_D * d_error);
         }
     }
 }
