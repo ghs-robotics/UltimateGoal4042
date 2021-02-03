@@ -446,6 +446,17 @@ class Robot
         return (deltaTicks / deltaTime);
     }
 
+    void pickUpWobbleGoal() {
+        turnArm();
+        toggleGrab();
+        calculateDrivePowers(0, 0.4, 0);
+        sendDrivePowers();
+        try {Thread.sleep(1000);} catch (Exception e) {System.out.println(e);}
+        stopDrive();
+        toggleGrab();
+        turnArm();
+    }
+
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
 

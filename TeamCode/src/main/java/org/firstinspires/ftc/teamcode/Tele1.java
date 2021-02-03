@@ -87,6 +87,11 @@ public class Tele1 extends OpMode
             robot.launchRing();
         }
 
+        //Press
+        if (controller1.right_bumper.equals("pressing")) {
+            robot.pickUpWobbleGoal();
+        }
+
         //Press "y" to turn on/off the intake motor
         if (controller1.y.equals("pressing")) {
             robot.toggleIntake();
