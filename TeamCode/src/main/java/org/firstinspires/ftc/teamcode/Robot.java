@@ -59,7 +59,7 @@ class Robot
     double shooterPower = 0;
     double intakePower = 0;
     double armAngle = 0.5;
-    double grabAngle = 0.2;
+    double grabAngle = 0.25; //Angle of 0.25 means closed
     double shooterAngle = 0.05;
     double speed = 1;
     double config = 0;
@@ -449,13 +449,13 @@ class Robot
     void pickUpWobbleGoal() {
         turnArm();
         toggleGrab();
-        toggleGrab();
         calculateDrivePowers(0, -0.4, 0);
         wait(0.6);
         sendDrivePowers();
         wait(1.6);
         stopDrive();
         toggleGrab();
+        wait(0.6);
         turnArm();
     }
 
