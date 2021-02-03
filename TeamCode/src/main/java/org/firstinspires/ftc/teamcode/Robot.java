@@ -207,11 +207,13 @@ class Robot {
         return (deltaTicks / deltaTime);
     }
 
-    public void pickUpWobbleGoal() {
-        startMoving(-0.2,0);
-        wait(1.0);
-        startMoving(0,0.2);
-        wait(1.0);
+    void pickUpWobbleGoal(double dX, double dY) {
+        turnArm();
+        toggleGrab();
+        startMoving(dX, 0);
+        startMoving(0, dY);
+        toggleGrab();
+        turnArm();
     }
 
     //Resets the timer
