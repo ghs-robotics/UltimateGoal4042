@@ -446,13 +446,15 @@ class Robot
         return (deltaTicks / deltaTime);
     }
 
-    void pickUpWobbleGoal() {
+    void pickUpWobbleGoal(double distance) {
+        double motorPower = -0.4 * (distance / Math.abs(distance));
+        double moveTime = distance / 100; //Adjust this later
         turnArm();
         toggleGrab();
-        calculateDrivePowers(0, -0.4, 0);
+        calculateDrivePowers(0, motorPower, 0);
         wait(0.6);
         sendDrivePowers();
-        wait(1.6);
+        wait(moveTime);
         stopDrive();
         toggleGrab();
         wait(0.6);

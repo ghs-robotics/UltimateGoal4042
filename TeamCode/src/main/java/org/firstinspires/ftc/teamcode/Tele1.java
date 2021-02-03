@@ -89,7 +89,11 @@ public class Tele1 extends OpMode
 
         //Press dpad right to pick up (already lined up) wobble goal
         if (controller1.dpad_right.equals("pressing")) {
-            robot.pickUpWobbleGoal();
+            robot.calculateDrivePowers(0,-0.4,0);
+            robot.sendDrivePowers();
+            robot.wait(2.0);
+            robot.stopDrive();
+            //robot.pickUpWobbleGoal(160);
         }
 
         //Press "y" to turn on/off the intake motor
