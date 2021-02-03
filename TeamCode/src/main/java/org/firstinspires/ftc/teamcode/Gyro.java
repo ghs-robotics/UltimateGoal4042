@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class Gyro {
     BNO055IMU gyro;
-    Orientation lastAngles = new Orientation();
+    Orientation lastAngles = new Orientation ();
     double globalAngle;
 
     Gyro(HardwareMap hardwareMap) {
@@ -31,13 +31,10 @@ public class Gyro {
     public double getAngle () {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        if (deltaAngle > 180)
-            deltaAngle -= 360;
+        if (deltaAngle < -180) { deltaAngle += 360; }
+        if (deltaAngle > 180) { deltaAngle -= 360; }
         globalAngle += deltaAngle;
         lastAngles = angles;
         return globalAngle;
     }
-
 }

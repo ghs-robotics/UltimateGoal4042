@@ -31,10 +31,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode {
+public class Tele1 extends OpMode
+{
     //Declare OpMode members
     Robot robot;
     Controller controller1;
@@ -53,12 +53,11 @@ public class Tele1 extends OpMode {
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {
-    }
+    public void init_loop() {}
 
     //Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() { robot.resetElapsedTime();}
+    public void start() { robot.resetElapsedTime(); }
 
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
@@ -72,13 +71,11 @@ public class Tele1 extends OpMode {
         }
 
         //Mecanum wheel drive
-        double r = Math.hypot(controller1.left_stick_x, controller1.left_stick_y);
-        double robotAngle = Math.atan2(controller1.left_stick_y, controller1.left_stick_x) - Math.PI / 4;
-        double rightX = controller1.right_stick_x;
-        robot.leftFrontPower = r * Math.cos(robotAngle) + rightX;
-        robot.rightFrontPower = r * Math.sin(robotAngle) - rightX;
-        robot.leftRearPower = r * Math.sin(robotAngle) + rightX;
-        robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
+        robot.calculateDrivePowers(
+                controller1.left_stick_x,
+                controller1.left_stick_y,
+                controller1.right_stick_x
+        );
         robot.updateDrive();
         //Eli's Branch
 
@@ -121,6 +118,5 @@ public class Tele1 extends OpMode {
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){
-    }
+    public void stop(){}
 }
