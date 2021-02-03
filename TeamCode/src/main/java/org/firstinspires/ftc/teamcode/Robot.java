@@ -59,7 +59,7 @@ class Robot
     double shooterPower = 0;
     double intakePower = 0;
     double armAngle = 0.5;
-    double grabAngle = 0.2;
+    double grabAngle = 0.25; //Angle of 0.25 means closed
     double shooterAngle = 0.05;
     double speed = 1;
     double config = 0;
@@ -444,6 +444,19 @@ class Robot
         previousShooterMotorTicks = shooterMotor.getCurrentPosition();
         previousElapsedTime = elapsedTime.seconds();
         return (deltaTicks / deltaTime);
+    }
+
+    void pickUpWobbleGoal() {
+        turnArm();
+        toggleGrab();
+        calculateDrivePowers(0, -0.4, 0);
+        wait(0.6);
+        sendDrivePowers();
+        wait(1.6);
+        stopDrive();
+        toggleGrab();
+        wait(0.6);
+        turnArm();
     }
 
     //Resets the timer
