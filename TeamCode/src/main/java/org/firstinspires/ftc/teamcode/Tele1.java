@@ -87,8 +87,8 @@ public class Tele1 extends OpMode
             robot.launchRing();
         }
 
-        //Press
-        if (controller1.right_bumper.equals("pressing")) {
+        //Press dpad right to pick up (already lined up) wobble goal
+        if (controller1.dpad_right.equals("pressing")) {
             robot.pickUpWobbleGoal();
         }
 
