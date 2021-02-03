@@ -27,7 +27,7 @@ import java.util.List;
 class Robot
 {
     //HSV constants
-    public static final Scalar LOWER_RING_HSV = new Scalar(74, 133, 130); //original values: 74, 153, 144
+    public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); //original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
     public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
     public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 12);
