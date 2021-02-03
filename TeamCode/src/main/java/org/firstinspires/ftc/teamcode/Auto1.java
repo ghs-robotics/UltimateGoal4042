@@ -16,30 +16,25 @@ import org.openftc.easyopencv.OpenCvPipeline;
  */
 @Autonomous
 public class Auto1 extends LinearOpMode {
-
-    private OpenCvInternalCamera phoneCam;
-    private OpenCVProcess pipeline;
+    //Declare OpMode members
+    Robot robot;
 
     @Override
     public void runOpMode() {
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        pipeline = new OpenCVProcess();
-        phoneCam.setPipeline(pipeline);
+        robot = new Robot(hardwareMap, telemetry);
+        robot.init();
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
 
-        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-            }
-        });
 
         waitForStart();
+
+        robot.identifyRingConfig();
+
+        while(opModeIsActive()){
+            robot.identifyRingConfig();
+            robot.updateDrive();
+        }
 
         if (opModeIsActive()) {
 
@@ -55,20 +50,6 @@ public class Auto1 extends LinearOpMode {
 
             telemetry.addData("opmode is working","");
             telemetry.update();
-        }
-    }
-
-    public static class OpenCVProcess extends OpenCvPipeline {
-
-        @Override
-        public void init(Mat firstFrame) {
-            //start opencv program to count rings
-        }
-
-        @Override
-        public Mat processFrame(Mat input) {
-            //run several opencv programs to change variables and stuff
-            return input;
         }
     }
 }

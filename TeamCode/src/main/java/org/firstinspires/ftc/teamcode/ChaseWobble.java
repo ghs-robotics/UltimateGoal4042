@@ -25,7 +25,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class ChaseRing extends LinearOpMode
+public class ChaseWobble extends LinearOpMode
 {
     Robot robot;
     Controller controller1;
@@ -36,13 +36,12 @@ public class ChaseRing extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setTargetTo("ring");
 
         waitForStart();
 
         while (opModeIsActive())
         {
-            robot.chaseRing();
+            robot.chaseWobble();
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

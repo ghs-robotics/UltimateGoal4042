@@ -32,27 +32,28 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode
-{
+@TeleOp(name="Tele2", group="Iterative Opmode")
+public class Tele2 extends OpMode {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
     //Controller controller2;
+    String target = "none";
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.resetServos();
+        robot.init();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {}
+    public void init_loop() {
+    }
 
     //Code to run ONCE when the driver hits PLAY
     @Override
@@ -64,53 +65,47 @@ public class Tele1 extends OpMode
         //Registers controller input
         controller1.update();
 
-        //Press "x" to toggle speed between 100% and 30%
-        if (controller1.x.equals("pressing")) {
-            robot.toggleSpeed();
-        }
-
         //Mecanum wheel drive
         robot.calculateDrivePowers(
                 controller1.left_stick_x,
                 controller1.left_stick_y,
                 controller1.right_stick_x
         );
-        robot.updateDrive();
+        if(target.equals("none")){ robot.updateDrive(); }
 
         //Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) {
-            robot.toggleShooter();
-        }
+        if (controller1.left_bumper.equals("pressing")) { robot.toggleShooter(); }
 
         //Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) {
-            robot.launchRing();
+        if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
+
+        if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
+        if (controller1.a.equals("pressing"))
+        {
+            stream();
+            target = "ring";
+            robot.setTargetTo("ring");
+        }
+//        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
+        if (controller1.y.equals("pressing"))
+        {
+            stream();
+            target = "tower";
+            robot.setTargetTo("tower");
         }
 
-        //Press "y" to turn on/off the intake motor
-        if (controller1.y.equals("pressing")) {
-            robot.toggleIntake();
-        }
+        if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_D -= 0.0001; }
+        if (controller1.dpad_up.equals("pressing")) { robot.yPID.k_D += 0.0001; }
 
-        //Press "b" to toggle the wobble gripper
-        if (controller1.b.equals("pressing")) {
-            robot.toggleGrab();
-        }
-
-        //Press "a" to turn the arm
-        if (controller1.a.equals("pressing")) {
-            robot.turnArm();
-        }
-
-        if (controller1.dpad_up.equals("pressing")) {
-            robot.increaseArmAngle();
-        }
-        if (controller1.dpad_down.equals("pressing")) {
-            robot.decreaseArmAngle();
-        }
+        if(target.equals("ring")){ robot.chaseRing(); }
+        if(target.equals("wobble")){ robot.chaseWobble(); }
+        if(target.equals("tower")){ robot.chaseTower(); }
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){}
+    public void stop(){
+    }
+
+    public void stream(){ if (target.equals("none")){ robot.startStreaming(); } }
 }
