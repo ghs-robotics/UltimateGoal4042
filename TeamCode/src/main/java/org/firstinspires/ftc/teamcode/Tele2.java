@@ -46,6 +46,7 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -84,14 +85,18 @@ public class Tele2 extends OpMode {
         {
             stream();
             target = "ring";
-            robot.setTargetTo("ring");
+            robot.setTargetToRing();
         }
-//        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
+
         if (controller1.y.equals("pressing"))
         {
             stream();
             target = "tower";
-            robot.setTargetTo("tower");
+            if (robot.targetWidth == 95){
+                robot.setTargetToTower(65, 105);
+            } else {
+                robot.setTargetToTower();
+            }
         }
 
         if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_D -= 0.0001; }
