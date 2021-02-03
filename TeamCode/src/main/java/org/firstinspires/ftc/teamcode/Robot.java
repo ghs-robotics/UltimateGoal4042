@@ -449,9 +449,10 @@ class Robot
     void pickUpWobbleGoal() {
         turnArm();
         toggleGrab();
-        calculateDrivePowers(0, 0.4, 0);
+        calculateDrivePowers(0, -0.4, 0);
+        try {Thread.sleep(600);} catch (Exception e) {System.out.println(e);}
         sendDrivePowers();
-        try {Thread.sleep(1000);} catch (Exception e) {System.out.println(e);}
+        try {Thread.sleep(1600);} catch (Exception e) {System.out.println(e);}
         stopDrive();
         toggleGrab();
         turnArm();
