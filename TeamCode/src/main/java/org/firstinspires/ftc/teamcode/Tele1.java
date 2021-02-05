@@ -31,10 +31,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode {
+public class Tele1 extends OpMode
+{
     //Declare OpMode members
     Robot robot;
     Controller controller1;
@@ -45,49 +45,78 @@ public class Tele1 extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
+        robot.resetServos();
+        robot.resetShooterMotor();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {
-    }
+    public void init_loop() {}
 
     //Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() {
-        robot.resetElapsedTime();
-    }
+    public void start() { robot.resetElapsedTime(); }
 
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
+        //Registers controller input
         controller1.update();
 
-        //PRESS THE "x" BUTTON ON THE CONTROLLER TO TOGGLE SPEED
+        //Press "x" to toggle speed between 100% and 30%
         if (controller1.x.equals("pressing")) {
             robot.toggleSpeed();
         }
 
         //Mecanum wheel drive
-        double r = Math.hypot(controller1.left_stick_x, controller1.left_stick_y);
-        double robotAngle = Math.atan2(controller1.left_stick_y, controller1.left_stick_x) - Math.PI / 4;
-        double rightX = controller1.right_stick_x;
-        robot.leftFrontPower = r * Math.cos(robotAngle) + rightX;
-        robot.rightFrontPower = r * Math.sin(robotAngle) - rightX;
-        robot.leftRearPower = r * Math.sin(robotAngle) + rightX;
-        robot.rightRearPower = r * Math.cos(robotAngle) - rightX;
+        robot.calculateDrivePowers(
+                controller1.left_stick_x,
+                controller1.left_stick_y,
+                controller1.right_stick_x
+        );
         robot.updateDrive();
+        //Eli's Branch
 
-        //@Imants, PRESS THE "a" BUTTON ON THE CONTROLLER TO TOGGLE THE INTAKE MOTOR
-        if (controller1.a.equals("pressing")) {
+        //Press left bumper to turn on/off the shooter motor
+        if (controller1.left_bumper.equals("pressing")) {
+            robot.toggleShooter();
+        }
+
+        //Press right bumper to launch a ring
+        if (controller1.right_bumper.equals("pressing")) {
+            robot.launchRing();
+        }
+
+        //Press "y" to turn on/off the intake motor
+        if (controller1.y.equals("pressing")) {
             robot.toggleIntake();
         }
+
+        //Press "b" to toggle the wobble gripper
+        if (controller1.b.equals("pressing")) {
+            robot.toggleGrab();
+        }
+
+        //Press "a" to turn the arm
+        if (controller1.a.equals("pressing")) {
+            robot.turnArm();
+        }
+
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.increaseArmAngle();
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.decreaseArmAngle();
+        }
+        if (Robot.ShooterMotorPowered){
+            robot.adjustShooterVelocity();
+        }
+
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop () {
-    }
+    public void stop(){}
 }

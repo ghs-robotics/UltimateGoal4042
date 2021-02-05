@@ -3,6 +3,7 @@
 *.aar
 *.ap_
 *.aab
+*.idea/*
 
 !libs/*.aar
 
@@ -85,3 +86,4 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+/Users/trangn/Desktop/Robotics/UltimateGoal4042/.idea/misc.xml
