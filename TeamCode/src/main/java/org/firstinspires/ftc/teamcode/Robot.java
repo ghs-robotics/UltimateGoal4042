@@ -436,6 +436,10 @@ class Robot
         armServo.setPosition(armAngle);
     }
 
+    void moveTo(double x, double y, double robotv) {
+
+    }
+
     //Calculates shooter motor speed in ticks per second
     double findShooterVelocity()
     {
