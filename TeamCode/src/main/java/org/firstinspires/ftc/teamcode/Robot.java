@@ -28,8 +28,8 @@ class Robot {
     //HSV constants
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); //original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
-    public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 30);
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 60); // 218, 70, 53
+    public static final Scalar UPPER_TOWER_HSV = new Scalar(54, 212, 255);
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
     public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
 
@@ -123,7 +123,7 @@ class Robot {
         //Initiating PID objects
         xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
-        wPID = new PIDController(0.0200, 0.0025, 0.0010, 1, -1.0, 1.0); //ADJUST!!
+        wPID = new PIDController(0.0200, 0, 0, 1, -1.0, 1.0); //ADJUST!!
 
         //Initiating some CV variables/objects
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -199,7 +199,7 @@ class Robot {
         currentTargetObject = "tower";
         xPID.resetValues();
         wPID.resetValues();
-        cover = 0.23;
+        cover = 0;
         lower = LOWER_TOWER_HSV;
         upper = UPPER_TOWER_HSV;
         targetX = x;
@@ -305,21 +305,7 @@ class Robot {
             y = 0;
         }
 
-        calculateDrivePowers(x, y, 0);
-        sendDrivePowers();
-
-        String t = currentTargetObject;
-
-        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-        telemetry.addData("Kd_x: ", xPID.k_D);
-        telemetry.addData("Kd_y: ", yPID.k_D);
-        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
-        telemetry.addData(t + "Y = ", objectY + " (target = " + targetY + ")");
-        telemetry.addData("width = ", objectWidth);
-        telemetry.addData("height = ", objectHeight);
-        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
-        telemetry.addData("cover: ", cover);
-        telemetry.update();
+        chaseObject(x, y);
     }
 
     //Makes the robot chase the wobble goal
@@ -374,7 +360,21 @@ class Robot {
             y = 0;
         }
 
-        chaseObject(x, y);
+        calculateDrivePowers(x, y, 0);
+        sendDrivePowers();
+
+        String t = currentTargetObject;
+
+        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+        telemetry.addData("Kd_x: ", xPID.k_D);
+        telemetry.addData("Kd_w: ", wPID.k_D);
+        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
+        telemetry.addData(t + "W = ", objectWidth + " (target = " + targetWidth + ")");
+        telemetry.addData("y = ", objectY);
+        telemetry.addData("height = ", objectHeight);
+        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
+        telemetry.addData("cover: ", cover);
+        telemetry.update();
     }
 
     //Makes the robot align with the tower goal
