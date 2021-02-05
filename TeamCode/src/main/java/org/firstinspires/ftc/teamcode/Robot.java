@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -19,7 +20,6 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +85,10 @@ class Robot {
     PIDController yPID;
 
     //CV objects
-    OpenCvInternalCamera phoneCam;
-    ObjectDeterminationPipeline pipeline;
+    OpenCvCamera phonecam;
+    OpenCvCamera webcam;
+
+    ObjectDeterminationPipeline pipeline = new ObjectDeterminationPipeline();
 
     //Creates a robot object with methods that we can use in both Auto and TeleOp
     Robot(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -125,9 +127,16 @@ class Robot {
 
         //Initiating some CV variables/objects
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        pipeline = new ObjectDeterminationPipeline();
-        phoneCam.setPipeline(pipeline);
+
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
+                .splitLayoutForMultipleViewports(cameraMonitorViewId,
+                        2,
+                        OpenCvCameraFactory.ViewportSplitMethod.HORIZONTALLY);
+
+        phonecam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class,"webcam"), viewportContainerIds[1]);
+        phonecam.setPipeline(pipeline);
+        webcam.setPipeline(pipeline);
     }
 
     //To use at the start of each OpMode that uses CV
@@ -141,8 +150,8 @@ class Robot {
         // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
         // out when the RC activity is in portrait. We do our actual image processing assuming
         // landscape orientation, though.
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        phonecam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+        phonecam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
                 startStreaming();
@@ -152,12 +161,12 @@ class Robot {
 
     //Start streaming frames on the phone camera
     void startStreaming() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+        phonecam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
     }
 
     //Stop streaming frames on the phone camera
     void stopStreaming() {
-        phoneCam.stopStreaming();
+        phonecam.stopStreaming();
     }
 
     //Updates the coordinates of the object being detected on the screen
