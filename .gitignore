@@ -43,7 +43,6 @@ captures/
 *.iml
 .idea/workspace.xml
 .idea/tasks.xml
-.idea/misc.xml
 .idea/gradle.xml
 .idea/assetWizardSettings.xml
 .idea/dictionaries
@@ -87,4 +86,4 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
-/Users/trangn/Desktop/Robotics/UltimateGoal4042/.idea/misc.xml
+# /Users/trangn/Desktop/Robotics/UltimateGoal4042/.idea/misc.xml

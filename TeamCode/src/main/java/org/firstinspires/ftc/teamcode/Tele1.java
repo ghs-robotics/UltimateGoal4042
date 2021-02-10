@@ -46,6 +46,7 @@ public class Tele1 extends OpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.resetServos();
+        robot.resetShooterMotor();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -76,6 +77,7 @@ public class Tele1 extends OpMode
                 controller1.right_stick_x
         );
         robot.updateDrive();
+        //Eli's Branch
 
         //Press left bumper to turn on/off the shooter motor
         if (controller1.left_bumper.equals("pressing")) {
@@ -113,6 +115,12 @@ public class Tele1 extends OpMode
         if (controller1.dpad_down.equals("pressing")) {
             robot.decreaseArmAngle();
         }
+
+
+       /* if (Robot.ShooterMotorPowered){
+            robot.adjustShooterVelocity();
+        } /*
+
     }
 
     //Code to run ONCE after the driver hits STOP
