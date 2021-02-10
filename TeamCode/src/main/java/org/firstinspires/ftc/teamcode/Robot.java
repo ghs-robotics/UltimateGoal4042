@@ -448,7 +448,7 @@ class Robot
 
     void pickUpWobbleGoal(double distance) { //distance is in inches
         double motorPower = -0.4 * (distance / Math.abs(distance));
-        double moveTime = distance / 15.0; //Adjust this later
+        double moveTime = distance / 15.0;
         turnArm();
         toggleGrab();
         calculateDrivePowers(0, motorPower, 0);
