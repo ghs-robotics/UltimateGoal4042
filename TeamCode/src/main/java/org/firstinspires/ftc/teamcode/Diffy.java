@@ -209,10 +209,6 @@ class Diffy {
         incline -= 0.1; //Also a placeholder
     }
 
-    void setIncline() {
-
-    }
-
     void increaseIncline(){
         if (incline < 10) {//Placeholder ???
             shooterPower1 = 0.5;
