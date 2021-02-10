@@ -28,6 +28,7 @@ class Diffy {
     double shooterPower1 = 0;
     double shooterPower2 = 0;
     double k = 1;
+    double incline = 0; //Change this later (placeholder)
     //k is a constant for smth ask imants abt diffy
 
     DcMotor shooterMotor1;
@@ -146,7 +147,8 @@ class Diffy {
 
     //fires ring
     void toggleShooter() {
-        elapsedTime.reset();
+        //loadRing();
+        elapsedTime.reset(); //Do we still need this?
         shooterPower1 = (shooterPower1 == 0 ? 1.0 : 0);
         shooterPower2 = (shooterPower2 == 0 ? 1.0 : 0);
         ShooterMotorPowered = !ShooterMotorPowered;
@@ -181,28 +183,52 @@ class Diffy {
         shooterServo.setPosition(shooterAngle);
     }
 
+    void setIncline(double newIncline) {
+        if (!ShooterMotorPowered) {
+            while (incline != newIncline) {
+                if (incline < newIncline) {
+                    increaseIncline();
+                    wait(0.1);
+                } else {
+                    decreaseIncline();
+                    wait(0.1);
+                }
+            }
+        }
+    }
+
     void increaseArmAngle(){
         armAngle += 0.1;
         armServo.setPosition(armAngle);
+        incline += 0.1;
     }
 
     void decreaseArmAngle(){
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
+        incline -= 0.1; //Also a placeholder
+    }
+
+    void setIncline() {
+
     }
 
     void increaseIncline(){
-        shooterPower1 = 0.5;
-        shooterPower2 = 1.0;
-        shooterMotor1.setPower(shooterPower1);
-        shooterMotor2.setPower(shooterPower2);
+        if (incline < 10) {//Placeholder ???
+            shooterPower1 = 0.5;
+            shooterPower2 = 1.0;
+            shooterMotor1.setPower(shooterPower1);
+            shooterMotor2.setPower(shooterPower2);
+        }
     }
 
     void decreaseIncline(){
-        shooterPower1 = 1.0;
-        shooterPower2 = 0.5;
-        shooterMotor1.setPower(shooterPower1);
-        shooterMotor2.setPower(shooterPower2);
+        if (incline > 0) {
+            shooterPower1 = 1.0;
+            shooterPower2 = 0.5;
+            shooterMotor1.setPower(shooterPower1);
+            shooterMotor2.setPower(shooterPower2);
+        }
     }
 
    /* //Calculates the speed of the shooter motor in ticks per second
