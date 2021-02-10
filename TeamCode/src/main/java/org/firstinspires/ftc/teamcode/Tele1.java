@@ -110,9 +110,11 @@ public class Tele1 extends OpMode
         if (controller1.dpad_down.equals("pressing")) {
             robot.decreaseArmAngle();
         }
-        if (Robot.ShooterMotorPowered){
+
+
+       /* if (Robot.ShooterMotorPowered){
             robot.adjustShooterVelocity();
-        }
+        } /*
 
     }
 

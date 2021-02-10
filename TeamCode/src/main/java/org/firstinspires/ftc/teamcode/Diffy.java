@@ -15,7 +15,6 @@ class Diffy {
     double rightFrontPower = 0;
     double leftRearPower = 0;
     double rightRearPower = 0;
-    double shooterPower = 0;
     double intakePower = 0;
     double armAngle = 0.5;
     double grabAngle = 0.2;
@@ -26,12 +25,17 @@ class Diffy {
     double CurrentElapsedTime = 0;
     double TargetMotorSpeed = 1600;
     public static boolean ShooterMotorPowered = false;
+    double shooterPower1 = 0;
+    double shooterPower2 = 0;
+    double k = 1;
+    //k is a constant for smth ask imants abt diffy
 
+    DcMotor shooterMotor1;
+    DcMotor shooterMotor2;
     DcMotor leftFrontDrive;
     DcMotor rightFrontDrive;
     DcMotor leftRearDrive;
     DcMotor rightRearDrive;
-    DcMotor shooterMotor;
     DcMotor intakeMotor;
     Servo armServo;
     Servo grabServo;
@@ -49,7 +53,8 @@ class Diffy {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
-        shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
+        shooterMotor1 = hardwareMap.get(DcMotor.class, "shooterMotor1");
+        shooterMotor2 = hardwareMap.get(DcMotor.class, "shooterMotor2");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
@@ -60,7 +65,8 @@ class Diffy {
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
         rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        shooterMotor.setDirection(DcMotor.Direction.FORWARD);
+        shooterMotor1.setDirection(DcMotor.Direction.FORWARD);
+        shooterMotor2.setDirection(DcMotor.Direction.FORWARD);
         intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         armServo.setDirection(Servo.Direction.FORWARD);
         grabServo.setDirection(Servo.Direction.FORWARD);
@@ -97,9 +103,12 @@ class Diffy {
         grabServo.setPosition(grabAngle);
         shooterServo.setPosition(shooterAngle);
     }
-    void resetShooterMotor() {
-        shooterMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        shooterMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    void resetShooterMotors() {
+        shooterMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooterMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        shooterMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooterMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     //Updates the powers being sent to the drive motors
@@ -115,12 +124,14 @@ class Diffy {
 //        telemetry.addData("rightFrontPower", "" + RF);
 //        telemetry.addData("leftRearPower", "" + LR);
 //        telemetry.addData("rightRearPower", "" + RR);
-        telemetry.addData("shooterPower", "" + shooterPower);
+        telemetry.addData("shooterPower1", "" + shooterPower1);
+        telemetry.addData("shooterPower2", "" + shooterPower2);
         telemetry.addData("armServo", "" + armAngle);
         telemetry.addData("grabServo", "" + grabAngle);
         telemetry.addData("shooterAngle", "" + shooterAngle);
-        telemetry.addData("shooterVelocity", "" + findShooterVelocity());
-        telemetry.addData("shooterMotorPosition", "" + shooterMotor.getCurrentPosition());
+        //telemetry.addData("shooterVelocity", "" + findShooterVelocity());//
+        telemetry.addData("shooterMotorPosition1", "" + shooterMotor1.getCurrentPosition());
+        telemetry.addData("shooterMotorPosition2", "" + shooterMotor2.getCurrentPosition());
         telemetry.update();
 
         //Sends desired power to drive motors
@@ -133,12 +144,14 @@ class Diffy {
     //Sets the drive speed to 30%
     void toggleSpeed() { speed = (speed == 1 ? 0.5 : 1); }
 
-    //Turns the shooter motor on or off
+    //fires ring
     void toggleShooter() {
         elapsedTime.reset();
-        shooterPower = (shooterPower == 0 ? 1.0 : 0);
+        shooterPower1 = (shooterPower1 == 0 ? 1.0 : 0);
+        shooterPower2 = (shooterPower2 == 0 ? 1.0 : 0);
         ShooterMotorPowered = !ShooterMotorPowered;
-        shooterMotor.setPower(shooterPower);
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
     }
 
     //Turns the intake motor on or off
@@ -159,7 +172,7 @@ class Diffy {
         grabServo.setPosition(grabAngle);
     }
 
-    //Launches a ring by moving the shooterServo
+    //Launches a ring by moving the shooterServo pushes ring into shooter thing
     void launchRing() {
         shooterAngle = 0.25;
         shooterServo.setPosition(shooterAngle);
@@ -178,11 +191,25 @@ class Diffy {
         armServo.setPosition(armAngle);
     }
 
-    //Calculates the speed of the shooter motor in ticks per second
+    void increaseIncline(){
+        shooterPower1 = 0.5;
+        shooterPower2 = 1.0;
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
+    }
+
+    void decreaseIncline(){
+        shooterPower1 = 1.0;
+        shooterPower2 = 0.5;
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
+    }
+
+   /* //Calculates the speed of the shooter motor in ticks per second
     double findShooterVelocity(){
         //Finds the number of ticks since the last time we ran the function
-        DeltaShooterMotorTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
-        previousShooterMotorTicks = shooterMotor.getCurrentPosition();
+        DeltaShooterMotorTicks = (shooterMotor1.getCurrentPosition() - previousShooterMotorTicks);
+        previousShooterMotorTicks = shooterMotor1.getCurrentPosition();
         CurrentElapsedTime = elapsedTime.seconds();
         elapsedTime.reset();
         return (DeltaShooterMotorTicks / CurrentElapsedTime);
@@ -197,7 +224,9 @@ class Diffy {
         shooterPower = Range.clip(shooterPower, 0, 1.0);
         shooterMotor.setPower(shooterPower);
     }
+    /*
 
+    */
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
 
