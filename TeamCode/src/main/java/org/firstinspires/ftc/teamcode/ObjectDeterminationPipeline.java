@@ -15,6 +15,8 @@ import java.util.List;
 
 public class    ObjectDeterminationPipeline extends OpenCvPipeline {
     public static final Scalar GREEN = new Scalar(0, 255, 0);
+    public static final Scalar LOWER_SQUARE_HSV = new Scalar(0, 0, 0);
+    public static final Scalar UPPER_SQUARE_HSV = new Scalar(255, 255, 255);
     public static final int SCREEN_HEIGHT = 240;
     public static final int SCREEN_WIDTH = 320;
 
@@ -25,6 +27,52 @@ public class    ObjectDeterminationPipeline extends OpenCvPipeline {
 
     @Override
     public void init(Mat firstFrame) {
+    }
+
+    //This function is a WIP, still needs testing
+    public int[] getSquareCoordinates(Mat input, int squareNum) {
+        Mat src = input;
+        int squareX = 0;
+        int squareY = 0;
+        //Make the image easier to read
+        Imgproc.resize(src, src, new Size(320, 240));
+        Imgproc.GaussianBlur(src, src, new Size(5, 5), 80, 80);
+        Core.inRange(src, LOWER_SQUARE_HSV, UPPER_SQUARE_HSV, src);
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
+        Imgproc.dilate(src, src, kernel);
+
+        //Find object contours for the square
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        //Find the largest contours in the image
+        Rect largest = new Rect();
+        Rect largest2 = new Rect();
+        Rect largest3 = new Rect();
+
+        for (int i = 0; i < contours.size(); i++) {
+            Rect rect = Imgproc.boundingRect(contours.get(i));
+            if (largest.area() < rect.area()) {
+                largest = rect;
+            } else if (largest2.area() < rect.area()) {
+                largest2 = rect;
+            } else if (largest3.area() < rect.area()) {
+                largest3 = rect;
+            }
+        }
+        if (squareNum == 0) {
+            squareX = largest.x;
+            squareY = largest.y;
+        } else if (squareNum == 1) {
+            squareX = largest2.x;
+            squareY = largest2.y;
+        } else {
+            squareX = largest3.x;
+            squareX = largest3.y;
+        }
+
+        return new int[]{squareX, squareY};
     }
 
     @Override
