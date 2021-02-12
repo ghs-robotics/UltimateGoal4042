@@ -46,6 +46,7 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -71,6 +72,7 @@ public class Tele2 extends OpMode {
                 controller1.left_stick_y,
                 controller1.right_stick_x
         );
+
         if(target.equals("none")){ robot.updateDrive(); }
 
         //Press left bumper to turn on/off the shooter motor
@@ -84,18 +86,22 @@ public class Tele2 extends OpMode {
         {
             stream();
             target = "ring";
-            robot.setTargetTo("ring");
+            robot.setTargetToRing();
         }
-//        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
+
         if (controller1.y.equals("pressing"))
         {
             stream();
             target = "tower";
-            robot.setTargetTo("tower");
+            if (robot.targetWidth == 85){
+                robot.setTargetToTower(65, 115);
+            } else {
+                robot.setTargetToTower(65, 85);
+            }
         }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_D -= 0.0001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.yPID.k_D += 0.0001; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.001; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.001; }
 
         if(target.equals("ring")){ robot.chaseRing(); }
         if(target.equals("wobble")){ robot.chaseWobble(); }

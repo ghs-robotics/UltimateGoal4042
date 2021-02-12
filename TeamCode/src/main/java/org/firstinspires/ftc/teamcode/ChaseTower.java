@@ -37,12 +37,13 @@ public class ChaseTower extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setTargetToTower();
 
         waitForStart();
 
         while (opModeIsActive())
         {
-            robot.chaseTower();
+            robot.chaseTower2();
 //            if (robot.elapsedTime.seconds() > 6 && shots < 3){
 //                robot.stopDrive();
 //                robot.toggleShooter();

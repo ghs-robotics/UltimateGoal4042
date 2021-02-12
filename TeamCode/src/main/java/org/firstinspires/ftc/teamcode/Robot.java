@@ -28,8 +28,8 @@ class Robot {
     //HSV constants
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); //original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 0, 0);
-    public static final Scalar UPPER_TOWER_HSV = new Scalar(255, 255, 12);
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 40); //original value: V = 60
+    public static final Scalar UPPER_TOWER_HSV = new Scalar(54, 212, 255);
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
     public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
 
@@ -40,7 +40,7 @@ class Robot {
 
     int targetX = 100;
     int targetY = 140;
-    int targetWidth = 75;
+    int targetWidth = 95;
     int objectX = 0;
     int objectY = 0;
     int objectWidth = 0;
@@ -58,7 +58,7 @@ class Robot {
     double shooterPower = 0;
     double intakePower = 0;
     double armAngle = 0.5;
-    double grabAngle = 0.2;
+    double grabAngle = 0.25; //Angle of 0.25 means closed
     double shooterAngle = 0.05;
     double speed = 1;
     double config = 0;
@@ -83,6 +83,7 @@ class Robot {
     //PID controllers
     PIDController xPID;
     PIDController yPID;
+    PIDController wPID;
 
     //CV objects
     OpenCvInternalCamera phoneCam;
@@ -122,8 +123,11 @@ class Robot {
         //Initiating PID objects
         xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
+        wPID = new PIDController(0.0440, 0.0020, 0, 2, -1.0, 1.0); //ADJUST!!
 
         //Initiating some CV variables/objects
+
+        //Does whatever
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new ObjectDeterminationPipeline();
@@ -168,31 +172,45 @@ class Robot {
         objectHeight = pipeline.objectHeight;
     }
 
-    //Switches the object that the robot is trying to detect with computer vision
-    void setTargetTo(String s) {
-        currentTargetObject = s;
-        cover = 0;
+    //Switches the object that the robot is trying to detect to a ring
+    void setTargetToRing(int x, int y) {
+        currentTargetObject = "ring";
         xPID.resetValues();
         yPID.resetValues();
-
-        if (s.equals("ring")) {
-            lower = LOWER_RING_HSV;
-            upper = UPPER_RING_HSV;
-            targetX = 100;
-            targetY = 140;
-        } else if (s.equals("tower")) {
-            lower = LOWER_TOWER_HSV;
-            upper = UPPER_TOWER_HSV;
-            targetX = 65; //95
-            targetWidth = 95; //75
-            cover = 0.23;
-        } else if (s.equals("wobble")) {
-            lower = LOWER_WOBBLE_HSV;
-            upper = UPPER_WOBBLE_HSV;
-            targetX = 60;
-            targetY = 160;
-        }
+        cover = 0;
+        lower = LOWER_RING_HSV;
+        upper = UPPER_RING_HSV;
+        targetX = x;
+        targetY = y;
     }
+
+    //Switches the object that the robot is trying to detect to the wobble goal
+    void setTargetToWobble(int x, int y) {
+        currentTargetObject = "wobble";
+        xPID.resetValues();
+        yPID.resetValues();
+        cover = 0;
+        lower = LOWER_WOBBLE_HSV;
+        upper = UPPER_WOBBLE_HSV;
+        targetX = x;
+        targetY = y;
+    }
+
+    //Switches the object that the robot is trying to detect to the tower goal
+    void setTargetToTower(int x, int w) {
+        currentTargetObject = "tower";
+        xPID.resetValues();
+        wPID.resetValues();
+        cover = 0;
+        lower = LOWER_TOWER_HSV;
+        upper = UPPER_TOWER_HSV;
+        targetX = x;
+        targetWidth = w;
+    }
+
+    void setTargetToRing() { setTargetToRing(100, 140); }
+    void setTargetToWobble() { setTargetToWobble(60, 160); }
+    void setTargetToTower() { setTargetToTower(65, 95); }
 
     //Sets servos to starting positions
     void resetServos() {
@@ -272,7 +290,7 @@ class Robot {
     //Makes the robot chase the closest ring
     void chaseRing() {
         if (!currentTargetObject.equals("ring")) {
-            setTargetTo("ring");
+            setTargetToRing();
         }
         updateObjectValues();
 
@@ -289,27 +307,13 @@ class Robot {
             y = 0;
         }
 
-        calculateDrivePowers(x, y, 0);
-        sendDrivePowers();
-
-        String t = currentTargetObject;
-
-        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-        telemetry.addData("Kd_x: ", xPID.k_D);
-        telemetry.addData("Kd_y: ", yPID.k_D);
-        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
-        telemetry.addData(t + "Y = ", objectY + " (target = " + targetY + ")");
-        telemetry.addData("width = ", objectWidth);
-        telemetry.addData("height = ", objectHeight);
-        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
-        telemetry.addData("cover: ", cover);
-        telemetry.update();
+        chaseObject(x, y);
     }
 
     //Makes the robot chase the wobble goal
     void chaseWobble() {
         if (!currentTargetObject.equals("wobble")) {
-            setTargetTo("wobble");
+            setTargetToWobble();
         }
         updateObjectValues();
 
@@ -346,25 +350,39 @@ class Robot {
 
     public void chaseTower() {
         if (!currentTargetObject.equals("tower")) {
-            setTargetTo("tower");
+            setTargetToTower();
         }
         updateObjectValues();
 
         x = xPID.calcVal(targetX - objectX);
-        y = -yPID.calcVal(targetWidth - objectWidth);
+        y = -wPID.calcVal(targetWidth - objectWidth);
 
         if (!(objectWidth > 60 && objectWidth < 220)) {
             x = 0;
             y = 0;
         }
 
-        chaseObject(x, y);
+        calculateDrivePowers(0, y, 0);
+        sendDrivePowers();
+
+        String t = currentTargetObject;
+
+        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+//        telemetry.addData("Kp_x: ", xPID.k_P);
+        telemetry.addData("Ki_w: ", wPID.k_I);
+//        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
+        telemetry.addData(t + "W = ", objectWidth + " (target = " + targetWidth + ")");
+        telemetry.addData("y = ", objectY);
+        telemetry.addData("height = ", objectHeight);
+        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
+        telemetry.addData("cover: ", cover);
+        telemetry.update();
     }
 
     //Makes the robot align with the tower goal
     void chaseTower2() {
         if (!currentTargetObject.equals("tower")) {
-            setTargetTo("tower");
+            setTargetToTower();
         }
         updateObjectValues();
 //        if (objectHeight < 10 && cover > 0) { cover -= 0.004; }
@@ -453,6 +471,21 @@ class Robot {
         return (deltaTicks / deltaTime);
     }
 
+    void pickUpWobbleGoal(double distance) {
+        double motorPower = -0.4 * (distance / Math.abs(distance));
+        double moveTime = distance / 100; //Adjust this later
+        turnArm();
+        toggleGrab();
+        calculateDrivePowers(0, motorPower, 0);
+        wait(0.6);
+        sendDrivePowers();
+        wait(moveTime);
+        stopDrive();
+        toggleGrab();
+        wait(0.6);
+        turnArm();
+    }
+
     //Resets the timer
     void resetElapsedTime() {
         elapsedTime.reset();
@@ -472,63 +505,11 @@ class Robot {
 
     //Classifies the starter stack
     void identifyRingConfig() {
-        setTargetTo("ring");
+        setTargetToRing();
         updateObjectValues();
         if (!(objectWidth == 0)) {
             config = 1.0 * objectHeight / objectWidth;
         }
     }
-
-    //Detects the position of the target object on the screen and returns an array with those values
-    public static int[] getObjectCoordinates(Mat input) {
-        Scalar GREEN = new Scalar(0, 255, 0);
-
-        Mat dst = new Mat();
-        Mat src = input;
-        Imgproc.resize(src, src, new Size(320, 240));
-
-        //Cover up background noise
-        Imgproc.rectangle(src, new Point(0, 0), new Point(320, (int) (Robot.cover * 240)), GREEN, -1);
-
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
-
-        //adding a mask to the dst mat
-        Core.inRange(dst, lower, upper, dst);
-
-        //dilate the ring to make it easier to detect
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(dst, dst, kernel);
-
-        //get the contours of the ring
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        //draw a contour on the src image
-        Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
-
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
-
-            //don't draw a square around a spot that's too small
-            //to avoid false detections
-            //if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
-        }
-
-        Rect largest = new Rect();
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (largest.area() < rect.area()) {
-                largest = rect;
-            }
-        }
-
-        //draws largest rect
-        Imgproc.rectangle(src, largest, GREEN, 5);
-
-        return new int[]{largest.x, largest.y, largest.width, largest.height};
-    }
-
 }
 //https://ftctechnh.github.io/ftc_app/doc/javadoc/index.html
