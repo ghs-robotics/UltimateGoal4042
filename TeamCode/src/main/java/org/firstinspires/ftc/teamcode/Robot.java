@@ -123,7 +123,7 @@ class Robot {
         //Initiating PID objects
         xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
-        wPID = new PIDController(0.0440, 0.0020, 0, 2, -1.0, 1.0); //ADJUST!!
+        wPID = new PIDController(0.0440, 0.0016, 0.0010, 2, -1.0, 1.0); //ADJUST WITH BETTER BATTERY!
 
         //Initiating some CV variables/objects
 
@@ -369,7 +369,7 @@ class Robot {
 
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
 //        telemetry.addData("Kp_x: ", xPID.k_P);
-        telemetry.addData("Ki_w: ", wPID.k_I);
+        telemetry.addData("Kd_w: ", wPID.k_D);
 //        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
         telemetry.addData(t + "W = ", objectWidth + " (target = " + targetWidth + ")");
         telemetry.addData("y = ", objectY);

@@ -100,8 +100,8 @@ public class Tele2 extends OpMode {
             }
         }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.001; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_D -= 0.0001; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_D += 0.0001; }
 
         if(target.equals("ring")){ robot.chaseRing(); }
         if(target.equals("wobble")){ robot.chaseWobble(); }
