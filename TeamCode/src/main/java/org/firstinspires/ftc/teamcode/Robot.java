@@ -126,8 +126,14 @@ class Robot {
         wPID = new PIDController(0.0200, 0, 0, 1, -1.0, 1.0); //ADJUST!!
 
         //Initiating some CV variables/objects
+
+        //obtains a live camera preview and displays on Robot Controller screen
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+        //Tells robot that there is a camera and this is the camera being used - specifies that it is the BACK camera
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+
+        //creates encapsulation of OpenCV image processing - image processing requires operations done in series rather than in parallel - "pipeline"
         pipeline = new ObjectDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
     }
@@ -144,6 +150,7 @@ class Robot {
         // out when the RC activity is in portrait. We do our actual image processing assuming
         // landscape orientation, though.
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+       //start and open camera
         phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
@@ -153,6 +160,8 @@ class Robot {
     }
 
     //Start streaming frames on the phone camera
+
+    //gives dimensions of view of camera and rotation - on its right side
     void startStreaming() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
     }
