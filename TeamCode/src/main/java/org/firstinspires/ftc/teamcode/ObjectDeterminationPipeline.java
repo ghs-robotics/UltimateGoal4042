@@ -13,7 +13,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectDeterminationPipeline extends OpenCvPipeline {
+public class    ObjectDeterminationPipeline extends OpenCvPipeline {
     public static final Scalar GREEN = new Scalar(0, 255, 0);
     public static final int SCREEN_HEIGHT = 240;
     public static final int SCREEN_WIDTH = 320;
@@ -55,15 +55,20 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         Imgproc.resize(src, src, new Size(320, 240));
 
         //Cover up background noise
+        //creates rectangle
         Imgproc.rectangle(src, new Point(0, 0), new Point(320, (int) (Robot.cover * 240)), GREEN, -1);
 
+        //convert color from RGB to HSV
         Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+        //create Gaussian blur on image
         Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
 
         //adding a mask to the dst mat
+        //filters colors within certain color range
         Core.inRange(dst, Robot.lower, Robot.upper, dst);
 
         //dilate the ring to make it easier to detect
+       //kernel determines how much you are changing the pixel
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
         Imgproc.dilate(dst, dst, kernel);
 
