@@ -84,9 +84,9 @@ public class Tele1 extends OpMode
             robot.toggleShooter();
         }
 
-        //Press right bumper to launch a ring
+        //Press right bumper to launch a ring/shoot
         if (controller1.right_bumper.equals("pressing")) {
-            robot.launchRing();
+            robot.toggleShooter();
         }
 
         //Press dpad right to pick up (already lined up) wobble goal

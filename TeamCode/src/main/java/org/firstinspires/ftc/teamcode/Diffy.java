@@ -147,13 +147,13 @@ class Diffy {
 
     //fires ring
     void toggleShooter() {
-        //loadRing();
         elapsedTime.reset(); //Do we still need this?
         shooterPower1 = (shooterPower1 == 0 ? 1.0 : 0);
         shooterPower2 = (shooterPower2 == 0 ? 1.0 : 0);
         ShooterMotorPowered = !ShooterMotorPowered;
         shooterMotor1.setPower(shooterPower1);
         shooterMotor2.setPower(shooterPower2);
+        launchRing();
     }
 
     //Turns the intake motor on or off
@@ -183,6 +183,7 @@ class Diffy {
         shooterServo.setPosition(shooterAngle);
     }
 
+    //changes incline based on incline functions below
     void setIncline(double newIncline) {
         if (!ShooterMotorPowered) {
             while (incline != newIncline) {
@@ -195,18 +196,6 @@ class Diffy {
                 }
             }
         }
-    }
-
-    void increaseArmAngle(){
-        armAngle += 0.1;
-        armServo.setPosition(armAngle);
-        incline += 0.1;
-    }
-
-    void decreaseArmAngle(){
-        armAngle -= 0.1;
-        armServo.setPosition(armAngle);
-        incline -= 0.1; //Also a placeholder
     }
 
     void increaseIncline(){
@@ -226,6 +215,20 @@ class Diffy {
             shooterMotor2.setPower(shooterPower2);
         }
     }
+
+    void increaseArmAngle(){
+        armAngle += 0.1;
+        armServo.setPosition(armAngle);
+        incline += 0.1;
+    }
+
+    void decreaseArmAngle(){
+        armAngle -= 0.1;
+        armServo.setPosition(armAngle);
+        incline -= 0.1; //Also a placeholder
+    }
+
+
 
    /* //Calculates the speed of the shooter motor in ticks per second
     double findShooterVelocity(){
