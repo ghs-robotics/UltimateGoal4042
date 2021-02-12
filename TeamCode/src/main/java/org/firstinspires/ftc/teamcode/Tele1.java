@@ -89,6 +89,11 @@ public class Tele1 extends OpMode
             robot.launchRing();
         }
 
+        //Press dpad right to pick up (already lined up) wobble goal
+        if (controller1.dpad_right.equals("pressing")) {
+            robot.pickUpWobbleGoal(24.0); //Pick up wobble goal that is 24 inches ahead
+        }
+
         //Press "y" to turn on/off the intake motor
         if (controller1.y.equals("pressing")) {
             robot.toggleIntake();
