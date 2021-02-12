@@ -93,15 +93,15 @@ public class Tele2 extends OpMode {
         {
             stream();
             target = "tower";
-            if (robot.targetWidth == 95){
-                robot.setTargetToTower(65, 105);
+            if (robot.targetWidth == 85){
+                robot.setTargetToTower(65, 115);
             } else {
-                robot.setTargetToTower();
+                robot.setTargetToTower(65, 85);
             }
         }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_P -= 0.0001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_P += 0.0001; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.001; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.001; }
 
         if(target.equals("ring")){ robot.chaseRing(); }
         if(target.equals("wobble")){ robot.chaseWobble(); }

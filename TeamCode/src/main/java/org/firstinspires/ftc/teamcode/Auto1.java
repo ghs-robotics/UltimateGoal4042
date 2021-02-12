@@ -37,7 +37,6 @@ public class Auto1 extends LinearOpMode {
         }
 
         if (opModeIsActive()) {
-
             //move towards the desired target wobble goal zone
 
             //once there, place down the wobble goal

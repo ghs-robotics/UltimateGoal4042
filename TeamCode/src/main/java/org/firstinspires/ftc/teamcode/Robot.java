@@ -28,7 +28,7 @@ class Robot {
     //HSV constants
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); //original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 60); // 218, 70, 53
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 40); //original value: V = 60
     public static final Scalar UPPER_TOWER_HSV = new Scalar(54, 212, 255);
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
     public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
@@ -40,7 +40,7 @@ class Robot {
 
     int targetX = 100;
     int targetY = 140;
-    int targetWidth = 75;
+    int targetWidth = 95;
     int objectX = 0;
     int objectY = 0;
     int objectWidth = 0;
@@ -123,9 +123,11 @@ class Robot {
         //Initiating PID objects
         xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
-        wPID = new PIDController(0.0200, 0, 0, 1, -1.0, 1.0); //ADJUST!!
+        wPID = new PIDController(0.0440, 0.0020, 0, 2, -1.0, 1.0); //ADJUST!!
 
         //Initiating some CV variables/objects
+
+        //Does whatever
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new ObjectDeterminationPipeline();
@@ -360,15 +362,15 @@ class Robot {
             y = 0;
         }
 
-        calculateDrivePowers(x, y, 0);
+        calculateDrivePowers(0, y, 0);
         sendDrivePowers();
 
         String t = currentTargetObject;
 
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-        telemetry.addData("Kd_x: ", xPID.k_D);
-        telemetry.addData("Kd_w: ", wPID.k_D);
-        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
+//        telemetry.addData("Kp_x: ", xPID.k_P);
+        telemetry.addData("Ki_w: ", wPID.k_I);
+//        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
         telemetry.addData(t + "W = ", objectWidth + " (target = " + targetWidth + ")");
         telemetry.addData("y = ", objectY);
         telemetry.addData("height = ", objectHeight);
