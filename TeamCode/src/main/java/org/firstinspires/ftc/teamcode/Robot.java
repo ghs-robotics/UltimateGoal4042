@@ -47,6 +47,7 @@ class Robot {
     int objectHeight = 0;
     double x = 0;
     double y = 0;
+    double targetAngle = 0; //gyroscope will target this angle
 
     String currentTargetObject = "ring";
 
@@ -84,6 +85,7 @@ class Robot {
     PIDController xPID;
     PIDController yPID;
     PIDController wPID;
+    PIDController gyroPID;
 
     //CV objects
     OpenCvInternalCamera phoneCam;
@@ -124,10 +126,9 @@ class Robot {
         xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
         wPID = new PIDController(0.0440, 0.0016, 0.0010, 2, -1.0, 1.0); //ADJUST WITH BETTER BATTERY!
+        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2, -1.0, 1.0); //works best when Ki = 0
 
         //Initiating some CV variables/objects
-
-        //Does whatever
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new ObjectDeterminationPipeline();
@@ -262,6 +263,16 @@ class Robot {
         sendDrivePowers();
     }
 
+//    public void adjustAngle() {
+//        calculateDrivePowers(0, 0, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+//        sendDrivePowers();
+//        telemetry.addData("angle: ", gyro.getAngle() + " ( target: " + targetAngle + " )");
+//        telemetry.addData("Kp: ", gyroPID.k_P);
+//        telemetry.addData("Ki: ", gyroPID.k_I);
+//        telemetry.addData("Kd: ", gyroPID.k_D);
+//        telemetry.update();
+//    }
+
     //Displays important values on the phone screen; don't ever call this method from another class
     void chaseObject(double x, double y) {
         calculateDrivePowers(x, y, 0);
@@ -362,20 +373,21 @@ class Robot {
             y = 0;
         }
 
-        calculateDrivePowers(0, y, 0);
+        calculateDrivePowers(0, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
         sendDrivePowers();
 
         String t = currentTargetObject;
 
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
 //        telemetry.addData("Kp_x: ", xPID.k_P);
-        telemetry.addData("Kd_w: ", wPID.k_D);
 //        telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
+        telemetry.addData("Kp: ", wPID.k_P);
+        telemetry.addData("Ki: ", wPID.k_I);
+        telemetry.addData("Kd: ", wPID.k_D);
         telemetry.addData(t + "W = ", objectWidth + " (target = " + targetWidth + ")");
         telemetry.addData("y = ", objectY);
         telemetry.addData("height = ", objectHeight);
         telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
-        telemetry.addData("cover: ", cover);
         telemetry.update();
     }
 

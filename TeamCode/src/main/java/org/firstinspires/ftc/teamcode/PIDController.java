@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
-public class PIDController
-{
+public class PIDController {
     public double k_P; //change to private later
     public double k_I;
     public double k_D;
@@ -17,8 +17,7 @@ public class PIDController
     private double prevTime; //measured in seconds!
     private ElapsedTime time;
 
-    public PIDController(double Kp, double Ki, double Kd, double tolerance, double min, double max)
-    {
+    public PIDController(double Kp, double Ki, double Kd, double tolerance, double min, double max) {
         k_P = Kp;
         k_I = Ki;
         k_D = Kd;
@@ -29,7 +28,11 @@ public class PIDController
         resetValues();
     }
 
-    public void resetValues(){
+    public PIDController(double Kp, double Ki, double Kd, double tolerance) {
+        this(Kp, Ki, Kd, tolerance, -1.0, 1.0);
+    }
+
+    public void resetValues() {
         p_error = 0;
         i_error = 0;
         d_error = 0;
@@ -38,8 +41,7 @@ public class PIDController
         time.reset();
     }
 
-    public double calcVal(double error)
-    {
+    public double calcVal(double error) {
         //If the error is small enough, the robot won't adjust
         if (Math.abs(error) < toleranceRadius) { return 0; }
 
@@ -54,6 +56,6 @@ public class PIDController
         prevTime = time.seconds();
 
         //Return the PID value
-        return (k_P * p_error + k_I * i_error + k_D * d_error);
+        return Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
     }
 }
