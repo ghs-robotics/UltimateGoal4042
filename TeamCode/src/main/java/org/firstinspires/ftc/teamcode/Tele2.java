@@ -32,6 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+// THIS CLASS IS FOR TESTING PURPOSES!!
+
 @TeleOp(name="Tele2", group="Iterative Opmode")
 public class Tele2 extends OpMode {
     //Declare OpMode members
