@@ -237,7 +237,7 @@ public class Robot {
     }
 
     // Sends desired power to drive motors
-    private void sendDrivePowers() {
+    public void sendDrivePowers() {
         leftFrontDrive.setPower(leftFrontPower);
         rightFrontDrive.setPower(rightFrontPower);
         leftRearDrive.setPower(leftRearPower);
