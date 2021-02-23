@@ -364,8 +364,8 @@ public class Robot {
             y = 0;
         }
 
-//        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
-        chaseObject(0, 0, 0);
+        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+//        chaseObject(0, 0, 0);
     }
 
     // Makes the robot move to a certain position relative to the tower goal
