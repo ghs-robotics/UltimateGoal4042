@@ -37,15 +37,30 @@ public class Auto1 extends LinearOpMode {
         }
 
         if (opModeIsActive()) {
-            //move towards the desired target wobble goal zone
-
-            //once there, place down the wobble goal
-
+            //Determine how many rings in the starting ring stacks
+            //Move forward 6-7 feet until at the edge of launch zone
+            //Move sideways until in line with tower goal
             //aim the robot at the goal and make sure that the robot is within the launch zone
-
-            //shoot 3 shots
-
-            //pickup 3 rings
+            //Shoot 3 rings
+            //move forward towards the desired target wobble goal zone
+            //Check distance to tower goal and correct if necessary
+            //Move left or right depending on target wobble goal
+            //once there, place down the wobble goal
+            //Head back to location where we shot the rings
+            //Move left or right and then backward towards second wobble goal
+            //pick up second wobble goal
+            // if starterStack != 0, pickup the starter stack rings
+            //Check that we're in shooting position
+            //Shoot the 3 rings
+                //(This is repeating the code from dropping off the first wobble goal)
+                //Move forward until at the edge of launch zone
+                //Move sideways until in line with tower goal
+                //move forward towards the desired target wobble goal zone
+                //Check distance to tower goal and correct if necessary
+                //Move left or right depending on target wobble goal
+                //once there, place down the wobble goal
+                //Head back to location where we shot the rings
+            //Move forward to park over launch line
 
             telemetry.addData("opmode is working","");
             telemetry.update();

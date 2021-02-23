@@ -31,10 +31,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode
-{
+public class Tele1butworse extends OpMode {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
@@ -45,87 +45,56 @@ public class Tele1 extends OpMode
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.resetServos();
-        robot.resetShooterMotor();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
-
+    //kenny codes :) fksdhfkl
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {}
+    public void init_loop() {
+    }
 
     //Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() { robot.resetElapsedTime(); }
+    public void start() {
+        robot.resetElapsedTime();
+    }
 
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-        //Registers controller input
         controller1.update();
 
-        //Press "x" to toggle speed between 100% and 30%
+        //PRESS THE "x" BUTTON ON THE CONTROLLER TO TOGGLE SPEED
         if (controller1.x.equals("pressing")) {
             robot.toggleSpeed();
         }
 
         //Mecanum wheel drive
-        robot.calculateDrivePowers(
-                controller1.left_stick_x,
-                controller1.left_stick_y,
-                controller1.right_stick_x
-        );
+
+
+        // get inputs from remote controller or autonomous navigation software
+        double x = (controller1.left_stick_x);  // left/right motion, scale of -1 to 1 (full left to full right)
+        double y = (controller1.left_stick_y);  // forward/backward, same scale
+        double r = (controller1.right_stick_x);  // ccw/cw, same scale
+// set motor powers, assumed that positive power = forwards motion for wheel, there's often a motor.reverse() function to help with this
+        robot.rightFrontPower = Range.clip(y - x + r,-1,1);
+        robot.leftFrontPower = Range.clip(y + x - r,-1,1);
+        robot.leftRearPower = Range.clip(y - x - r,-1,1);
+        robot.rightRearPower = Range.clip(y + x + r,-1,1);
         robot.updateDrive();
-        //Eli's Branch
 
-        //Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) {
-            robot.toggleShooter();
-        }
 
-        //Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) {
-            robot.launchRing();
-        }
-
-        //Press dpad right to pick up (already lined up) wobble goal
-        if (controller1.dpad_right.equals("pressing")) {
-            robot.calculateDrivePowers(0,-0.4,0);
-            robot.sendDrivePowers();
-            robot.wait(2.0);
-            robot.stopDrive();
-            //robot.pickUpWobbleGoal(160);
-        }
-
-        //Press "y" to turn on/off the intake motor
-        if (controller1.y.equals("pressing")) {
+        //@Imants, PRESS THE "a" BUTTON ON THE CONTROLLER TO TOGGLE THE INTAKE MOTOR
+        if (controller1.a.equals("pressing")) {
             robot.toggleIntake();
         }
 
-        //Press "b" to toggle the wobble gripper
-        if (controller1.b.equals("pressing")) {
-            robot.toggleGrab();
-        }
-
-        //Press "a" to turn the arm
-        if (controller1.a.equals("pressing")) {
-            robot.turnArm();
-        }
-
-        if (controller1.dpad_up.equals("pressing")) {
-            robot.increaseArmAngle();
-        }
-        if (controller1.dpad_down.equals("pressing")) {
-            robot.decreaseArmAngle();
-        }
-        if (Robot.ShooterMotorPowered){
-            robot.adjustShooterVelocity();
-        }
 
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){}
+    public void stop () {
+    }
 }
