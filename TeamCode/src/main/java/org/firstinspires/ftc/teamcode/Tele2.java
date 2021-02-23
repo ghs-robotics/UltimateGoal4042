@@ -100,10 +100,10 @@ public class Tele2 extends OpMode {
         {
             stream();
             target = "tower";
-            if (robot.targetWidth == 85){
-                robot.setTargetToTower(65, 115);
+            if (robot.targetWidth == 65){
+                robot.setTargetToTower(65, 105);
             } else {
-                robot.setTargetToTower(65, 85);
+                robot.setTargetToTower(65, 65);
             }
         }
 

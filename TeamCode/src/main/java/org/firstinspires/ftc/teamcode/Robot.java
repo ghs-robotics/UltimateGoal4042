@@ -28,7 +28,7 @@ class Robot {
     //HSV constants
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); //original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); //original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 40); //original value: V = 60
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 30); //original value: V = 60, V=40 works well
     public static final Scalar UPPER_TOWER_HSV = new Scalar(54, 212, 255);
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
     public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
@@ -123,14 +123,17 @@ class Robot {
         this.telemetry = telemetry;
 
         //Initiating PID objects
-        xPID = new PIDController(0.0120, 0.0022, 0.0015, 3, -1.0, 1.0); //0.0120, 0.0022, 0.0015
-        yPID = new PIDController(0.0200, 0.0025, 0.0010, 3, -1.0, 1.0); //Kp = 0.0200, 0.0025, 0.0010
-        wPID = new PIDController(0.0440, 0.0016, 0.0010, 2, -1.0, 1.0); //ADJUST WITH BETTER BATTERY!
-        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2, -1.0, 1.0); //works best when Ki = 0
+        xPID = new PIDController(0.0120, 0.0022, 0.0015, 3);
+        yPID = new PIDController(0.0200, 0.0025, 0.0010, 3);
+        wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
+        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
 
         //Initiating some CV variables/objects
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId",
+                "id", hardwareMap.appContext.getPackageName());
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         pipeline = new ObjectDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
     }
