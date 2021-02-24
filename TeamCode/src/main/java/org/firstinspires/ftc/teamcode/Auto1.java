@@ -33,31 +33,30 @@ public class Auto1 extends LinearOpMode {
         int stage = 1;
         waitForStart();
 
-        // TO DO: remove the switch statement???
-        while(opModeIsActive()) {
-            switch (stage) {
-                case 1 :
+
+
+
+
+
+
                     //Determine how many rings in the starting ring stacks
                     robot.identifyRingConfig();
                     robot.config = 1; // For testing purposes
-                    stage++;
-                    break;
 
-                case 2 :
+
+
                     //Move forward 6-7 feet until at the edge of launch zone
                     robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
-                    stage++;
-                    break;
 
-                case 3 :
+
+
                     //Move sideways until in line with tower goal
                     //aim the robot at the goal and make sure that the robot is within the launch zone
                     //Shoot 3 rings
                     robot.adjustAndShoot();
-                    stage++;
-                    break;
 
-                case 4 :
+
+
                     //move forward towards the desired target wobble goal zone
                     //Check distance to tower goal and correct if necessary
                     //Move left or right depending on target wobble goal
@@ -68,10 +67,9 @@ public class Auto1 extends LinearOpMode {
                     } else {
                         robot.moveToPos(CONFIG_4_POS, 3);
                     }
-                    stage++;
-                    break;
 
-                case 5 :
+
+
                     //once there, place down the wobble goal
                     robot.turnArm();
                     robot.wait(0.5);
@@ -80,46 +78,38 @@ public class Auto1 extends LinearOpMode {
                     robot.turnArm();
                     robot.wait(0.4);
                     robot.resetServos();
-                    stage++;
-                    break;
 
-                case 6 :
+
                     //Head back to location where we shot the rings
                     //Move left or right and then backward towards second wobble goal
                     robot.moveToPos(SECOND_WOBBLE_POS, 3);
-                    stage++;
-                    break;
 
-                case 7 :
+
                     // Turn around
                     robot.rotateToPos(180, 3);
-                    stage++;
-                    break;
 
-                case 8 :
+
+
                     //pick up second wobble goal
                     robot.pickUpWobbleGoal(8);
-                    stage++;
-                    break;
 
-                case 9 :
+
+
                     // if starterStack != 0, pickup the starter stack rings
                     if (robot.config == 4) {
                         robot.moveToPos(STARTER_STACK_BEFORE_POS, 5);
                         robot.moveToPos(STARTER_STACK_AFTER_POS, 5);
                     }
-                    stage++;
-                    break;
 
-                case 10 :
+
+
                     //Check that we're in shooting position
                     //Shoot the 3 rings
                     robot.wait(0.01);
                     robot.adjustAndShoot();
-                    stage++;
-                    break;
 
-                case 11 :
+
+
                     //move forward towards the desired target wobble goal zone
                     //Check distance to tower goal and correct if necessary
                     //Move left or right depending on target wobble goal
@@ -131,10 +121,9 @@ public class Auto1 extends LinearOpMode {
                     } else {
                         robot.moveToPos(CONFIG_4_POS, 3);
                     }
-                    stage++;
-                    break;
 
-                case 12 :
+
+
                     //once there, place down the wobble goal
                     robot.turnArm();
                     robot.wait(0.51);
@@ -143,14 +132,12 @@ public class Auto1 extends LinearOpMode {
                     robot.turnArm();
                     robot.wait(0.4);
                     robot.resetServos();
-                    stage++;
-                    break;
 
-                case 13 :
+
+
                     //Move forward to park over launch line
                     robot.moveToPos(PARK_POS, 5);
-                    stage++;
-                    break;
+
             }
             sleep(50);
         }
