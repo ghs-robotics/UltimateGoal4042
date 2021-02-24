@@ -142,11 +142,12 @@ class Robot {
     //To use at the start of each OpMode that uses CV
     void init() {
         resetServos();
-        initCamera();
+        initPhone();
+        initWebcam();
     }
 
     //Initialize the phone camera
-    void initCamera() {
+    void initPhone() {
         // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
         // out when the RC activity is in portrait. We do our actual image processing assuming
         // landscape orientation, though.
@@ -154,19 +155,37 @@ class Robot {
         phonecam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
-                startStreaming();
+                startPhone();
+            }
+        });
+    }
+
+    void initWebcam() {
+        webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                startWebcam();
             }
         });
     }
 
     //Start streaming frames on the phone camera
-    void startStreaming() {
+    void startPhone() {
         phonecam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
     }
 
     //Stop streaming frames on the phone camera
-    void stopStreaming() {
+    void stopPhone() {
         phonecam.stopStreaming();
+    }
+
+    void startWebcam() {
+        webcam.startStreaming(320,240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+    }
+
+    void stopWebcam() {
+        webcam.stopStreaming();
     }
 
     //Updates the coordinates of the object being detected on the screen
@@ -487,6 +506,8 @@ class Robot {
             config = 1.0 * objectHeight / objectWidth;
         }
     }
+
+
 
     //Detects the position of the target object on the screen and returns an array with those values
     public static int[] getObjectCoordinates(Mat input) {
