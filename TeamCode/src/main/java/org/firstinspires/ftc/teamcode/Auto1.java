@@ -33,6 +33,7 @@ public class Auto1 extends LinearOpMode {
         int stage = 1;
         waitForStart();
 
+        // TO DO: remove the switch statement???
         while(opModeIsActive()) {
             switch (stage) {
                 case 1 :

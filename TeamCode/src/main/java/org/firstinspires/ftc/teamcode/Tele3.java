@@ -27,6 +27,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp
 public class Tele3 extends LinearOpMode
 {
+    public static final int[] NEXT_TO_STARTER_STACK_POS = new int[]{170, 90}; // x position, width
+    public static final int[] SHOOTER_POS = new int[]{100, 80};
+    public static final int[] CONFIG_0_POS = new int[]{30, 107};
+    public static final int[] CONFIG_1_POS = new int[]{103, 165};
+    public static final int[] CONFIG_4_POS = new int[]{100, 80}; // TO DO: CAN'T SEE TOWER GOAL FROM THIS POS!
+    public static final int[] SECOND_WOBBLE_POS = new int[]{53, 73};
+    public static final int[] STARTER_STACK_BEFORE_POS = new int[]{100, 80};
+    public static final int[] STARTER_STACK_AFTER_POS = new int[]{100, 70};
+    public static final int[] PARK_POS = new int[]{100, 95};
+
     Robot robot;
     Controller controller1;
 
@@ -47,17 +57,31 @@ public class Tele3 extends LinearOpMode
         while (opModeIsActive()) {
             controller1.update();
             if (controller1.a.equals("pressing")) {
-                robot.adjustAndShoot();
+                robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
             }
             if (controller1.b.equals("pressing")) {
-                robot.moveToPos(new int[]{70, 105}, 3);
+                robot.adjustAndShoot();
             }
             if (controller1.y.equals("pressing")) {
                 robot.moveToPos(new int[]{170, 90}, 3);
             }
             if (controller1.x.equals("pressing")) {
-                robot.moveToPos(new int[]{145, 65}, 3);
+                robot.moveToPos(new int[]{100, 105}, 3);
             }
+
+            /*
+            if (controller1.dpad_down.equals("pressing")) {
+                double[] list = Robot.lower.val;
+                Robot.lower = new Scalar(list[0], list[1], list[2] - 2);
+            }
+            if (controller1.dpad_up.equals("pressing")) {
+                double[] list = Robot.lower.val;
+                Robot.lower = new Scalar(list[0], list[1], list[2] + 2);
+            }
+
+            robot.telemetry.addData("HSV MIN, MAX: ", Robot.lower + ", " + Robot.upper);
+            robot.telemetry.update();
+            */
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

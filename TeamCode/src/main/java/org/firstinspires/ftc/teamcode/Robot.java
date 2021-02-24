@@ -17,8 +17,8 @@ public class Robot {
     // HSV constants
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); // original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); // original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 30); // original value: V = 60, V=40 works well
-    public static final Scalar UPPER_TOWER_HSV = new Scalar(54, 212, 255);
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 80, 100); // original values: 0, 124, 60
+    public static final Scalar UPPER_TOWER_HSV = new Scalar(80, 255, 220); // original values: 54, 212, 255
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
     public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
 
