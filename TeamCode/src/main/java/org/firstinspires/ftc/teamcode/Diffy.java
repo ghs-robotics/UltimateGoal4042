@@ -248,22 +248,6 @@ class Diffy {
      /*
 
     */
-=======
-    }
-
-    void increaseIncline(){
-        shooterPower1 = 0.5;
-        shooterPower2 = 1.0;
-        shooterMotor1.setPower(shooterPower1);
-        shooterMotor2.setPower(shooterPower2);
-    }
-
-    void decreaseIncline(){
-        shooterPower1 = 1.0;
-        shooterPower2 = 0.5;
-        shooterMotor1.setPower(shooterPower1);
-        shooterMotor2.setPower(shooterPower2);
-    }
 
     /* //Calculates the speed of the shooter motor in ticks per second
      double findShooterVelocity(){
@@ -287,7 +271,6 @@ class Diffy {
      /*
 
      */
->>>>>>> 2b6b0d72563ff368e0b49dc77db959a0e4697d83
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
 

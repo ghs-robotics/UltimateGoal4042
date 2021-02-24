@@ -13,7 +13,7 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-public class    ObjectDeterminationPipeline extends OpenCvPipeline {
+public class ObjectDeterminationPipeline extends OpenCvPipeline {
     public static final Scalar GREEN = new Scalar(0, 255, 0);
     public static final Scalar LOWER_SQUARE_HSV = new Scalar(0, 0, 0);
     public static final Scalar UPPER_SQUARE_HSV = new Scalar(255, 255, 255);
@@ -30,7 +30,7 @@ public class    ObjectDeterminationPipeline extends OpenCvPipeline {
     }
 
     //This function is a WIP, still needs testing
-    public int[] getSquareCoordinates(Mat input, int squareNum) {   
+    public int[] getSquareCoordinates(Mat input, int squareNum) {
         Mat src = input;
         int squareX = 0;
         int squareY = 0;
@@ -77,7 +77,7 @@ public class    ObjectDeterminationPipeline extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
-        //update ring coordinates
+        // Update ring coordinates
         int[] coords = getObjectCoordinates(input);
         objectX = coords[0];
         objectY = coords[1];
@@ -89,17 +89,47 @@ public class    ObjectDeterminationPipeline extends OpenCvPipeline {
                 new Point(objectX, objectY), // First point which defines the rectangle
                 new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
                 GREEN, // The color the rectangle is drawn in
-                -1); // Negative thickness means solid fill
+                2); // Negative thickness (-1) means solid fill
 
         return input;
     }
 
-    //Detects the position of the target object on the screen and returns an array with those values
-    public static int[] getObjectCoordinates(Mat input) {
+    public static int[] getObjectCoordinates(Mat src) {
+        Mat dst = new Mat();
+        Imgproc.resize(src, src, new Size(320, 240));
+
+        // Convert color from RGB to HSV
+        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+
+        // adding a mask to the dst mat
+        // filters colors within certain color range
+        Core.inRange(dst, Robot.lower, Robot.upper, dst);
+
+        // Get the contours of the ring
+        List<MatOfPoint> contours = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        // Draw contours on the src image
+        Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+
+        Rect largest = new Rect();
+        for (int i = 0; i < contours.size(); i++) {
+            Rect rect = Imgproc.boundingRect(contours.get(i));
+            if (largest.area() < rect.area()) {
+                largest = rect;
+            }
+        }
+
+        return new int[]{largest.x, largest.y, largest.width, largest.height};
+    }
+
+
+    // Detects the position of the target object on the screen and returns an array with those values
+    public static int[] getObjectCoordinates2(Mat src) {
         Scalar GREEN = new Scalar(0, 255, 0);
 
         Mat dst = new Mat();
-        Mat src = input;
         Imgproc.resize(src, src, new Size(320, 240));
 
         //Cover up background noise
