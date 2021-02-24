@@ -30,16 +30,28 @@ public class Auto1 extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        int stage = 1;
         waitForStart();
 
         //Determine how many rings in the starting ring stacks
-        robot.identifyRingConfig();
+//        robot.identifyRingConfig();
         robot.config = 1; // For testing purposes
 
         //Move forward 6-7 feet until at the edge of launch zone
         robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
 
+//        double t = getElapsedTimeSeconds();
+//        while ((leftRearPower != 0
+//                || rightRearPower != 0
+//                || leftFrontPower != 0
+//                || rightFrontPower != 0
+//                || Math.abs(targetWidth - objectWidth) > tolerance
+//                || Math.abs(targetX - objectX) > tolerance)
+//                && elapsedTime.seconds() - t < 3) {
+//            chaseTower();
+//        }
+//        stopDrive();
+
+        /*
         //Move sideways until in line with tower goal
         //aim the robot at the goal and make sure that the robot is within the launch zone
         //Shoot 3 rings
@@ -56,6 +68,7 @@ public class Auto1 extends LinearOpMode {
             robot.moveToPos(CONFIG_4_POS, 3);
         }
 
+        /*
         //once there, place down the wobble goal
         robot.turnArm();
         robot.wait(0.5);
@@ -109,5 +122,6 @@ public class Auto1 extends LinearOpMode {
 
         //Move forward to park over launch line
         robot.moveToPos(PARK_POS, 5);
+        */
     }
 }
