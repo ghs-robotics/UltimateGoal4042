@@ -43,7 +43,7 @@ public class ChaseTower extends LinearOpMode
 
         while (opModeIsActive())
         {
-            robot.chaseTower2();
+            robot.chaseTower();
 //            if (robot.elapsedTime.seconds() > 6 && shots < 3){
 //                robot.stopDrive();
 //                robot.toggleShooter();

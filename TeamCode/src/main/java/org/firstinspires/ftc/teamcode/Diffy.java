@@ -147,8 +147,7 @@ class Diffy {
 
     //fires ring
     void toggleShooter() {
-        //loadRing();
-        elapsedTime.reset(); //Do we still need this?
+        elapsedTime.reset();
         shooterPower1 = (shooterPower1 == 0 ? 1.0 : 0);
         shooterPower2 = (shooterPower2 == 0 ? 1.0 : 0);
         ShooterMotorPowered = !ShooterMotorPowered;
@@ -227,28 +226,68 @@ class Diffy {
         }
     }
 
-   /* //Calculates the speed of the shooter motor in ticks per second
-    double findShooterVelocity(){
-        //Finds the number of ticks since the last time we ran the function
-        DeltaShooterMotorTicks = (shooterMotor1.getCurrentPosition() - previousShooterMotorTicks);
-        previousShooterMotorTicks = shooterMotor1.getCurrentPosition();
-        CurrentElapsedTime = elapsedTime.seconds();
-        elapsedTime.reset();
-        return (DeltaShooterMotorTicks / CurrentElapsedTime);
-    }
+    /* //Calculates the speed of the shooter motor in ticks per second
+     double findShooterVelocity(){
+         //Finds the number of ticks since the last time we ran the function
+         DeltaShooterMotorTicks = (shooterMotor1.getCurrentPosition() - previousShooterMotorTicks);
+         previousShooterMotorTicks = shooterMotor1.getCurrentPosition();
+         CurrentElapsedTime = elapsedTime.seconds();
+         elapsedTime.reset();
+         return (DeltaShooterMotorTicks / CurrentElapsedTime);
+     }
 
-    void adjustShooterVelocity(){
-        if (findShooterVelocity() > TargetMotorSpeed){
-            shooterPower -= 0.001;
-        } else {
-            shooterPower += 0.001;
-        }
-        shooterPower = Range.clip(shooterPower, 0, 1.0);
-        shooterMotor.setPower(shooterPower);
-    }
-    /*
+     void adjustShooterVelocity(){
+         if (findShooterVelocity() > TargetMotorSpeed){
+             shooterPower -= 0.001;
+         } else {
+             shooterPower += 0.001;
+         }
+         shooterPower = Range.clip(shooterPower, 0, 1.0);
+         shooterMotor.setPower(shooterPower);
+     }
+     /*
 
     */
+=======
+    }
+
+    void increaseIncline(){
+        shooterPower1 = 0.5;
+        shooterPower2 = 1.0;
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
+    }
+
+    void decreaseIncline(){
+        shooterPower1 = 1.0;
+        shooterPower2 = 0.5;
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
+    }
+
+    /* //Calculates the speed of the shooter motor in ticks per second
+     double findShooterVelocity(){
+         //Finds the number of ticks since the last time we ran the function
+         DeltaShooterMotorTicks = (shooterMotor1.getCurrentPosition() - previousShooterMotorTicks);
+         previousShooterMotorTicks = shooterMotor1.getCurrentPosition();
+         CurrentElapsedTime = elapsedTime.seconds();
+         elapsedTime.reset();
+         return (DeltaShooterMotorTicks / CurrentElapsedTime);
+     }
+
+     void adjustShooterVelocity(){
+         if (findShooterVelocity() > TargetMotorSpeed){
+             shooterPower -= 0.001;
+         } else {
+             shooterPower += 0.001;
+         }
+         shooterPower = Range.clip(shooterPower, 0, 1.0);
+         shooterMotor.setPower(shooterPower);
+     }
+     /*
+
+     */
+>>>>>>> 2b6b0d72563ff368e0b49dc77db959a0e4697d83
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
 

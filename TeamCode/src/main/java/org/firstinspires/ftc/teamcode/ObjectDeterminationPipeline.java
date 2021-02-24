@@ -116,7 +116,7 @@ public class    ObjectDeterminationPipeline extends OpenCvPipeline {
         Core.inRange(dst, Robot.lower, Robot.upper, dst);
 
         //dilate the ring to make it easier to detect
-       //kernel determines how much you are changing the pixel
+        //kernel determines how much you are changing the pixel
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
         Imgproc.dilate(dst, dst, kernel);
 
