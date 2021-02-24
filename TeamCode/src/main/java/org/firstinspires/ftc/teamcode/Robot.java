@@ -37,7 +37,7 @@ class Robot {
     public static Scalar lower = LOWER_RING_HSV;
     public static Scalar upper = UPPER_RING_HSV;
     public static double cover = 0;
-
+    
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 75;

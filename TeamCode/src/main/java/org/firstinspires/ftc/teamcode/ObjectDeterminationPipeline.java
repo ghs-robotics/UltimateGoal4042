@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.provider.ContactsContract;
+
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -22,6 +25,7 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
     @Override
     public Mat processFrame(Mat input) {
+        this.input = input;
         //update ring coordinates
         int[] coords = Robot.getObjectCoordinates(input);
         objectX = coords[0];
@@ -35,6 +39,27 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
                 new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
                 GREEN, // The color the rectangle is drawn in
                 -1); // Negative thickness means solid fill
+        input = showHSVCrosshair(input);
+
+        return input;
+    }
+    //https://stackoverflow.com/questions/17035005/using-get-and-put-to-access-pixel-values-in-opencv-for-java
+    //this is the method that displays hsv values of a point on screen
+    private Mat showHSVCrosshair(Mat input) {
+        int targetX = input.cols()/2;
+        int targetY = input.rows()/2;
+
+        Mat dst = input.clone();
+        dst.convertTo(dst, CvType.CV_64FC3);
+        Imgproc.cvtColor(dst,dst,Imgproc.COLOR_RGB2HSV);
+        int size = (int) (input.total() * input.channels());
+
+        double[] data = new double[size];
+
+        dst.get(targetX,targetY,data);
+
+
+        input.get(targetX,targetY);
 
         return input;
     }
