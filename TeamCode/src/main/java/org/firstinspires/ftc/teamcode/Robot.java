@@ -390,6 +390,7 @@ public class Robot {
 
     // Makes the robot rotate to a certain angle
     public void rotateToPos(int angle, int tolerance) {
+        targetAngle = angle;
         while(Math.abs(targetAngle - gyro.getAngle()) > 5) {
             adjustAngle();
         }
