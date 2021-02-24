@@ -46,7 +46,6 @@ public class Tele1 extends OpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.resetServos();
-        robot.resetShooterMotor();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -84,14 +83,18 @@ public class Tele1 extends OpMode
             robot.toggleShooter();
         }
 
-        //Press right bumper to launch a ring/shoot
+        //Press right bumper to launch a ring
         if (controller1.right_bumper.equals("pressing")) {
-            robot.toggleShooter();
+            robot.launchRing();
         }
 
         //Press dpad right to pick up (already lined up) wobble goal
         if (controller1.dpad_right.equals("pressing")) {
-            robot.pickUpWobbleGoal(24.0); //Pick up wobble goal that is 24 inches ahead
+            robot.calculateDrivePowers(0,-0.4,0);
+            robot.sendDrivePowers();
+            robot.wait(2.0);
+            robot.stopDrive();
+            //robot.pickUpWobbleGoal(160);
         }
 
         //Press "y" to turn on/off the intake motor
@@ -115,12 +118,6 @@ public class Tele1 extends OpMode
         if (controller1.dpad_down.equals("pressing")) {
             robot.decreaseArmAngle();
         }
-
-
-       /* if (Robot.ShooterMotorPowered){
-            robot.adjustShooterVelocity();
-        } /*
-
     }
 
     //Code to run ONCE after the driver hits STOP

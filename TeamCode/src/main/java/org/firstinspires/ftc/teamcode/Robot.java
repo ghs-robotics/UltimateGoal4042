@@ -17,8 +17,8 @@ public class Robot {
     // HSV constants
     public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); // original values: 74, 153, 144
     public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); // original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 124, 30); // original value: V = 60, V=40 works well
-    public static final Scalar UPPER_TOWER_HSV = new Scalar(54, 212, 255);
+    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 80, 100); // original values: 0, 124, 60
+    public static final Scalar UPPER_TOWER_HSV = new Scalar(80, 255, 220); // original values: 54, 212, 255
     public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
     public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
 
@@ -113,8 +113,8 @@ public class Robot {
         this.telemetry = telemetry;
 
         // Initializing PID objects
-        xPID = new PIDController(0.0120, 0.0022, 0.0015, 3);
-        yPID = new PIDController(0.0200, 0.0025, 0.0010, 3);
+        xPID = new PIDController(0.0120, 0.0022, 0.0015, 2);
+        yPID = new PIDController(0.0200, 0.0025, 0.0010, 2);
         wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
 
@@ -159,7 +159,7 @@ public class Robot {
     }
 
     // Updates the coordinates of the object being detected on the screen
-    private void updateObjectValues() {
+    public void updateObjectValues() {
         objectX = pipeline.objectX;
         objectY = pipeline.objectY;
         objectWidth = pipeline.objectWidth;
@@ -257,16 +257,11 @@ public class Robot {
         sendDrivePowers();
     }
 
-//    // For testing the gyroPID
-//    public void adjustAngle() {
-//        calculateDrivePowers(0, 0, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
-//        sendDrivePowers();
-//        telemetry.addData("angle: ", gyro.getAngle() + " ( target: " + targetAngle + " )");
-//        telemetry.addData("Kp: ", gyroPID.k_P);
-//        telemetry.addData("Ki: ", gyroPID.k_I);
-//        telemetry.addData("Kd: ", gyroPID.k_D);
-//        telemetry.update();
-//    }
+    // Turns the robot to a desired angle (if called repeatedly)
+    public void adjustAngle() {
+        calculateDrivePowers(0, 0, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+        sendDrivePowers();
+    }
 
     // Displays important values on the phone screen
     private void chaseObject(double x, double y, double rotation) {
@@ -369,7 +364,97 @@ public class Robot {
             y = 0;
         }
 
-        chaseObject(0, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+//        chaseObject(0, 0, 0);
+    }
+
+    // Makes the robot move to a certain position relative to the tower goal
+    public void moveToPos(int[] pos, int tolerance) {
+        setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
+        updateObjectValues();
+        while(Math.abs(targetWidth - objectWidth) > 5 || Math.abs(targetX - objectX) > 5) {
+            chaseTower();
+        }
+        double t = getElapsedTimeSeconds();
+        while ((leftRearPower != 0
+                || rightRearPower != 0
+                || leftFrontPower != 0
+                || rightFrontPower != 0
+                || Math.abs(targetWidth - objectWidth) > tolerance
+                || Math.abs(targetX - objectX) > tolerance)
+                && elapsedTime.seconds() - t < 3) {
+            chaseTower();
+        }
+        stopDrive();
+    }
+
+    // Makes the robot rotate to a certain angle
+    public void rotateToPos(int angle, int tolerance) {
+        while(Math.abs(targetAngle - gyro.getAngle()) > 5) {
+            adjustAngle();
+        }
+        double t = getElapsedTimeSeconds();
+        while ((leftRearPower != 0
+                || rightRearPower != 0
+                || leftFrontPower != 0
+                || rightFrontPower != 0
+                || Math.abs(targetAngle - gyro.getAngle()) > tolerance)
+                && elapsedTime.seconds() - t < 3) {
+            adjustAngle();
+        }
+        stopDrive();
+    }
+
+    // Makes the robot line up with the tower goal and shoot three rings
+    public void adjustAndShoot() {
+        setTargetToTower(95,80);
+        updateObjectValues();
+        double t = getElapsedTimeSeconds();
+        while(Math.abs(targetWidth - objectWidth) > 2 || Math.abs(targetX - objectX) > 2 && elapsedTime.seconds() - t < 4) {
+            chaseTower();
+        }
+        t = getElapsedTimeSeconds();
+        chaseTower();
+        toggleShooter();
+        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
+                || rightFrontPower != 0) && elapsedTime.seconds() - t < 3) {
+            chaseTower();
+        }
+        stopDrive();
+        for (int i = 0; i < 3; i++) {
+            launchRing();
+            wait(0.4);
+        }
+        toggleShooter();
+    }
+
+    public void shootStep1() {
+        setTargetToTower(95,80);
+        updateObjectValues();
+        double t = getElapsedTimeSeconds();
+        while(Math.abs(targetWidth - objectWidth) > 2 || Math.abs(targetX - objectX) > 2 && elapsedTime.seconds() - t < 4) {
+            chaseTower();
+        }
+    }
+
+    public void shootStep2() {
+        double t = getElapsedTimeSeconds();
+        chaseTower();
+        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
+                || rightFrontPower != 0) && elapsedTime.seconds() - t < 3) {
+            chaseTower();
+        }
+        stopDrive();
+    }
+
+    public void shootStep3() {
+        toggleShooter();
+        wait(1.0);
+        for (int i = 0; i < 3; i++) {
+            launchRing();
+            wait(0.4);
+        }
+        toggleShooter();
     }
 
     // Toggles the drive speed between 50% and normal
@@ -403,7 +488,7 @@ public class Robot {
         grabServo.setPosition(grabAngle);
     }
 
-    //Launches a ring by moving the shooterServo
+    // Launches a ring by moving the shooterServo
     public void launchRing() {
         shooterAngle = 0.25;
         shooterServo.setPosition(shooterAngle);

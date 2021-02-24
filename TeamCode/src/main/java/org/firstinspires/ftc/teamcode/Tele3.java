@@ -1,14 +1,32 @@
+/*
+ * Copyright (c) 2020 OpenFTC Team
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-/**
- * This will be the main class that we will put all of our autonomous code into
- * This class is obviously not complete, and the structure of the code is not decided yet
- */
-@Autonomous
-public class Auto1 extends LinearOpMode {
+@TeleOp
+public class Tele3 extends LinearOpMode
+{
     public static final int[] NEXT_TO_STARTER_STACK_POS = new int[]{170, 90}; // x position, width
     public static final int[] SHOOTER_POS = new int[]{100, 80};
     public static final int[] CONFIG_0_POS = new int[]{30, 107};
@@ -19,23 +37,64 @@ public class Auto1 extends LinearOpMode {
     public static final int[] STARTER_STACK_AFTER_POS = new int[]{100, 70};
     public static final int[] PARK_POS = new int[]{100, 95};
 
-    // Declare OpMode members
     Robot robot;
+    Controller controller1;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode()
+    {
         robot = new Robot(hardwareMap, telemetry);
+        controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setTargetToTower();
+        robot.setTargetToTower(95,80);
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        int stage = 1;
         waitForStart();
 
-        // TO DO: remove the switch statement???
-        while(opModeIsActive()) {
-            switch (stage) {
+        robot.updateObjectValues();
+
+        while (opModeIsActive()) {
+            controller1.update();
+            if (controller1.a.equals("pressing")) {
+                robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
+            }
+            if (controller1.b.equals("pressing")) {
+                robot.adjustAndShoot();
+            }
+            if (controller1.y.equals("pressing")) {
+                robot.moveToPos(new int[]{170, 90}, 3);
+            }
+            if (controller1.x.equals("pressing")) {
+                robot.moveToPos(new int[]{100, 105}, 3);
+            }
+
+            /*
+            if (controller1.dpad_down.equals("pressing")) {
+                double[] list = Robot.lower.val;
+                Robot.lower = new Scalar(list[0], list[1], list[2] - 2);
+            }
+            if (controller1.dpad_up.equals("pressing")) {
+                double[] list = Robot.lower.val;
+                Robot.lower = new Scalar(list[0], list[1], list[2] + 2);
+            }
+
+            robot.telemetry.addData("HSV MIN, MAX: ", Robot.lower + ", " + Robot.upper);
+            robot.telemetry.update();
+            */
+
+            // Don't burn CPU cycles busy-looping in this sample
+            sleep(50);
+        }
+    }
+}
+/*
+while(opModeIsActive()) {
+            if(stage == 2) {
+                robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
+                stage++;
+            }
+            /*switch (stage) {
                 case 1 :
                     //Determine how many rings in the starting ring stacks
                     robot.identifyRingConfig();
@@ -48,6 +107,7 @@ public class Auto1 extends LinearOpMode {
                     robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
                     stage++;
                     break;
+
 
                 case 3 :
                     //Move sideways until in line with tower goal
@@ -152,7 +212,6 @@ public class Auto1 extends LinearOpMode {
                     stage++;
                     break;
             }
-            sleep(50);
-        }
-    }
+sleep(50);
 }
+ */

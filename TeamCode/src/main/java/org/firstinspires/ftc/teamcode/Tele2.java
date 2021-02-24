@@ -48,7 +48,7 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        //robot.setTargetToTower();
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -84,12 +84,6 @@ public class Tele2 extends OpMode {
         if (target.equals("none")){ robot.updateDrive(); }
 
         if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
-        if (controller1.b.equals("pressing"))
-        {
-            robot.stopStreaming();
-            target = "angle";
-            robot.targetAngle = (robot.targetAngle == 0 ? 45 : 0);
-        }
 
         if (controller1.a.equals("pressing"))
         {
@@ -102,11 +96,6 @@ public class Tele2 extends OpMode {
         {
             stream();
             target = "tower";
-            if (robot.targetWidth == 65){
-                robot.setTargetToTower(65, 105);
-            } else {
-                robot.setTargetToTower(65, 65);
-            }
         }
 
         if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.001; }
@@ -119,7 +108,7 @@ public class Tele2 extends OpMode {
         if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0001; }
 
         if(target.equals("ring")){ robot.chaseRing(); }
-//        if(target.equals("angle")){ robot.adjustAngle(); }
+        if(target.equals("angle")){ robot.adjustAngle(); }
         if(target.equals("tower")){ robot.chaseTower(); }
     }
 
