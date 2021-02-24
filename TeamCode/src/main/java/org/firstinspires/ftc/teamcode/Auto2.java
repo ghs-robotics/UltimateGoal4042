@@ -43,7 +43,7 @@ public class Auto2 extends LinearOpMode {
         //Move sideways until in line with tower goal
         //aim the robot at the goal and make sure that the robot is within the launch zone
         //Shoot 3 rings
-//        robot.adjustAndShoot();
+        robot.adjustAndShoot();
 
     }
 }

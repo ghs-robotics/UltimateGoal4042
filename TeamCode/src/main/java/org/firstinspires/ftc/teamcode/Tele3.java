@@ -87,7 +87,6 @@ public class Tele3 extends LinearOpMode
             sleep(50);
         }
     }
-
 }
 /*
 while(opModeIsActive()) {
