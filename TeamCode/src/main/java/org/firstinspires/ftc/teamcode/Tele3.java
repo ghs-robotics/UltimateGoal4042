@@ -32,9 +32,9 @@ public class Tele3 extends LinearOpMode
     public static final int[] CONFIG_0_POS = new int[]{30, 107};
     public static final int[] CONFIG_1_POS = new int[]{103, 115}; //TO DO: CAN BARELY SEE TOWER GOAL FROM HERE!
     public static final int[] CONFIG_4_POS = new int[]{100, 80}; // TO DO: CAN'T SEE TOWER GOAL FROM THIS POS!
-    public static final int[] SECOND_WOBBLE_POS = new int[]{53, 73};
+    public static final int[] SECOND_WOBBLE_POS = new int[]{43, 73};
     public static final int[] STARTER_STACK_BEFORE_POS = new int[]{100, 80};
-    public static final int[] STARTER_STACK_AFTER_POS = new int[]{100, 70};
+    public static final int[] STARTER_STACK_AFTER_POS = new int[]{100, 60};
     public static final int[] PARK_POS = new int[]{100, 95};
 
     Robot robot;
@@ -61,7 +61,7 @@ public class Tele3 extends LinearOpMode
         madeIt("config identified");
 
         //Move forward 6-7 feet until at the edge of launch zone
-        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
+        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 25);
 
         madeIt("next to starter stack");
 
@@ -77,20 +77,20 @@ public class Tele3 extends LinearOpMode
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS, 3);
+            robot.moveToPos(CONFIG_0_POS, 15);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS, 3);
+            robot.moveToPos(CONFIG_1_POS, 15);
         } else {
-            robot.moveToPos(CONFIG_4_POS, 3);
+            robot.moveToPos(CONFIG_4_POS, 15);
         }
 
         madeIt("next to wobble goal drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(1.0);
-        robot.toggleGrab();
         robot.wait(0.5);
+        robot.toggleGrab();
+        robot.wait(0.3);
         robot.turnArm();
         robot.wait(0.1);
         robot.toggleGrab();
@@ -99,7 +99,7 @@ public class Tele3 extends LinearOpMode
 
         //Head back to location where we shot the rings
         //Move left or right and then backward towards second wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 5);
+        robot.moveToPos(SECOND_WOBBLE_POS, 20);
 
         madeIt("going for the second wobble goal");
 
@@ -109,7 +109,7 @@ public class Tele3 extends LinearOpMode
         madeIt("turned around");
 
         //pick up second wobble goal
-        robot.pickUpWobbleGoal(12);
+        robot.pickUpWobbleGoal(1.5);
         robot.targetAngle = 0;
 
         madeIt("picked up the second wobble goal");
@@ -117,8 +117,8 @@ public class Tele3 extends LinearOpMode
 
         // if starterStack != 0, pickup the starter stack rings
         if (robot.config == 1) {
-            robot.moveToPos(STARTER_STACK_BEFORE_POS, 8);
-            robot.moveToPos(STARTER_STACK_AFTER_POS, 8);
+            robot.moveToPos(STARTER_STACK_BEFORE_POS, 15);
+            robot.moveToPos(STARTER_STACK_AFTER_POS, 15);
         }
 
         madeIt("gathered rings");
@@ -126,7 +126,6 @@ public class Tele3 extends LinearOpMode
 
         //Check that we're in shooting position
         //Shoot the 3 rings
-        robot.wait(0.01);
         robot.adjustAndShoot();
 
         madeIt("shot more rings");
@@ -134,30 +133,29 @@ public class Tele3 extends LinearOpMode
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
-        robot.wait(0.01);
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS, 3);
+            robot.moveToPos(CONFIG_0_POS, 15);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS, 3);
+            robot.moveToPos(CONFIG_1_POS, 15);
         } else {
-            robot.moveToPos(CONFIG_4_POS, 3);
+            robot.moveToPos(CONFIG_4_POS, 15);
         }
 
         madeIt("brought second wobble goal to drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(0.51);
+        robot.wait(0.5);
         robot.toggleGrab();
-        robot.wait(0.1);
+        robot.wait(0.3);
         robot.turnArm();
-        robot.wait(0.4);
+        robot.wait(0.1);
         robot.toggleGrab();
 
         madeIt("delivered the second wobble");
 
         //Move forward to park over launch line
-        robot.moveToPos(PARK_POS, 5);
+        robot.moveToPos(PARK_POS, 10);
 
 
         madeIt("parked");

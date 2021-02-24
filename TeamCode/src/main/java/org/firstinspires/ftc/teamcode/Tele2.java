@@ -96,6 +96,15 @@ public class Tele2 extends OpMode {
         {
             stream();
             target = "tower";
+            robot.setTargetToTower();
+        }
+
+        if (controller1.b.equals("pressing"))
+        {
+            stream();
+            target = "tower";
+            robot.setTargetToTower(95, 80);
+            robot.moveToPos(new int[]{95, 80},5);
         }
 
         if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.001; }

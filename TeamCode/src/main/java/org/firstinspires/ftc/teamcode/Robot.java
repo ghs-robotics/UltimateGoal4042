@@ -376,16 +376,16 @@ public class Robot {
             chaseTower();
         }
         double t = getElapsedTimeSeconds();
-        while ((leftRearPower != 0
+        while ((/*leftRearPower != 0
                 || rightRearPower != 0
                 || leftFrontPower != 0
                 || rightFrontPower != 0
-                || Math.abs(targetWidth - objectWidth) > tolerance
+                || */Math.abs(targetWidth - objectWidth) > tolerance
                 || Math.abs(targetX - objectX) > tolerance)
                 && elapsedTime.seconds() - t < 3) {
             chaseTower();
         }
-        stopDrive();
+        //stopDrive();
     }
 
     // Makes the robot rotate to a certain angle
@@ -395,15 +395,15 @@ public class Robot {
             adjustAngle();
         }
         double t = getElapsedTimeSeconds();
-        while ((leftRearPower != 0
+        while ((/*leftRearPower != 0
                 || rightRearPower != 0
                 || leftFrontPower != 0
                 || rightFrontPower != 0
-                || Math.abs(targetAngle - gyro.getAngle()) > tolerance)
+                || */Math.abs(targetAngle - gyro.getAngle()) > tolerance)
                 && elapsedTime.seconds() - t < 3) {
             adjustAngle();
         }
-        stopDrive();
+        //stopDrive();
     }
 
     // Makes the robot line up with the tower goal and shoot three rings
@@ -511,15 +511,12 @@ public class Robot {
     }
 
     // Makes robot move forward and pick up wobble goal
-    public void pickUpWobbleGoal(double distance) {
-        double motorPower = -0.4 * (distance / Math.abs(distance));
-        double moveTime = distance / 100; //Adjust this later
+    public void pickUpWobbleGoal(double sec) {
         turnArm();
         toggleGrab();
-        calculateDrivePowers(0, motorPower, 0);
-        wait(0.6);
+        calculateDrivePowers(0,-0.4,0);
         sendDrivePowers();
-        wait(moveTime);
+        wait(sec); //Adjust this later
         stopDrive();
         toggleGrab();
         wait(0.6);

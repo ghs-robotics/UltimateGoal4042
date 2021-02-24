@@ -44,6 +44,7 @@ public class ChaseTower extends LinearOpMode
 
         robot.setTargetToTower(95,80);
         robot.updateObjectValues();
+        robot.adjustAndShoot();
 
         while (opModeIsActive()) {
 //            if (stage == 1) {
