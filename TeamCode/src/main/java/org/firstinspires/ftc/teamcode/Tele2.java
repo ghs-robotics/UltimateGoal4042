@@ -32,6 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+// THIS CLASS IS FOR TESTING PURPOSES!!
+
 @TeleOp(name="Tele2", group="Iterative Opmode")
 public class Tele2 extends OpMode {
     //Declare OpMode members
@@ -46,6 +48,7 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        //robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -65,40 +68,58 @@ public class Tele2 extends OpMode {
         //Registers controller input
         controller1.update();
 
+        //Press left bumper to turn on/off the shooter motor
+//        if (controller1.left_bumper.equals("pressing")) { robot.toggleShooter(); }
+
+        //Press right bumper to launch a ring
+//        if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
+
         //Mecanum wheel drive
         robot.calculateDrivePowers(
                 controller1.left_stick_x,
                 controller1.left_stick_y,
                 controller1.right_stick_x
         );
-        if(target.equals("none")){ robot.updateDrive(); }
 
-        //Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) { robot.toggleShooter(); }
-
-        //Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
+        if (target.equals("none")){ robot.updateDrive(); }
 
         if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
+        if (controller1.b.equals("pressing"))
+        {
+            robot.stopStreaming();
+            target = "angle";
+            robot.targetAngle = (robot.targetAngle == 0 ? 45 : 0);
+        }
+
         if (controller1.a.equals("pressing"))
         {
             stream();
             target = "ring";
-            robot.setTargetTo("ring");
+            robot.setTargetToRing();
         }
-//        if (controller1.b.equals("pressing")) { stream(); target = "wobble"; }
+
         if (controller1.y.equals("pressing"))
         {
             stream();
             target = "tower";
-            robot.setTargetTo("tower");
+            if (robot.targetWidth == 65){
+                robot.setTargetToTower(65, 105);
+            } else {
+                robot.setTargetToTower(65, 65);
+            }
         }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_D -= 0.0001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.yPID.k_D += 0.0001; }
+        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.001; }
+        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.001; }
+
+        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0001; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0001; }
+
+        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0001; }
+        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0001; }
 
         if(target.equals("ring")){ robot.chaseRing(); }
-        if(target.equals("wobble")){ robot.chaseWobble(); }
+//        if(target.equals("angle")){ robot.adjustAngle(); }
         if(target.equals("tower")){ robot.chaseTower(); }
     }
 
@@ -107,5 +128,5 @@ public class Tele2 extends OpMode {
     public void stop(){
     }
 
-    public void stream(){ if (target.equals("none")){ robot.startStreaming(); } }
+    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.startStreaming(); } }
 }

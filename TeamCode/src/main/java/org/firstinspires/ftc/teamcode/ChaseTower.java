@@ -37,6 +37,7 @@ public class ChaseTower extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setTargetToTower();
 
         waitForStart();
 

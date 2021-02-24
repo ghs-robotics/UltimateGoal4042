@@ -28,7 +28,6 @@ class Diffy {
     double shooterPower1 = 0;
     double shooterPower2 = 0;
     double k = 1;
-    double incline = 0; //Change this later (placeholder)
     //k is a constant for smth ask imants abt diffy
 
     DcMotor shooterMotor1;
@@ -147,13 +146,12 @@ class Diffy {
 
     //fires ring
     void toggleShooter() {
-        elapsedTime.reset(); //Do we still need this?
+        elapsedTime.reset();
         shooterPower1 = (shooterPower1 == 0 ? 1.0 : 0);
         shooterPower2 = (shooterPower2 == 0 ? 1.0 : 0);
         ShooterMotorPowered = !ShooterMotorPowered;
         shooterMotor1.setPower(shooterPower1);
         shooterMotor2.setPower(shooterPower2);
-        launchRing();
     }
 
     //Turns the intake motor on or off
@@ -183,75 +181,52 @@ class Diffy {
         shooterServo.setPosition(shooterAngle);
     }
 
-    //changes incline based on incline functions below
-    void setIncline(double newIncline) {
-        if (!ShooterMotorPowered) {
-            while (incline != newIncline) {
-                if (incline < newIncline) {
-                    increaseIncline();
-                    wait(0.1);
-                } else {
-                    decreaseIncline();
-                    wait(0.1);
-                }
-            }
-        }
-    }
-
-    void increaseIncline(){
-        if (incline < 10) {//Placeholder ???
-            shooterPower1 = 0.5;
-            shooterPower2 = 1.0;
-            shooterMotor1.setPower(shooterPower1);
-            shooterMotor2.setPower(shooterPower2);
-        }
-    }
-
-    void decreaseIncline(){
-        if (incline > 0) {
-            shooterPower1 = 1.0;
-            shooterPower2 = 0.5;
-            shooterMotor1.setPower(shooterPower1);
-            shooterMotor2.setPower(shooterPower2);
-        }
-    }
-
     void increaseArmAngle(){
         armAngle += 0.1;
         armServo.setPosition(armAngle);
-        incline += 0.1;
     }
 
     void decreaseArmAngle(){
         armAngle -= 0.1;
         armServo.setPosition(armAngle);
-        incline -= 0.1; //Also a placeholder
     }
 
-
-
-   /* //Calculates the speed of the shooter motor in ticks per second
-    double findShooterVelocity(){
-        //Finds the number of ticks since the last time we ran the function
-        DeltaShooterMotorTicks = (shooterMotor1.getCurrentPosition() - previousShooterMotorTicks);
-        previousShooterMotorTicks = shooterMotor1.getCurrentPosition();
-        CurrentElapsedTime = elapsedTime.seconds();
-        elapsedTime.reset();
-        return (DeltaShooterMotorTicks / CurrentElapsedTime);
+    void increaseIncline(){
+        shooterPower1 = 0.5;
+        shooterPower2 = 1.0;
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
     }
 
-    void adjustShooterVelocity(){
-        if (findShooterVelocity() > TargetMotorSpeed){
-            shooterPower -= 0.001;
-        } else {
-            shooterPower += 0.001;
-        }
-        shooterPower = Range.clip(shooterPower, 0, 1.0);
-        shooterMotor.setPower(shooterPower);
+    void decreaseIncline(){
+        shooterPower1 = 1.0;
+        shooterPower2 = 0.5;
+        shooterMotor1.setPower(shooterPower1);
+        shooterMotor2.setPower(shooterPower2);
     }
-    /*
 
-    */
+    /* //Calculates the speed of the shooter motor in ticks per second
+     double findShooterVelocity(){
+         //Finds the number of ticks since the last time we ran the function
+         DeltaShooterMotorTicks = (shooterMotor1.getCurrentPosition() - previousShooterMotorTicks);
+         previousShooterMotorTicks = shooterMotor1.getCurrentPosition();
+         CurrentElapsedTime = elapsedTime.seconds();
+         elapsedTime.reset();
+         return (DeltaShooterMotorTicks / CurrentElapsedTime);
+     }
+
+     void adjustShooterVelocity(){
+         if (findShooterVelocity() > TargetMotorSpeed){
+             shooterPower -= 0.001;
+         } else {
+             shooterPower += 0.001;
+         }
+         shooterPower = Range.clip(shooterPower, 0, 1.0);
+         shooterMotor.setPower(shooterPower);
+     }
+     /*
+
+     */
     //Resets the timer
     void resetElapsedTime() { elapsedTime.reset(); }
 
