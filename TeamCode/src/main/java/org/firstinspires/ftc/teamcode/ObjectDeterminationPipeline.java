@@ -30,7 +30,7 @@ public class    ObjectDeterminationPipeline extends OpenCvPipeline {
     }
 
     //This function is a WIP, still needs testing
-    public int[] getSquareCoordinates(Mat input, int squareNum) {
+    public int[] getSquareCoordinates(Mat input, int squareNum) {   
         Mat src = input;
         int squareX = 0;
         int squareY = 0;
