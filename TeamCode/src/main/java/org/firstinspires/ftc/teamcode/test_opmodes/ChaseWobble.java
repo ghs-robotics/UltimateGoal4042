@@ -19,17 +19,19 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
+
 @TeleOp
-public class ChaseTower extends LinearOpMode
+public class ChaseWobble extends LinearOpMode
 {
     Robot robot;
     Controller controller1;
-    int shots = 0;
 
     @Override
     public void runOpMode()
@@ -37,24 +39,13 @@ public class ChaseTower extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setTargetToWobble();
 
         waitForStart();
 
         while (opModeIsActive())
         {
-            robot.chaseTower();
-//            if (robot.elapsedTime.seconds() > 6 && shots < 3){
-//                robot.stopDrive();
-//                robot.toggleShooter();
-//                robot.wait(1.5);
-//                robot.launchRing();
-//                robot.wait(0.5);
-//                robot.launchRing();
-//                robot.wait(0.5);
-//                robot.launchRing();
-//                shots += 3;
-//                robot.toggleShooter();
-//            }
+            robot.chaseWobble();
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

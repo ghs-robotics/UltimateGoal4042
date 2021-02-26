@@ -19,16 +19,21 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
+
 @TeleOp
-public class ChaseRing extends LinearOpMode
+public class ChaseTower extends LinearOpMode
 {
     Robot robot;
     Controller controller1;
+    int stage = 1;
+    double t = 0;
 
     @Override
     public void runOpMode()
@@ -36,14 +41,43 @@ public class ChaseRing extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setTargetTo("ring");
+        robot.setTargetToTower();
 
         waitForStart();
 
-        while (opModeIsActive())
-        {
-            robot.chaseRing();
+        robot.setTargetToTower(95,80);
+        robot.updateObjectValues();
 
+        robot.adjustAndShoot();
+
+        while (opModeIsActive()) {
+//            if (stage == 1) {
+//                if (Math.abs(robot.targetWidth - robot.objectWidth) > 5
+//                        || Math.abs(robot.targetX - robot.objectX) > 5) {
+//                    robot.chaseTower();
+//                } else {
+//                    robot.toggleShooter();
+//                    t = robot.getElapsedTimeSeconds();
+//                    stage++;
+//                }
+//            }
+//
+//            if (stage == 2) {
+//                if ((robot.leftRearPower != 0
+//                        || robot.rightRearPower != 0
+//                        || robot.leftFrontPower != 0
+//                        || robot.rightFrontPower != 0)
+//                        && robot.elapsedTime.seconds() - t < 5) {
+//                    robot.chaseTower();
+//                } else {
+//                    robot.stopDrive();
+//                    for (int i = 0; i < 3; i++) {
+//                        robot.launchRing();
+//                    }
+//                    robot.toggleShooter();
+//                    stage++;
+//                }
+//            }
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
         }

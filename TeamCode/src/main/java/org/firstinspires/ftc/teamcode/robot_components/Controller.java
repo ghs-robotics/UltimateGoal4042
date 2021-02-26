@@ -1,34 +1,35 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-class Controller {
+
+public class Controller {
     Gamepad gamepad;
 
-    String a;
-    String b;
-    String x;
-    String y;
-    String dpad_right;
-    String dpad_up;
-    String dpad_left;
-    String dpad_down;
-    String back;
-    String guide;
-    String start;
-    String left_stick_button;
-    String right_stick_button;
-    String left_bumper;
-    String right_bumper;
+    public String a;
+    public String b;
+    public String x;
+    public String y;
+    public String dpad_right;
+    public String dpad_up;
+    public String dpad_left;
+    public String dpad_down;
+    public String back;
+    public String guide;
+    public String start;
+    public String left_stick_button;
+    public String right_stick_button;
+    public String left_bumper;
+    public String right_bumper;
 
-    double left_stick_x;
-    double left_stick_y;
-    double right_stick_x;
-    double right_stick_y;
-    double left_trigger;
-    double right_trigger;
+    public double left_stick_x;
+    public double left_stick_y;
+    public double right_stick_x;
+    public double right_stick_y;
+    public double left_trigger;
+    public double right_trigger;
 
-    Controller(Gamepad gamepad) {
+    public Controller(Gamepad gamepad) {
         this.gamepad = gamepad;
 
         a = "released";
@@ -55,7 +56,7 @@ class Controller {
         right_trigger = 0;
     }
 
-    void update() {
+    public void update() {
         a = check(a, gamepad.a);
         b = check(b, gamepad.b);
         x = check(x, gamepad.x);
@@ -86,7 +87,7 @@ class Controller {
         right_trigger = gamepad.right_trigger;
     }
 
-    String check(String previous, Boolean current) {
+    public String check(String previous, Boolean current) {
         String state;
         if (current) {
             if (previous.equals("released")) {
