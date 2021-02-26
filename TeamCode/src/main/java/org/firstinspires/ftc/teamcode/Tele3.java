@@ -61,7 +61,7 @@ public class Tele3 extends LinearOpMode
         madeIt("config identified");
 
         //Move forward 6-7 feet until at the edge of launch zone
-        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 25);
+        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
 
         madeIt("next to starter stack");
 
@@ -77,20 +77,20 @@ public class Tele3 extends LinearOpMode
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS, 15);
+            robot.moveToPos(CONFIG_0_POS, 3);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS, 15);
+            robot.moveToPos(CONFIG_1_POS, 3);
         } else {
-            robot.moveToPos(CONFIG_4_POS, 15);
+            robot.moveToPos(CONFIG_4_POS, 3);
         }
 
         madeIt("next to wobble goal drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(0.5);
+        robot.wait(1.0);
         robot.toggleGrab();
-        robot.wait(0.3);
+        robot.wait(0.5);
         robot.turnArm();
         robot.wait(0.1);
         robot.toggleGrab();
@@ -99,7 +99,7 @@ public class Tele3 extends LinearOpMode
 
         //Head back to location where we shot the rings
         //Move left or right and then backward towards second wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 20);
+        robot.moveToPos(SECOND_WOBBLE_POS, 5);
 
         madeIt("going for the second wobble goal");
 
@@ -109,16 +109,15 @@ public class Tele3 extends LinearOpMode
         madeIt("turned around");
 
         //pick up second wobble goal
-        robot.pickUpWobbleGoal(1.5);
+        robot.pickUpWobbleGoal(1.0);
         robot.targetAngle = 0;
 
         madeIt("picked up the second wobble goal");
 
-
         // if starterStack != 0, pickup the starter stack rings
         if (robot.config == 1) {
-            robot.moveToPos(STARTER_STACK_BEFORE_POS, 15);
-            robot.moveToPos(STARTER_STACK_AFTER_POS, 15);
+            robot.moveToPos(STARTER_STACK_BEFORE_POS, 8);
+            robot.moveToPos(STARTER_STACK_AFTER_POS, 8);
         }
 
         madeIt("gathered rings");
@@ -126,6 +125,7 @@ public class Tele3 extends LinearOpMode
 
         //Check that we're in shooting position
         //Shoot the 3 rings
+        robot.wait(0.01);
         robot.adjustAndShoot();
 
         madeIt("shot more rings");
@@ -133,29 +133,30 @@ public class Tele3 extends LinearOpMode
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
+        robot.wait(0.01);
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS, 15);
+            robot.moveToPos(CONFIG_0_POS, 3);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS, 15);
+            robot.moveToPos(CONFIG_1_POS, 3);
         } else {
-            robot.moveToPos(CONFIG_4_POS, 15);
+            robot.moveToPos(CONFIG_4_POS, 3);
         }
 
         madeIt("brought second wobble goal to drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(0.5);
+        robot.wait(0.51);
         robot.toggleGrab();
-        robot.wait(0.3);
-        robot.turnArm();
         robot.wait(0.1);
+        robot.turnArm();
+        robot.wait(0.4);
         robot.toggleGrab();
 
         madeIt("delivered the second wobble");
 
         //Move forward to park over launch line
-        robot.moveToPos(PARK_POS, 10);
+        robot.moveToPos(PARK_POS, 5);
 
 
         madeIt("parked");

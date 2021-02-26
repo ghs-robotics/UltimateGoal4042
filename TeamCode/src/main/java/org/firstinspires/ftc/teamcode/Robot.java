@@ -28,6 +28,7 @@ public class Robot {
     public static double cover = 0; // The fraction of the top part of the camera screen that is
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
+    boolean objectNotIdentified = false; // The program will know when the object isn't in view
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 95;
@@ -270,6 +271,10 @@ public class Robot {
 
         String t = currentTargetObject;
 
+        if (objectNotIdentified) {
+            telemetry.addData("ATTENTION: ", "OBJECT NOT IDENTIFIED");
+        }
+        
         if (t.equals("tower")) {
             telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
             telemetry.addData("towerY = ", objectY);
@@ -359,9 +364,12 @@ public class Robot {
         x = xPID.calcVal(targetX - objectX);
         y = -wPID.calcVal(targetWidth - objectWidth);
 
-        if (!(objectWidth > 60 && objectWidth < 220)) {
+        if (!(objectWidth > 40 && objectWidth < 230)) {
             x = 0;
             y = 0;
+            objectNotIdentified = true;
+        } else if (objectNotIdentified == true) {
+            objectNotIdentified = false;
         }
 
         chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
@@ -372,10 +380,12 @@ public class Robot {
     public void moveToPos(int[] pos, int tolerance) {
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         updateObjectValues();
-        while(Math.abs(targetWidth - objectWidth) > 5 || Math.abs(targetX - objectX) > 5) {
+        double t = getElapsedTimeSeconds();
+        while(Math.abs(targetWidth - objectWidth) > 5 || Math.abs(targetX - objectX) > 5
+                && elapsedTime.seconds() - t < 8) {
             chaseTower();
         }
-        double t = getElapsedTimeSeconds();
+        t = getElapsedTimeSeconds();
         while ((/*leftRearPower != 0
                 || rightRearPower != 0
                 || leftFrontPower != 0
@@ -391,10 +401,11 @@ public class Robot {
     // Makes the robot rotate to a certain angle
     public void rotateToPos(int angle, int tolerance) {
         targetAngle = angle;
-        while(Math.abs(targetAngle - gyro.getAngle()) > 5) {
+        double t = getElapsedTimeSeconds();
+        while(Math.abs(targetAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 8) {
             adjustAngle();
         }
-        double t = getElapsedTimeSeconds();
+        t = getElapsedTimeSeconds();
         while ((/*leftRearPower != 0
                 || rightRearPower != 0
                 || leftFrontPower != 0

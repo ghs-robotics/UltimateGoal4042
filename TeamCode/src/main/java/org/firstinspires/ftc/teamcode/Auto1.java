@@ -87,11 +87,10 @@ public class Auto1 extends LinearOpMode {
         madeIt("turned around");
 
         //pick up second wobble goal
-        robot.pickUpWobbleGoal(8);
+        robot.pickUpWobbleGoal(1.0);
         robot.targetAngle = 0;
 
         madeIt("picked up the second wobble goal");
-
 
         // if starterStack != 0, pickup the starter stack rings
         if (robot.config == 1) {
