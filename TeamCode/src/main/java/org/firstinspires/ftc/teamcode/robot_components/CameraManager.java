@@ -14,6 +14,8 @@ public class CameraManager {
     //public OpenCvInternalCamera phonecam;
     public OpenCvCamera phonecam;
     public OpenCvCamera webcam;
+
+    //current camera alternates between the phonecam and the webcam
     public OpenCvCamera currentCamera;
     public ObjectDeterminationPipeline pipeline;
 
@@ -34,6 +36,10 @@ public class CameraManager {
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class,"webcam"), viewportContainerIds[1]);
         phonecam.setPipeline(pipeline);
         webcam.setPipeline(pipeline);
+
+        //the phone camera is the default camera
+        currentCamera = phonecam;
+
     }
 
     //Initialize the camera
@@ -43,16 +49,6 @@ public class CameraManager {
         // landscape orientation, though.
         currentCamera.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         currentCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                startStreaming();
-            }
-        });
-    }
-
-    void initWebcam() {
-        webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
             public void onOpened() {
                 startStreaming();
