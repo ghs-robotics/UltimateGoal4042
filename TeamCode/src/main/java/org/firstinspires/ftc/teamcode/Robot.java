@@ -376,23 +376,22 @@ public class Robot {
 //        chaseObject(0, 0, 0);
     }
 
+    public void moveToPos(int[] pos) {
+        moveToPos(pos, 0.5);
+    }
+
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, int tolerance) {
+    public void moveToPos(int[] pos, double tolerance) {
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         updateObjectValues();
         double t = getElapsedTimeSeconds();
-        while(Math.abs(targetWidth - objectWidth) > 5 || Math.abs(targetX - objectX) > 5
-                && elapsedTime.seconds() - t < 8) {
+        while(Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8
+                && elapsedTime.seconds() - t < 5) {
             chaseTower();
         }
         t = getElapsedTimeSeconds();
-        while ((/*leftRearPower != 0
-                || rightRearPower != 0
-                || leftFrontPower != 0
-                || rightFrontPower != 0
-                || */Math.abs(targetWidth - objectWidth) > tolerance
-                || Math.abs(targetX - objectX) > tolerance)
-                && elapsedTime.seconds() - t < 3) {
+        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
+                || rightFrontPower != 0) && elapsedTime.seconds() - t < tolerance) {
             chaseTower();
         }
         //stopDrive();

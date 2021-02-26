@@ -145,6 +145,6 @@ public class Auto1 extends LinearOpMode {
     public void madeIt(String s) {
         robot.telemetry.addData("Made it! Status: ", s);
         robot.telemetry.update();
-        robot.wait(0.5);
+        robot.wait(0.0);
     }
 }
