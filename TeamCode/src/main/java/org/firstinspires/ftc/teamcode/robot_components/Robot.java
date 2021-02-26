@@ -28,6 +28,8 @@ public class Robot {
     public static double cover = 0; // The fraction of the top part of the camera screen that is
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
+    public CameraManager cameraManager;
+
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 95;
@@ -77,10 +79,6 @@ public class Robot {
     public PIDController wPID; // For the width of the tower goal
     public PIDController gyroPID; // Controls the angle
 
-    // CV objects
-    OpenCvInternalCamera phoneCam;
-    ObjectDeterminationPipeline pipeline;
-
     // Creates a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
         // These are the names to use in the phone config (in quotes below)
@@ -118,52 +116,28 @@ public class Robot {
         wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
 
-        // Initializing some CV variables/objects
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId",
-                "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        pipeline = new ObjectDeterminationPipeline();
-        phoneCam.setPipeline(pipeline);
+        cameraManager = new CameraManager(hardwareMap);
     }
 
     // To use at the start of each OpMode that uses CV
     public void init() {
         resetServos();
-        initCamera();
-    }
-
-    // Initializes the phone camera
-    public void initCamera() {
-        // Sets the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                startStreaming();
-            }
-        });
-    }
-
-    // Starts streaming frames on the phone camera
-    public void startStreaming() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-    }
-
-    // Stops streaming frames on the phone camera
-    public void stopStreaming() {
-        phoneCam.stopStreaming();
+        cameraManager.initCamera();
     }
 
     // Updates the coordinates of the object being detected on the screen
     public void updateObjectValues() {
+        int[] values = cameraManager.getObjectValues();
+        objectX = values[0];
+        objectY = values[1];
+        objectWidth = values[2];
+        objectHeight = values[3];
+        /* old code, using this for reference
         objectX = pipeline.objectX;
         objectY = pipeline.objectY;
         objectWidth = pipeline.objectWidth;
         objectHeight = pipeline.objectHeight;
+        */
     }
 
     // Switches the object that the robot is trying to detect to a ring
