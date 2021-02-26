@@ -104,10 +104,6 @@ public class Auto1 extends LinearOpMode {
 
         //Check that we're in shooting position
         //Shoot the 3 rings
-        robot.wait(0.01);
-        robot.adjustAndShoot();
-
-        madeIt("shot more rings");
 
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
@@ -133,6 +129,17 @@ public class Auto1 extends LinearOpMode {
         robot.toggleGrab();
 
         madeIt("delivered the second wobble");
+
+        if(robot.getElapsedTimeSeconds() <= 26) {
+
+            robot.wait(0.01);
+            robot.adjustAndShoot();
+            madeIt("shot more rings");
+        } else {
+            madeIt("Skipped shooting second ring set");
+        }
+
+
 
         //Move forward to park over launch line
         robot.moveToPos(PARK_POS, 5);
