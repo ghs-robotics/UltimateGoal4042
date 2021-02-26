@@ -12,11 +12,13 @@ import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 public class ObjectDeterminationPipeline extends OpenCvPipeline {
     public static final Scalar GREEN = new Scalar(0, 255, 0);
     public static final Scalar LOWER_SQUARE_HSV = new Scalar(0, 0, 0);
     public static final Scalar UPPER_SQUARE_HSV = new Scalar(255, 255, 255);
+
     public static final int SCREEN_HEIGHT = 240;
     public static final int SCREEN_WIDTH = 320;
 
@@ -61,16 +63,23 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
                 largest3 = rect;
             }
         }
+        Imgproc.rectangle(src, largest, GREEN, 5);
+        Imgproc.rectangle(src, largest2, GREEN, 5);
+        Imgproc.rectangle(src, largest3, GREEN, 5);
+        int x1 = largest.x; int x2 = largest2.x; int x3 = largest3.x;
+        int[] xVals = new int[]{x1,x2,x3};
+        Arrays.sort(xVals);
         if (squareNum == 0) {
-            squareX = largest.x;
-            squareY = largest.y;
+            squareX = (xVals[0] == largest.x) ? largest.x : (xVals[0] == largest2.x) ? largest2.x : largest3.x;
+            squareY = (xVals[0] == largest.x) ? largest.y : (xVals[0] == largest2.x) ? largest2.y : largest3.y;
         } else if (squareNum == 1) {
-            squareX = largest2.x;
-            squareY = largest2.y;
+            squareX = (xVals[1] == largest.x) ? largest.x : (xVals[1] == largest2.x) ? largest2.x : largest3.x;
+            squareY = (xVals[1] == largest.x) ? largest.y : (xVals[1] == largest2.x) ? largest2.y : largest3.y;
         } else {
-            squareX = largest3.x;
-            squareX = largest3.y;
+            squareX = (xVals[2] == largest.x) ? largest.x : (xVals[2] == largest2.x) ? largest2.x : largest3.x;
+            squareX = (xVals[2] == largest.x) ? largest.y : (xVals[2] == largest2.x) ? largest2.y : largest3.y;
         }
+        Imgproc.circle(src, new Point(squareX, squareY),50, GREEN,5);
 
         return new int[]{squareX, squareY};
     }
