@@ -377,7 +377,7 @@ public class Robot {
     }
 
     public void moveToPos(int[] pos) {
-        moveToPos(pos, 0.5);
+        moveToPos(pos, 1.0);
     }
 
     // Makes the robot move to a certain position relative to the tower goal

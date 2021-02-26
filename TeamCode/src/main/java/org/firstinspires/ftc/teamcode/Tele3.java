@@ -54,6 +54,8 @@ public class Tele3 extends LinearOpMode
 
         robot.updateObjectValues();
 
+        robot.resetElapsedTime();
+
         //Determine how many rings in the starting ring stacks
 //        robot.identifyRingConfig();
         robot.config = 1; // For testing purposes
@@ -61,7 +63,7 @@ public class Tele3 extends LinearOpMode
         madeIt("config identified");
 
         //Move forward 6-7 feet until at the edge of launch zone
-        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
+        robot.moveToPos(NEXT_TO_STARTER_STACK_POS);
 
         madeIt("next to starter stack");
 
@@ -72,25 +74,24 @@ public class Tele3 extends LinearOpMode
 
         madeIt("shot three goals");
 
-
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS, 3);
+            robot.moveToPos(CONFIG_0_POS);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS, 3);
+            robot.moveToPos(CONFIG_1_POS);
         } else {
-            robot.moveToPos(CONFIG_4_POS, 3);
+            robot.moveToPos(CONFIG_4_POS);
         }
 
         madeIt("next to wobble goal drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(1.0);
+        robot.wait(0.4);
         robot.toggleGrab();
-        robot.wait(0.5);
+        robot.wait(0.4);
         robot.turnArm();
         robot.wait(0.1);
         robot.toggleGrab();
@@ -99,7 +100,7 @@ public class Tele3 extends LinearOpMode
 
         //Head back to location where we shot the rings
         //Move left or right and then backward towards second wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 5);
+        robot.moveToPos(SECOND_WOBBLE_POS);
 
         madeIt("going for the second wobble goal");
 
@@ -116,8 +117,8 @@ public class Tele3 extends LinearOpMode
 
         // if starterStack != 0, pickup the starter stack rings
         if (robot.config == 1) {
-            robot.moveToPos(STARTER_STACK_BEFORE_POS, 8);
-            robot.moveToPos(STARTER_STACK_AFTER_POS, 8);
+            robot.moveToPos(STARTER_STACK_BEFORE_POS);
+            robot.moveToPos(STARTER_STACK_AFTER_POS);
         }
 
         madeIt("gathered rings");
@@ -125,38 +126,46 @@ public class Tele3 extends LinearOpMode
 
         //Check that we're in shooting position
         //Shoot the 3 rings
-        robot.wait(0.01);
-        robot.adjustAndShoot();
-
-        madeIt("shot more rings");
 
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         robot.wait(0.01);
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS, 3);
+            robot.moveToPos(CONFIG_0_POS);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS, 3);
+            robot.moveToPos(CONFIG_1_POS);
         } else {
-            robot.moveToPos(CONFIG_4_POS, 3);
+            robot.moveToPos(CONFIG_4_POS);
         }
 
         madeIt("brought second wobble goal to drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(0.51);
-        robot.toggleGrab();
-        robot.wait(0.1);
-        robot.turnArm();
         robot.wait(0.4);
+        robot.toggleGrab();
+        robot.wait(0.4);
+        robot.turnArm();
+        robot.wait(0.1);
         robot.toggleGrab();
 
         madeIt("delivered the second wobble");
 
+        if(robot.getElapsedTimeSeconds() <= 26) {
+
+            robot.wait(0.01);
+            robot.adjustAndShoot();
+            madeIt("shot more rings");
+        } else {
+            madeIt("Skipped shooting second ring set");
+        }
+
+
+
         //Move forward to park over launch line
-        robot.moveToPos(PARK_POS, 5);
+        robot.moveToPos(PARK_POS);
+        robot.stopDrive();
 
 
         madeIt("parked");
