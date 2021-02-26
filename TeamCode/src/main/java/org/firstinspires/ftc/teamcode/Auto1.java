@@ -31,6 +31,7 @@ public class Auto1 extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+        robot.resetElapsedTime();
 
         //Determine how many rings in the starting ring stacks
 //        robot.identifyRingConfig();
@@ -135,6 +136,7 @@ public class Auto1 extends LinearOpMode {
 
         //Move forward to park over launch line
         robot.moveToPos(PARK_POS, 5);
+        robot.stopDrive();
 
 
         madeIt("parked");
