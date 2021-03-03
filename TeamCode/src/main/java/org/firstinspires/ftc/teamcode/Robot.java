@@ -63,7 +63,8 @@ public class Robot {
     DcMotor leftRearDrive;
     DcMotor rightRearDrive;
     DcMotor shooterMotor;
-    DcMotor intakeMotor;
+    DcMotor intakeMotor1;
+    DcMotor intakeMotor2;
     Servo armServo;
     Servo grabServo;
     Servo shooterServo;
@@ -90,7 +91,8 @@ public class Robot {
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        intakeMotor1 = hardwareMap.get(DcMotor.class, "intakeMotor1");
+        intakeMotor2 = hardwareMap.get(DcMotor.class, "intakeMotor2")
         armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
         shooterServo = hardwareMap.get(Servo.class, "shooterServo");
@@ -101,7 +103,8 @@ public class Robot {
         leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
         rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
         shooterMotor.setDirection(DcMotor.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor1.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor2.setDirection(DcMotor.Direction.FORWARD);
         armServo.setDirection(Servo.Direction.FORWARD);
         grabServo.setDirection(Servo.Direction.FORWARD);
         shooterServo.setDirection(Servo.Direction.FORWARD);
@@ -479,11 +482,19 @@ public class Robot {
         shooterMotor.setPower(shooterPower);
     }
 
-    // Turns the intake motor on or off
-    public void toggleIntake() {
+    /* This is commented out because we're not sure
+    // Turns the intake motor 1 (large) on or off
+    public void toggleIntakeMotor1() {
         intakePower = (intakePower == 0 ? 1 : 0);
-        intakeMotor.setPower(intakePower);
+        intakeMotor1.setPower(intakePower);
     }
+
+    // Turns the intake motor 2 (transfer) on or off
+    public void toggleIntakeMotor2() {
+        intakePower = (intakePower == 0 ? 1 : 0);
+        intakeMotor2.setPower(intakePower);
+    }
+     */
 
     // Turns the arm
     public void turnArm() {

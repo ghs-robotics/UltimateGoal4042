@@ -87,10 +87,13 @@ public class Tele1 extends OpMode
             robot.launchRing();
         }
 
+        /* This is commented out because we're unsure
         //Press "y" to turn on/off the intake motor
         if (controller1.y.equals("pressing")) {
-            robot.toggleIntake();
+            robot.toggleIntakeMotor1();
+            robot.toggleIntakeMotor2();
         }
+         */
 
         //Press "b" to toggle the wobble gripper
         if (controller1.b.equals("pressing")) {
