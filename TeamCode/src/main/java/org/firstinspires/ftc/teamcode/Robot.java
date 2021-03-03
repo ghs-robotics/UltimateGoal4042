@@ -28,6 +28,7 @@ public class Robot {
     public static double cover = 0; // The fraction of the top part of the camera screen that is
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
+    boolean objectNotIdentified = false; // The program will know when the object isn't in view
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 95;
@@ -52,12 +53,9 @@ public class Robot {
     double grabAngle = 0.25; // Angle of 0.25 means closed
     double shooterAngle = 0.05;
     double speed = 1;
-    double previousShooterMotorTicks = 0;
-    double DeltaShooterMotorTicks = 0;
-    double CurrentElapsedTime = 0;
-    double TargetMotorSpeed = 1500;
-    public static boolean ShooterMotorPowered = false;
     double config = 0;
+
+    double previousShooterMotorTicks = 0;
     double previousElapsedTime = 0;
 
     DcMotor leftFrontDrive;
@@ -273,6 +271,10 @@ public class Robot {
 
         String t = currentTargetObject;
 
+        if (objectNotIdentified) {
+            telemetry.addData("ATTENTION: ", "OBJECT NOT IDENTIFIED");
+        }
+
         if (t.equals("tower")) {
             telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
             telemetry.addData("towerY = ", objectY);
@@ -362,50 +364,59 @@ public class Robot {
         x = xPID.calcVal(targetX - objectX);
         y = -wPID.calcVal(targetWidth - objectWidth);
 
-        if (!(objectWidth > 60 && objectWidth < 220)) {
+        if (!(objectWidth > 40 && objectWidth < 230)) {
             x = 0;
             y = 0;
+            objectNotIdentified = true;
+        } else if (objectNotIdentified == true) {
+            objectNotIdentified = false;
         }
 
         chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
 //        chaseObject(0, 0, 0);
     }
 
+    public void moveToPos(int[] pos) {
+        moveToPos(pos, 1.0);
+    }
+
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, int tolerance) {
+    public void moveToPos(int[] pos, double tolerance) {
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         updateObjectValues();
         while(Math.abs(targetWidth - objectWidth) > 5 || Math.abs(targetX - objectX) > 5) {
             chaseTower();
         }
         double t = getElapsedTimeSeconds();
-        while ((leftRearPower != 0
-                || rightRearPower != 0
-                || leftFrontPower != 0
-                || rightFrontPower != 0
-                || Math.abs(targetWidth - objectWidth) > tolerance
-                || Math.abs(targetX - objectX) > tolerance)
-                && elapsedTime.seconds() - t < 3) {
+        while(Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8
+                && elapsedTime.seconds() - t < 5) {
             chaseTower();
         }
-        stopDrive();
+        t = getElapsedTimeSeconds();
+        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
+                || rightFrontPower != 0) && elapsedTime.seconds() - t < tolerance) {
+            chaseTower();
+        }
+        //stopDrive();
     }
 
     // Makes the robot rotate to a certain angle
     public void rotateToPos(int angle, int tolerance) {
-        while(Math.abs(targetAngle - gyro.getAngle()) > 5) {
+        targetAngle = angle;
+        double t = getElapsedTimeSeconds();
+        while(Math.abs(targetAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 8) {
             adjustAngle();
         }
-        double t = getElapsedTimeSeconds();
-        while ((leftRearPower != 0
+        t = getElapsedTimeSeconds();
+        while ((/*leftRearPower != 0
                 || rightRearPower != 0
                 || leftFrontPower != 0
                 || rightFrontPower != 0
-                || Math.abs(targetAngle - gyro.getAngle()) > tolerance)
+                || */Math.abs(targetAngle - gyro.getAngle()) > tolerance)
                 && elapsedTime.seconds() - t < 3) {
             adjustAngle();
         }
-        stopDrive();
+        //stopDrive();
     }
 
     // Makes the robot line up with the tower goal and shoot three rings
@@ -513,15 +524,12 @@ public class Robot {
     }
 
     // Makes robot move forward and pick up wobble goal
-    public void pickUpWobbleGoal(double distance) {
-        double motorPower = -0.4 * (distance / Math.abs(distance));
-        double moveTime = distance / 15.0;
+    public void pickUpWobbleGoal(double sec) {
         turnArm();
         toggleGrab();
-        calculateDrivePowers(0, motorPower, 0);
-        wait(0.6);
+        calculateDrivePowers(0,-0.4,0);
         sendDrivePowers();
-        wait(moveTime);
+        wait(sec); //Adjust this later
         stopDrive();
         toggleGrab();
         wait(0.6);

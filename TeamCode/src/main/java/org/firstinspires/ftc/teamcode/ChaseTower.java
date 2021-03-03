@@ -29,8 +29,6 @@ public class ChaseTower extends LinearOpMode
 {
     Robot robot;
     Controller controller1;
-    int stage = 1;
-    double t = 0;
 
     @Override
     public void runOpMode()
@@ -38,46 +36,12 @@ public class ChaseTower extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setTargetToTower();
 
         waitForStart();
 
         robot.setTargetToTower(95,80);
         robot.updateObjectValues();
-
         robot.adjustAndShoot();
-
-        while (opModeIsActive()) {
-//            if (stage == 1) {
-//                if (Math.abs(robot.targetWidth - robot.objectWidth) > 5
-//                        || Math.abs(robot.targetX - robot.objectX) > 5) {
-//                    robot.chaseTower();
-//                } else {
-//                    robot.toggleShooter();
-//                    t = robot.getElapsedTimeSeconds();
-//                    stage++;
-//                }
-//            }
-//
-//            if (stage == 2) {
-//                if ((robot.leftRearPower != 0
-//                        || robot.rightRearPower != 0
-//                        || robot.leftFrontPower != 0
-//                        || robot.rightFrontPower != 0)
-//                        && robot.elapsedTime.seconds() - t < 5) {
-//                    robot.chaseTower();
-//                } else {
-//                    robot.stopDrive();
-//                    for (int i = 0; i < 3; i++) {
-//                        robot.launchRing();
-//                    }
-//                    robot.toggleShooter();
-//                    stage++;
-//                }
-//            }
-            // Don't burn CPU cycles busy-looping in this sample
-            sleep(50);
-        }
     }
 
 }

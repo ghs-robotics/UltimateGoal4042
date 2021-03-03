@@ -76,7 +76,6 @@ public class Tele1 extends OpMode
                 controller1.right_stick_x
         );
         robot.updateDrive();
-        //Eli's Branch
 
         //Press left bumper to turn on/off the shooter motor
         if (controller1.left_bumper.equals("pressing")) {
@@ -86,15 +85,6 @@ public class Tele1 extends OpMode
         //Press right bumper to launch a ring
         if (controller1.right_bumper.equals("pressing")) {
             robot.launchRing();
-        }
-
-        //Press dpad right to pick up (already lined up) wobble goal
-        if (controller1.dpad_right.equals("pressing")) {
-            robot.calculateDrivePowers(0,-0.4,0);
-            robot.sendDrivePowers();
-            robot.wait(2.0);
-            robot.stopDrive();
-            //robot.pickUpWobbleGoal(160);
         }
 
         //Press "y" to turn on/off the intake motor
@@ -113,10 +103,10 @@ public class Tele1 extends OpMode
         }
 
         if (controller1.dpad_up.equals("pressing")) {
-            robot.increaseArmAngle();
+            robot.rotateToPos(0, 3);
         }
         if (controller1.dpad_down.equals("pressing")) {
-            robot.decreaseArmAngle();
+            robot.rotateToPos(180, 3);
         }
     }
 
