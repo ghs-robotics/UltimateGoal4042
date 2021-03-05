@@ -37,7 +37,7 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         System.out.println("x: " + coordinates[0] + ", y: " + coordinates[1]);
     }
 
-    public static int[] getSquareCoordinatesNew(Mat input, int squareNum) {
+    public static int[] getSquareCoordinatesMat input, int squareNum) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         Scalar LOWER_SQUARE_HSV = new Scalar(0,0,98);
@@ -94,64 +94,6 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         Imgproc.circle(origial, new Point(x + w/2, y + h/2),50, BLUE,5);
 
         return new int[]{pickedRect.x, pickedRect.y};
-    }
-
-    //This function is a WIP, still needs testing
-    public static int[] getSquareCoordinatesOld(Mat input, int squareNum) {
-        Mat src = input;
-        int squareX = 0;
-        int squareY = 0;
-        //Make the image easier to read
-        Imgproc.resize(src, src, new Size(320, 240));
-        Imgproc.GaussianBlur(src, src, new Size(5, 5), 80, 80);
-        Core.inRange(src, LOWER_SQUARE_HSV, UPPER_SQUARE_HSV, src);
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(src, src, kernel);
-
-        //Find object contours for the square
-        List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        //Find the largest contours in the image
-        Rect largest = new Rect();
-        Rect largest2 = new Rect();
-        Rect largest3 = new Rect();
-
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (largest.area() < rect.area()) {
-                largest3 = largest2;
-                largest2 = largest;
-                largest = rect;
-            } else if (largest2.area() < rect.area()) {
-                largest3 = largest2;
-                largest2 = rect;
-            } else if (largest3.area() < rect.area()) {
-                largest3 = rect;
-            }
-        } 0 14 0 135 98 242
-        Imgproc.rectangle(src, largest, GREEN, 5);
-        Imgproc.rectangle(src, largest2, GREEN, 5);
-        Imgproc.rectangle(src, largest3, GREEN, 5);
-        int x1 = largest.x; int x2 = largest2.x; int x3 = largest3.x;
-        int[] xVals = new int[]{x1,x2,x3};
-        Arrays.sort(xVals);
-        Rect pickedRect = xVals[SQUARE_A] == largest.x ? largest : xVals[SQUARE_B] == largest2.x ? largest2 : largest3;
-
-        if (squareNum == 0) {
-            squareX = (xVals[0] == largest.x) ? largest.x : (xVals[0] == largest2.x) ? largest2.x : largest3.x;
-            squareY = (xVals[0] == largest.x) ? largest.y : (xVals[0] == largest2.x) ? largest2.y : largest3.y;
-        } else if (squareNum == 1) {
-            squareX = (xVals[1] == largest.x) ? largest.x : (xVals[1] == largest2.x) ? largest2.x : largest3.x;
-            squareY = (xVals[1] == largest.x) ? largest.y : (xVals[1] == largest2.x) ? largest2.y : largest3.y;
-        } else {
-            squareX = (xVals[2] == largest.x) ? largest.x : (xVals[2] == largest2.x) ? largest2.x : largest3.x;
-            squareX = (xVals[2] == largest.x) ? largest.y : (xVals[2] == largest2.x) ? largest2.y : largest3.y;
-        }
-        Imgproc.circle(src, new Point(squareX, squareY),50, GREEN,5);
-
-        return new int[]{squareX, squareY};
     }
 
     @Override
