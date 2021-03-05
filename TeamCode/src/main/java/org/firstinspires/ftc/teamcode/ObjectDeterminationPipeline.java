@@ -37,32 +37,29 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         System.out.println("x: " + coordinates[0] + ", y: " + coordinates[1]); */
     }
 
-    public static int[] getSquareCoordinatesMat (input, int squareNum) {
+    public static int[] getSquareCoordinatesMat ( Mat input, int squareNum) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
+        //we need to find the hsv values for the actual squares
+        //right now we just have placeholders
         Scalar LOWER_SQUARE_HSV = new Scalar(0,0,98);
         Scalar UPPER_SQUARE_HSV = new Scalar(14,135,242);
 
-        Mat origial = Imgcodecs.imread(path);
-        Mat src = Imgcodecs.imread(path);
-
-        Imgproc.cvtColor(src, src, Imgproc.COLOR_RGB2HSV);
+        Imgproc.cvtColor(input, input, Imgproc.COLOR_RGB2HSV);
         Scalar GREEN = new Scalar(0,255,0);
         Scalar RED = new Scalar(0,0,255);
         Scalar BLUE = new Scalar(255,0,0);
 
         //Make the image easier to read
-        Imgproc.resize(src, src, new Size(WIDTH, HEIGHT));
-        Imgproc.resize(origial, origial, new Size(WIDTH, HEIGHT));
-        Imgproc.GaussianBlur(src, src, new Size(5, 5), 80, 80);
-        Core.inRange(src, LOWER_SQUARE_HSV, UPPER_SQUARE_HSV, src);
+        Imgproc.GaussianBlur(input, input, new Size(5, 5), 80, 80);
+        Core.inRange(input, LOWER_SQUARE_HSV, UPPER_SQUARE_HSV, input);
         Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(src, src, kernel);
+        Imgproc.dilate(input, input, kernel);
 
         //Find object contours for the square
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(input, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         //Find the largest contours in the image
         ArrayList<Rect> rects = new ArrayList<>();
@@ -88,10 +85,10 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
         int w = pickedRect.width, h = pickedRect.height, x = pickedRect.x, y = pickedRect.y;
 
-        Imgproc.rectangle(origial, rects.get(0), RED, 5);
-        Imgproc.rectangle(origial, rects.get(1), RED, 5);
-        Imgproc.rectangle(origial, rects.get(2), RED, 5);
-        Imgproc.circle(origial, new Point(x + w/2, y + h/2),50, BLUE,5);
+        Imgproc.rectangle(input, rects.get(0), RED, 5);
+        Imgproc.rectangle(input, rects.get(1), RED, 5);
+        Imgproc.rectangle(input, rects.get(2), RED, 5);
+        Imgproc.circle(input, new Point(x + w/2, y + h/2),50, BLUE,5);
 
         return new int[]{pickedRect.x, pickedRect.y};
     }
