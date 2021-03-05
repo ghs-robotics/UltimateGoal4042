@@ -30,14 +30,14 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
     @Override
     public void init(Mat firstFrame) {
-        String file = "D:/Downloads/BenImages/TapeLeft.jpeg";
+        /*String file = "D:/Downloads/BenImages/TapeLeft.jpeg";
         Imgcodecs imageCodecs = new Imgcodecs();
         Mat image = Imgcodecs.imread(file);
         int[] coordinates = getSquareCoordinates(image, 0);
-        System.out.println("x: " + coordinates[0] + ", y: " + coordinates[1]);
+        System.out.println("x: " + coordinates[0] + ", y: " + coordinates[1]); */
     }
 
-    public static int[] getSquareCoordinatesMat input, int squareNum) {
+    public static int[] getSquareCoordinatesMat (input, int squareNum) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         Scalar LOWER_SQUARE_HSV = new Scalar(0,0,98);
