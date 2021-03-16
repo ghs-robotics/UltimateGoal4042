@@ -76,7 +76,6 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         return new int[]{largest.x, largest.y, largest.width, largest.height};
     }
 
-
     // Detects the position of the target object on the screen and returns an array with those values
     public static int[] getObjectCoordinates2(Mat src) {
         Scalar GREEN = new Scalar(0, 255, 0);
@@ -88,7 +87,7 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         //creates rectangle
         Imgproc.rectangle(src, new Point(0, 0), new Point(320, (int) (Robot.cover * 240)), GREEN, -1);
 
-        //convert color from RGB to HSV
+        //convert color from BGR to HSV
         Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
         //create Gaussian blur on image
         Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
