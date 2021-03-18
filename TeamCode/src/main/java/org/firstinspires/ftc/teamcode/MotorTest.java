@@ -64,18 +64,27 @@ public class MotorTest extends OpMode
         //Registers controller input
         controller1.update();
 
-        // leftDiffy
-        if (controller1.x.equals("pressing")) {
-            robot.diffy.leftDiffyPower = (robot.diffy.leftDiffyPower == 0 ? 1 : 0);
-            robot.diffy.sendPowers();
+        // shooter Servo: 0.58 (regular back) to 0.46 (forward)
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.shooterAngle += 0.02;
+            robot.shooterServo.setPosition(robot.shooterAngle);
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.shooterAngle -= 0.02;
+            robot.shooterServo.setPosition(robot.shooterAngle);
         }
 
-        // rightDiffy
-        if (controller1.y.equals("pressing")) {
-            robot.diffy.rightDiffyPower = (robot.diffy.rightDiffyPower == 0 ? 1 : 0);
-            robot.diffy.sendPowers();
+        // grab Servo: 0.15 (closed) to 0.48 (open)
+        if (controller1.dpad_right.equals("pressing")) {
+            robot.grabAngle += 0.02;
+            robot.grabServo.setPosition(robot.grabAngle);
+        }
+        if (controller1.dpad_left.equals("pressing")) {
+            robot.grabAngle -= 0.02;
+            robot.grabServo.setPosition(robot.grabAngle);
         }
 
+        robot.updateDrive();
     }
 
     //Code to run ONCE after the driver hits STOP

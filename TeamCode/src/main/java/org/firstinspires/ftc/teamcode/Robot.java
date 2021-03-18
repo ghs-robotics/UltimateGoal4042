@@ -48,9 +48,9 @@ public class Robot {
     double leftRearPower = 0;
     double rightRearPower = 0;
     double intakePower = 0;
-    double armAngle = 0.5; // Up position
-    double grabAngle = 0.25; // Angle of 0.25 means closed
-    double shooterAngle = 0.05;
+    double armAngle = 0.45; // Up position
+    double grabAngle = 0.15; // Closed position
+    double shooterAngle = 0.58; // Back (regular) position
     double speed = 1;
     double config = 0;
 
@@ -267,8 +267,8 @@ public class Robot {
         telemetry.addData("RF", "" + rightFrontPower);
         telemetry.addData("LR", "" + leftRearPower);
         telemetry.addData("RR", "" + rightRearPower);
-        telemetry.addData("armServo", "" + armAngle);
-        telemetry.addData("grabServo", "" + grabAngle);
+        telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
+        telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
         telemetry.addData("shooterAngle", "" + shooterAngle);
         telemetry.addData("angle", "" + gyro.getAngle());
         telemetry.addData("config: ", "" + config);
@@ -459,7 +459,7 @@ public class Robot {
     }
 
     // Turns the shooter motor on or off
-    public void toggleShooter() { diffy.toggleShooter(); }
+    public void toggleShooter() { diffy.toggleShooter(0); }
 
     // Turns the intake motor on or off
     public void toggleIntake() {
@@ -470,36 +470,24 @@ public class Robot {
     // Turns the arm
     public void turnArm() {
         // Default angle is 0.5 (which is the up position)
-        armAngle = (armAngle == 0.88 ? 0.5 : 0.88);
+        armAngle = (armAngle == 0.88 ? 0.45 : 0.88);
         armServo.setPosition(armAngle);
     }
 
     // Toggles the wobble gripper
     public void toggleGrab() {
-        // Default angle is 0.25, which means the gripper is closed
-        grabAngle = (grabAngle == 0.25 ? 0 : 0.25);
+        // Default angle is 0.15 (which means the gripper is closed)
+        grabAngle = (grabAngle == 0.48 ? 0.15 : 0.48);
         grabServo.setPosition(grabAngle);
     }
 
     // Launches a ring by moving the shooterServo
     public void launchRing() {
-        shooterAngle = 0.25;
+        shooterAngle = 0.46; // Forward position
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
-        shooterAngle = 0.05;
+        shooterAngle = 0.58; // Back position
         shooterServo.setPosition(shooterAngle);
-    }
-
-    // TODO: FOR TESTING PURPOSES ONLY
-    public void increaseArmAngle() {
-        armAngle += 0.1;
-        armServo.setPosition(armAngle);
-    }
-
-    // TODO: FOR TESTING PURPOSES ONLY
-    public void decreaseArmAngle() {
-        armAngle -= 0.1;
-        armServo.setPosition(armAngle);
     }
 
     // Makes robot move forward and pick up wobble goal
@@ -516,7 +504,7 @@ public class Robot {
     }
 
     // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
-    void identifyRingConfig() {
+    public void identifyRingConfig() {
         setTargetToRing();
         updateObjectValues();
         if (!(objectWidth == 0)) {
@@ -525,17 +513,17 @@ public class Robot {
     }
 
     // Resets the timer
-    void resetElapsedTime() {
+    public void resetElapsedTime() {
         elapsedTime.reset();
     }
 
     // Returns how many seconds have passed since the timer was last reset
-    double getElapsedTimeSeconds() {
+    public double getElapsedTimeSeconds() {
         return elapsedTime.seconds();
     }
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds
-    void wait(double seconds) {
+    public void wait(double seconds) {
         double start = getElapsedTimeSeconds();
         while (getElapsedTimeSeconds() - start < seconds) {}
     }

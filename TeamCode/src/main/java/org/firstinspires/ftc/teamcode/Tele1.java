@@ -103,10 +103,14 @@ public class Tele1 extends OpMode
         }
 
         if (controller1.dpad_up.equals("pressing")) {
-            robot.rotateToPos(0, 3);
+            robot.diffy.leftDiffyPower += 0.05;
+            robot.diffy.rightDiffyPower += 0.05;
+            robot.diffy.sendPowers();
         }
         if (controller1.dpad_down.equals("pressing")) {
-            robot.rotateToPos(180, 3);
+            robot.diffy.leftDiffyPower -= 0.05;
+            robot.diffy.rightDiffyPower -= 0.05;
+            robot.diffy.sendPowers();
         }
     }
 

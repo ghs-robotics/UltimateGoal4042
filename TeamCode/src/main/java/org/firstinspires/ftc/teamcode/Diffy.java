@@ -40,10 +40,10 @@ public class Diffy {
     }
 
     // Fires ring
-    public void toggleShooter() {
+    public void toggleShooter(double power) {
         elapsedTime.reset(); // TODO : Ask Kenny why we need this line
-        leftDiffyPower = (leftDiffyPower == 0 ? 0.3 : 0); //TODO: Change back to 1.0
-        rightDiffyPower = (rightDiffyPower == 0 ? 0.3 : 0);
+        leftDiffyPower = power; //TODO: Change back to 1.0
+        rightDiffyPower = power;
         shooterMotorPowered = !shooterMotorPowered;
         sendPowers();
     }
