@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -29,6 +29,8 @@ public class Robot {
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
     boolean objectNotIdentified = false; // The program will know when the object isn't in view
+    public CameraManager cameraManager;
+
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 95;
@@ -73,14 +75,10 @@ public class Robot {
     Telemetry telemetry;
 
     // PID controllers
-    PIDController xPID; // For the x-position of the robot
-    PIDController yPID; // For the y-position of the robot
-    PIDController wPID; // For the width of the tower goal
-    PIDController gyroPID; // Controls the angle
-
-    // CV objects
-    OpenCvInternalCamera phoneCam;
-    ObjectDeterminationPipeline pipeline;
+    public PIDController xPID; // For the x-position of the robot
+    public PIDController yPID; // For the y-position of the robot
+    public PIDController wPID; // For the width of the tower goal
+    public PIDController gyroPID; // Controls the angle
 
 //    HardwareMap h; // TODO : get rid of this
 
@@ -122,14 +120,7 @@ public class Robot {
         wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
 
-        // Initializing some CV variables/objects
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId",
-                "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        pipeline = new ObjectDeterminationPipeline();
-        phoneCam.setPipeline(pipeline);
+        cameraManager = new CameraManager(hardwareMap);
     }
 
 //    public void swap() {// TODO : get rid of this
@@ -147,39 +138,22 @@ public class Robot {
     // To use at the start of each OpMode that uses CV
     public void init() {
         resetServos();
-        initCamera();
-    }
-
-    // Initializes the phone camera
-    public void initCamera() {
-        // Sets the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                startStreaming();
-            }
-        });
-    }
-
-    // Starts streaming frames on the phone camera
-    public void startStreaming() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-    }
-
-    // Stops streaming frames on the phone camera
-    public void stopStreaming() {
-        phoneCam.stopStreaming();
+        cameraManager.initCamera();
     }
 
     // Updates the coordinates of the object being detected on the screen
     public void updateObjectValues() {
+        int[] values = cameraManager.getObjectValues();
+        objectX = values[0];
+        objectY = values[1];
+        objectWidth = values[2];
+        objectHeight = values[3];
+        /* old code, using this for reference
         objectX = pipeline.objectX;
         objectY = pipeline.objectY;
         objectWidth = pipeline.objectWidth;
         objectHeight = pipeline.objectHeight;
+        */
     }
 
     // Switches the object that the robot is trying to detect to a ring
@@ -292,7 +266,7 @@ public class Robot {
         if (objectNotIdentified) {
             telemetry.addData("ATTENTION: ", "OBJECT NOT IDENTIFIED");
         }
-        
+
         if (t.equals("tower")) {
             telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
             telemetry.addData("towerY = ", objectY);

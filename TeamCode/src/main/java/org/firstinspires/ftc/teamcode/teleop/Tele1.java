@@ -27,36 +27,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// THIS CLASS IS FOR TESTING PURPOSES!!
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
-@TeleOp(name="Tele2", group="Iterative Opmode")
-public class Tele2 extends OpMode {
+@TeleOp(name="Tele1", group="Iterative Opmode")
+public class Tele1 extends OpMode
+{
     //Declare OpMode members
     Robot robot;
     Controller controller1;
     //Controller controller2;
-    String target = "none";
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.init();
-        robot.setTargetToTower();
+        robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {
-    }
+    public void init_loop() {}
 
     //Code to run ONCE when the driver hits PLAY
     @Override
@@ -68,11 +67,10 @@ public class Tele2 extends OpMode {
         //Registers controller input
         controller1.update();
 
-        //Press left bumper to turn on/off the shooter motor
-//        if (controller1.left_bumper.equals("pressing")) { robot.toggleShooter(); }
-
-        //Press right bumper to launch a ring
-//        if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
+        //Press "x" to toggle speed between 100% and 30%
+        if (controller1.x.equals("pressing")) {
+            robot.toggleSpeed();
+        }
 
         //Mecanum wheel drive
         robot.calculateDrivePowers(
@@ -80,51 +78,46 @@ public class Tele2 extends OpMode {
                 controller1.left_stick_y,
                 controller1.right_stick_x
         );
+        robot.updateDrive();
 
-        if (target.equals("none")){ robot.updateDrive(); }
-
-        if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
-
-        if (controller1.a.equals("pressing"))
-        {
-            stream();
-            target = "ring";
-            robot.setTargetToRing();
+        //Press left bumper to turn on/off the shooter motor
+        if (controller1.left_bumper.equals("pressing")) {
+            robot.toggleShooter();
         }
 
-        if (controller1.y.equals("pressing"))
-        {
-            stream();
-            target = "tower";
-            robot.setTargetToTower();
+        //Press right bumper to launch a ring
+        if (controller1.right_bumper.equals("pressing")) {
+            robot.launchRing();
         }
 
-        if (controller1.b.equals("pressing"))
-        {
-            stream();
-            target = "tower";
-            robot.setTargetToTower(95, 80);
-            robot.moveToPos(new int[]{95, 80},5);
+        //Press "y" to turn on/off the intake motor
+        if (controller1.y.equals("pressing")) {
+            robot.toggleIntake();
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.001; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.001; }
+        //Press "b" to toggle the wobble gripper
+        if (controller1.b.equals("pressing")) {
+            robot.toggleGrab();
+        }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0001; }
+        //Press "a" to turn the arm
+        if (controller1.a.equals("pressing")) {
+            robot.turnArm();
+        }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0001; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0001; }
-
-        if(target.equals("ring")){ robot.chaseRing(); }
-        if(target.equals("angle")){ robot.adjustAngle(); }
-        if(target.equals("tower")){ robot.chaseTower(); }
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.diffy.leftDiffyPower += 0.05;
+            robot.diffy.rightDiffyPower += 0.05;
+            robot.diffy.sendPowers();
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.diffy.leftDiffyPower -= 0.05;
+            robot.diffy.rightDiffyPower -= 0.05;
+            robot.diffy.sendPowers();
+        }
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){
-    }
-
-    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.startStreaming(); } }
+    public void stop(){}
 }

@@ -1,7 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 /**
  * This will be the main class that we will put all of our autonomous code into
