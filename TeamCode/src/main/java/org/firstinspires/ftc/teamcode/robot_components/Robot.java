@@ -8,10 +8,6 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Scalar;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 
 public class Robot {
     // HSV constants
@@ -28,51 +24,50 @@ public class Robot {
     public static double cover = 0; // The fraction of the top part of the camera screen that is
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
-    boolean objectNotIdentified = false; // The program will know when the object isn't in view
+    private boolean objectNotIdentified = false; // The program will know when the object isn't in view
     public CameraManager cameraManager;
 
-    int targetX = 100;
-    int targetY = 140;
-    int targetWidth = 95;
-    int objectX = 0;
-    int objectY = 0;
-    int objectWidth = 0;
-    int objectHeight = 0;
-    double x = 0;
-    double y = 0;
-    double targetAngle = 0; // gyroscope will target this angle
+    private int targetX = 100;
+    private int targetY = 140;
+    private int targetWidth = 95;
+    private int objectX = 0;
+    private int objectY = 0;
+    private int objectWidth = 0;
+    private int objectHeight = 0;
+    private double x = 0;
+    private double y = 0;
+    public double targetAngle = 0; // gyroscope will target this angle
 
-    String currentTargetObject = "ring";
+    private String currentTargetObject = "ring";
 
     // Robot variables and objects
-    double leftFrontPower = 0;
-    double rightFrontPower = 0;
-    double leftRearPower = 0;
-    double rightRearPower = 0;
-    double intakePower = 0;
-    double armAngle = 0.45; // Up position
-    double grabAngle = 0.15; // Closed position
-    double shooterAngle = 0.58; // Back (regular) position
-    double speed = 1;
-    double config = 0;
+    private double leftFrontPower = 0;
+    private double rightFrontPower = 0;
+    private double leftRearPower = 0;
+    private double rightRearPower = 0;
+    private double intakePower = 0;
+    public double armAngle = 0.45; // Up position
+    public double grabAngle = 0.15; // Closed position
+    public double shooterAngle = 0.58; // Back (regular) position
+    public double speed = 1;
+    public double config = 0;
 
-    double previousShooterMotorTicks = 0;
-    double previousElapsedTime = 0;
+    HardwareMap hardwareMap; // TODO : get rid of this
 
-    DcMotor leftFrontDrive;
-    DcMotor rightFrontDrive;
-    DcMotor leftRearDrive;
-    DcMotor rightRearDrive;
-    DcMotor intakeMotor;
-    Servo armServo;
-    Servo grabServo;
-    Servo shooterServo;
+    public DcMotor leftFrontDrive;
+    public DcMotor rightFrontDrive;
+    public DcMotor leftRearDrive;
+    public DcMotor rightRearDrive;
+    public DcMotor intakeMotor;
+    public Servo armServo;
+    public Servo grabServo;
+    public Servo shooterServo;
 
-    Diffy diffy;
+    public Diffy diffy;
 
-    ElapsedTime elapsedTime;
-    Gyro gyro;
-    Telemetry telemetry;
+    public ElapsedTime elapsedTime;
+    public Gyro gyro;
+    public Telemetry telemetry;
 
     // PID controllers
     public PIDController xPID; // For the x-position of the robot
@@ -80,11 +75,9 @@ public class Robot {
     public PIDController wPID; // For the width of the tower goal
     public PIDController gyroPID; // Controls the angle
 
-//    HardwareMap h; // TODO : get rid of this
-
     // Creates a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
-//        h = hardwareMap;// TODO : get rid of this
+        this.hardwareMap = hardwareMap;// TODO : get rid of this
 
         // These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
@@ -237,10 +230,7 @@ public class Robot {
     // Updates the powers being sent to the drive motors
     public void updateDrive() {
         //Displays motor powers on the phone
-        telemetry.addData("LF", "" + leftFrontPower);
-        telemetry.addData("RF", "" + rightFrontPower);
-        telemetry.addData("LR", "" + leftRearPower);
-        telemetry.addData("RR", "" + rightRearPower);
+        telemetry.addData("encoderPos", "" + diffy.position());
         telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
         telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
         telemetry.addData("shooterAngle", "" + shooterAngle);

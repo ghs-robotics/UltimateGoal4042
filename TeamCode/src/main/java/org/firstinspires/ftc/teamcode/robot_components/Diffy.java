@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -6,14 +6,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Diffy {
     public static boolean shooterMotorPowered = false;
-    double leftDiffyPower = 0;
-    double rightDiffyPower = 0;
-    double k = 1; //k is a constant for smth ask imants abt diffy
+    public double leftDiffyPower = 0;
+    public double rightDiffyPower = 0;
+    public double k = 1; //k is a constant for smth ask imants abt diffy
 
-    DcMotor leftDiffyMotor;
-    DcMotor rightDiffyMotor;
+    public DcMotor leftDiffyMotor;
+    public DcMotor rightDiffyMotor;
+    public DcMotor encoder;
 
-    ElapsedTime elapsedTime;
+    private ElapsedTime elapsedTime;
 
     public Diffy(HardwareMap hardwareMap) {
         leftDiffyMotor = hardwareMap.get(DcMotor.class, "leftDiffyMotor");
@@ -58,6 +59,10 @@ public class Diffy {
         leftDiffyPower = 1.0;
         rightDiffyPower = 0.5;
         sendPowers();
+    }
+
+    public double position() {
+        return encoder.getCurrentPosition();
     }
 
     /*

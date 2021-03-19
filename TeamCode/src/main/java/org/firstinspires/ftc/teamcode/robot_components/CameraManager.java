@@ -58,7 +58,7 @@ public class CameraManager {
 
     //Start streaming frames on the phone camera
     public void startStreaming() {
-        phonecam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+        phonecam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
     }
 
     //Stop streaming frames on the phone camera

@@ -32,6 +32,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
+
 @TeleOp(name="MotorTest", group="Iterative Opmode")
 public class MotorTest extends OpMode
 {
