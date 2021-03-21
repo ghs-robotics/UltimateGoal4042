@@ -10,40 +10,50 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 
 public class CameraManager {
 
-    //CAUTION, I changed the type of the camera to OpenCvCamera so I can make the camera's interchangable
-    //public OpenCvInternalCamera phonecam;
-    public OpenCvCamera phonecam;
+    // CAUTION, I changed the type of the camera to OpenCvCamera so I can make the cameras interchangeable
+//    public OpenCvInternalCamera phoneCam;
+    public OpenCvCamera phoneCam;
     public OpenCvCamera webcam;
 
-    //current camera alternates between the phonecam and the webcam
-    public OpenCvCamera currentCamera;
-    public ObjectDeterminationPipeline pipeline;
-
-    public int[] getObjectValues() {
-        return  new int[]{1,2,3,4};
-    }
+    // Current camera alternates between the phoneCam and the webcam
+//    public OpenCvCamera currentCamera;
+    public ObjectDeterminationPipeline phoneCamPipeline;
+    public ObjectDeterminationPipeline webcamPipeline;
 
     public CameraManager(HardwareMap hardwareMap) {
         // Initializing some CV variables/objects
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId",
+                "id",
+                hardwareMap.appContext.getPackageName());
 
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
-                .splitLayoutForMultipleViewports(cameraMonitorViewId,
-                        2,
-                        OpenCvCameraFactory.ViewportSplitMethod.HORIZONTALLY);
+                .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
+                        2, // The number of sub-containers to create
+                        OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
-        phonecam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class,"webcam"), viewportContainerIds[1]);
-        phonecam.setPipeline(pipeline);
-        webcam.setPipeline(pipeline);
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"webcam"), viewportContainerIds[1]);
 
-        //the phone camera is the default camera
-        currentCamera = phonecam;
+        phoneCam.openCameraDevice();
+        webcam.openCameraDevice();
 
+        phoneCamPipeline = new ObjectDeterminationPipeline();
+        webcamPipeline = new ObjectDeterminationPipeline();
+
+        phoneCam.setPipeline(phoneCamPipeline);
+        webcam.setPipeline(webcamPipeline);
+
+        // The phone camera is the default camera
+//        currentCamera = phoneCam;
     }
 
-    //Initialize the camera
+    // Initialize the camera
     public void initCamera() {
+        startStreaming();
+        /*
         // Sets the viewport policy to optimized view so the preview doesn't appear 90 deg
         // out when the RC activity is in portrait. We do our actual image processing assuming
         // landscape orientation, though.
@@ -54,15 +64,26 @@ public class CameraManager {
                 startStreaming();
             }
         });
+        */
     }
 
     //Start streaming frames on the phone camera
     public void startStreaming() {
-        phonecam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+//        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
+        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
     //Stop streaming frames on the phone camera
     public void stopStreaming() {
-        phonecam.stopStreaming();
+        phoneCam.stopStreaming();
+        webcam.stopStreaming();
+    }
+
+    public int[] getObjectData(String target) {
+        if (target.equals("tower")) {
+            return webcamPipeline.getObjectData();
+        }
+        return phoneCamPipeline.getObjectData();
     }
 }

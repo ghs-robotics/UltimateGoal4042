@@ -52,8 +52,6 @@ public class Robot {
     public double speed = 1;
     public double config = 0;
 
-    HardwareMap hardwareMap; // TODO : get rid of this
-
     public DcMotor leftFrontDrive;
     public DcMotor rightFrontDrive;
     public DcMotor leftRearDrive;
@@ -77,7 +75,6 @@ public class Robot {
 
     // Creates a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
-        this.hardwareMap = hardwareMap;// TODO : get rid of this
 
         // These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
@@ -103,6 +100,7 @@ public class Robot {
         diffy = new Diffy(hardwareMap);
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
+        cameraManager = new CameraManager(hardwareMap);
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         this.telemetry = telemetry;
@@ -112,21 +110,7 @@ public class Robot {
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 2);
         wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
-
-        cameraManager = new CameraManager(hardwareMap);
     }
-
-//    public void swap() {// TODO : get rid of this
-//        int cameraMonitorViewId = h.appContext.getResources().getIdentifier(
-//                "cameraMonitorViewId",
-//                "id", h.appContext.getPackageName());
-//        phoneCam.stopStreaming();
-//        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-//                OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
-//        phoneCam.setPipeline(pipeline);
-//        initCamera();
-//        startStreaming();
-//    }
 
     // To use at the start of each OpMode that uses CV
     public void init() {
@@ -136,17 +120,11 @@ public class Robot {
 
     // Updates the coordinates of the object being detected on the screen
     public void updateObjectValues() {
-        int[] values = cameraManager.getObjectValues();
-        objectX = values[0];
-        objectY = values[1];
-        objectWidth = values[2];
-        objectHeight = values[3];
-        /* old code, using this for reference
-        objectX = pipeline.objectX;
-        objectY = pipeline.objectY;
-        objectWidth = pipeline.objectWidth;
-        objectHeight = pipeline.objectHeight;
-        */
+        int[] val = cameraManager.getObjectData(currentTargetObject);
+        objectX = val[0];
+        objectY = val[1];
+        objectWidth = val[2];
+        objectHeight = val[3];
     }
 
     // Switches the object that the robot is trying to detect to a ring
@@ -186,9 +164,9 @@ public class Robot {
     }
 
     // Set a target and use default values for the target position
-    public void setTargetToRing() { setTargetToRing(100, 140); }
+    public void setTargetToRing() { setTargetToRing(230, 190); } // Originally: y = 220
     public void setTargetToWobble() { setTargetToWobble(60, 160); }
-    public void setTargetToTower() { setTargetToTower(65, 95); }
+    public void setTargetToTower() { setTargetToTower(140, 70); }
 
     // Sets servos to starting positions
     public void resetServos() {
@@ -202,11 +180,8 @@ public class Robot {
         leftFrontPower = 0;
         rightFrontPower = 0;
         leftRearPower = 0;
-        leftRearPower = 0;
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftRearDrive.setPower(leftRearPower);
-        rightRearDrive.setPower(rightRearPower);
+        rightRearPower = 0;
+        sendDrivePowers();
     }
 
     // Calculates powers for mecanum wheel drive
@@ -219,7 +194,7 @@ public class Robot {
         rightRearPower = Range.clip(r * Math.cos(robotAngle) - rotation, -1.0, 1.0) * speed;
     }
 
-    // Sends desired power to drive motors
+    // Sends power to drive motors
     public void sendDrivePowers() {
         leftFrontDrive.setPower(leftFrontPower);
         rightFrontDrive.setPower(rightFrontPower);
@@ -230,7 +205,7 @@ public class Robot {
     // Updates the powers being sent to the drive motors
     public void updateDrive() {
         //Displays motor powers on the phone
-        telemetry.addData("encoderPos", "" + diffy.position());
+//        telemetry.addData("encoderPos", "" + diffy.getPosition());
         telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
         telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
         telemetry.addData("shooterAngle", "" + shooterAngle);
@@ -294,7 +269,8 @@ public class Robot {
         double r = 1.0 * w / h;
 
         // Testing to make sure the detected object is a ring
-        if (!(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5)) {
+        if (!(h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5)) { // 8,23,22,90,1.5,7
+            // TODO: Make sure we aren't double-checking this condition in the pipeline or here!
             x = 0;
             y = 0;
         }
@@ -346,7 +322,7 @@ public class Robot {
         x = xPID.calcVal(targetX - objectX);
         y = -wPID.calcVal(targetWidth - objectWidth);
 
-        if (!(objectWidth > 40 && objectWidth < 230)) {
+        if (!(objectWidth > 40 && objectWidth < 150)) { // TODO : perhaps adjust these values
             x = 0;
             y = 0;
             objectNotIdentified = true;
@@ -354,7 +330,8 @@ public class Robot {
             objectNotIdentified = false;
         }
 
-        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+//        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+        chaseObject(x, y, 0); // TODO : comment out
 //        chaseObject(0, 0, 0);
     }
 

@@ -64,15 +64,15 @@ public class Tele1 extends OpMode
     //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
-        //Registers controller input
+        // Registers controller input
         controller1.update();
 
-        //Press "x" to toggle speed between 100% and 30%
+        // Press "x" to toggle speed between 100% and 30%
         if (controller1.x.equals("pressing")) {
             robot.toggleSpeed();
         }
 
-        //Mecanum wheel drive
+        // Mecanum wheel drive
         robot.calculateDrivePowers(
                 controller1.left_stick_x,
                 controller1.left_stick_y,
@@ -80,27 +80,27 @@ public class Tele1 extends OpMode
         );
         robot.updateDrive();
 
-        //Press left bumper to turn on/off the shooter motor
+        // Press left bumper to turn on/off the shooter motor
         if (controller1.left_bumper.equals("pressing")) {
             robot.toggleShooter();
         }
 
-        //Press right bumper to launch a ring
+        // Press right bumper to launch a ring
         if (controller1.right_bumper.equals("pressing")) {
             robot.launchRing();
         }
 
-        //Press "y" to turn on/off the intake motor
+        // Press "y" to turn on/off the intake motor
         if (controller1.y.equals("pressing")) {
             robot.toggleIntake();
         }
 
-        //Press "b" to toggle the wobble gripper
+        // Press "b" to toggle the wobble gripper
         if (controller1.b.equals("pressing")) {
             robot.toggleGrab();
         }
 
-        //Press "a" to turn the arm
+        // Press "a" to turn the arm
         if (controller1.a.equals("pressing")) {
             robot.turnArm();
         }

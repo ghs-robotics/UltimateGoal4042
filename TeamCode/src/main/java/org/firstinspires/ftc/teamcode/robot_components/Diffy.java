@@ -9,6 +9,10 @@ public class Diffy {
     public double leftDiffyPower = 0;
     public double rightDiffyPower = 0;
     public double k = 1; //k is a constant for smth ask imants abt diffy
+    private long prevLeftPos = 0;
+    private long prevRightPos = 0;
+    private double prevLeftSeconds = 0;
+    private double prevRightSeconds = 0;
 
     public DcMotor leftDiffyMotor;
     public DcMotor rightDiffyMotor;
@@ -61,20 +65,32 @@ public class Diffy {
         sendPowers();
     }
 
-    public double position() {
+    /*
+    public double getPosition() {
         return encoder.getCurrentPosition();
     }
+     */
 
-    /*
-    // Calculates shooter motor speed in ticks per second
-    private double findShooterVelocity() {
-        double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
-        double deltaTime = elapsedTime.seconds() - previousElapsedTime;
-        previousShooterMotorTicks = shooterMotor.getCurrentPosition();
-        previousElapsedTime = elapsedTime.seconds();
+
+    // Calculates left diffy motor speed in ticks per second
+    private double getLeftVelocity() {
+        long deltaTicks = (leftDiffyMotor.getCurrentPosition() - prevLeftPos);
+        double deltaTime = elapsedTime.seconds() - prevLeftSeconds;
+        prevLeftPos = leftDiffyMotor.getCurrentPosition();
+        prevLeftSeconds = elapsedTime.seconds();
         return (deltaTicks / deltaTime);
     }
 
+    // Calculates right diffy motor speed in ticks per second
+    private double getRightVelocity() {
+        long deltaTicks = (rightDiffyMotor.getCurrentPosition() - prevRightPos);
+        double deltaTime = elapsedTime.seconds() - prevRightSeconds;
+        prevRightPos = rightDiffyMotor.getCurrentPosition();
+        prevRightSeconds = elapsedTime.seconds();
+        return (deltaTicks / deltaTime);
+    }
+
+    /*
      void adjustShooterVelocity(){
          if (findShooterVelocity() > TargetMotorSpeed){
              shooterPower -= 0.001;

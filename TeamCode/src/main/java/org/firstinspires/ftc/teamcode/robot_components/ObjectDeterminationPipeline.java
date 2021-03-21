@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.robot_components;
 
-import org.firstinspires.ftc.teamcode.robot_components.Robot;
 import org.opencv.core.Core;
 
 import org.opencv.core.CvType;
@@ -33,7 +32,7 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
     @Override
     public Mat processFrame(Mat input) {
         // Update ring coordinates
-        int[] coords = getObjectCoordinates(input);
+        int[] coords = findObjectCoordinates(input);
         objectX = coords[0];
         objectY = coords[1];
         objectWidth = coords[2];
@@ -45,10 +44,16 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
                 new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
                 GREEN, // The color the rectangle is drawn in
                 -1); // Negative thickness means solid fill
-        input = showHSVCrosshair(input);
+
+//        input = showHSVCrosshair(input); //TODO : uncomment?
 
         return input;
     }
+
+    public int[] getObjectData() {
+        return new int[]{objectX, objectY, objectWidth, objectHeight};
+    }
+
     //https://stackoverflow.com/questions/17035005/using-get-and-put-to-access-pixel-values-in-opencv-for-java
     //this is the method that displays hsv values of a point on screen
     private Mat showHSVCrosshair(Mat input) {
@@ -64,27 +69,26 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
         dst.get(targetX,targetY,data);
 
-
         input.get(targetX,targetY);
 
         return input;
     }
 
-    public static int[] getObjectCoordinates(Mat src) {
-        Mat dst = new Mat();
+    // Detects the position of the target object on the screen and returns an array with those values
+    public int[] findObjectCoordinates(Mat src) {
         Imgproc.resize(src, src, new Size(320, 240));
 
         // Convert color from RGB to HSV
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
+        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
 
         // adding a mask to the dst mat
         // filters colors within certain color range
-        Core.inRange(dst, Robot.lower, Robot.upper, dst);
+        Core.inRange(src, Robot.lower, Robot.upper, src);
 
         // Get the contours of the ring
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
         Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
@@ -92,16 +96,25 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         Rect largest = new Rect();
         for (int i = 0; i < contours.size(); i++) {
             Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (largest.area() < rect.area()) {
+            if (largest.area() < rect.area() /*&& ringTest(rect.width, rect.height) */) {
                 largest = rect;
             }
         }
 
+        // Draw largest rect
+        Imgproc.rectangle(src, largest, GREEN, 1); // TODO : comment out?
+
         return new int[]{largest.x, largest.y, largest.width, largest.height};
     }
 
-    // Detects the position of the target object on the screen and returns an array with those values
-    public static int[] getObjectCoordinates2(Mat src) {
+    // Testing to make sure the detected object is a ring
+    private boolean ringTest(double w, double h) {
+        double r = 1.0 * w / h;
+        return (h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5); // 8,23,22,90,1.5,7
+    }
+
+    // A comprehensive backup
+    public int[] getObjectCoordinates2(Mat src) {
         Scalar GREEN = new Scalar(0, 255, 0);
 
         Mat dst = new Mat();
