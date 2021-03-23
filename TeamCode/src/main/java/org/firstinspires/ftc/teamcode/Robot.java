@@ -47,11 +47,10 @@ public class Robot {
     double rightFrontPower = 0;
     double leftRearPower = 0;
     double rightRearPower = 0;
-    double shooterPower = 0;
     double intakePower = 0;
-    double armAngle = 0.5; // Up position
-    double grabAngle = 0.25; // Angle of 0.25 means closed
-    double shooterAngle = 0.05;
+    double armAngle = 0.45; // Up position
+    double grabAngle = 0.15; // Closed position
+    double shooterAngle = 0.58; // Back (regular) position
     double speed = 1;
     double config = 0;
 
@@ -62,11 +61,12 @@ public class Robot {
     DcMotor rightFrontDrive;
     DcMotor leftRearDrive;
     DcMotor rightRearDrive;
-    DcMotor shooterMotor;
     DcMotor intakeMotor;
     Servo armServo;
     Servo grabServo;
     Servo shooterServo;
+
+    Diffy diffy;
 
     ElapsedTime elapsedTime;
     Gyro gyro;
@@ -82,31 +82,34 @@ public class Robot {
     OpenCvInternalCamera phoneCam;
     ObjectDeterminationPipeline pipeline;
 
+//    HardwareMap h; // TODO : get rid of this
+
     // Creates a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
+//        h = hardwareMap;// TODO : get rid of this
+
         // These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
-        shooterMotor = hardwareMap.get(DcMotor.class, "shooterMotor");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
         shooterServo = hardwareMap.get(Servo.class, "shooterServo");
 
         // Defines the forward direction for each of our motors/servos
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        shooterMotor.setDirection(DcMotor.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.REVERSE);
         armServo.setDirection(Servo.Direction.FORWARD);
         grabServo.setDirection(Servo.Direction.FORWARD);
         shooterServo.setDirection(Servo.Direction.FORWARD);
 
         // Initializes some other useful tools for our robot (the gyroscope, the timer, etc.)
+        diffy = new Diffy(hardwareMap);
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
         elapsedTime = new ElapsedTime();
@@ -128,6 +131,18 @@ public class Robot {
         pipeline = new ObjectDeterminationPipeline();
         phoneCam.setPipeline(pipeline);
     }
+
+//    public void swap() {// TODO : get rid of this
+//        int cameraMonitorViewId = h.appContext.getResources().getIdentifier(
+//                "cameraMonitorViewId",
+//                "id", h.appContext.getPackageName());
+//        phoneCam.stopStreaming();
+//        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+//                OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
+//        phoneCam.setPipeline(pipeline);
+//        initCamera();
+//        startStreaming();
+//    }
 
     // To use at the start of each OpMode that uses CV
     public void init() {
@@ -248,9 +263,12 @@ public class Robot {
     // Updates the powers being sent to the drive motors
     public void updateDrive() {
         //Displays motor powers on the phone
-        telemetry.addData("shooterPower", "" + shooterPower);
-        telemetry.addData("armServo", "" + armAngle);
-        telemetry.addData("grabServo", "" + grabAngle);
+        telemetry.addData("LF", "" + leftFrontPower);
+        telemetry.addData("RF", "" + rightFrontPower);
+        telemetry.addData("LR", "" + leftRearPower);
+        telemetry.addData("RR", "" + rightRearPower);
+        telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
+        telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
         telemetry.addData("shooterAngle", "" + shooterAngle);
         telemetry.addData("angle", "" + gyro.getAngle());
         telemetry.addData("config: ", "" + config);
@@ -381,39 +399,35 @@ public class Robot {
     }
 
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double tolerance) {
+    public void moveToPos(int[] pos, double maxSeconds) {
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         updateObjectValues();
         while(Math.abs(targetWidth - objectWidth) > 5 || Math.abs(targetX - objectX) > 5) {
             chaseTower();
         }
         double t = getElapsedTimeSeconds();
-        while(Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8
+        while((Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8)
                 && elapsedTime.seconds() - t < 5) {
             chaseTower();
         }
         t = getElapsedTimeSeconds();
         while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
-                || rightFrontPower != 0) && elapsedTime.seconds() - t < tolerance) {
+                || rightFrontPower != 0) && elapsedTime.seconds() - t < maxSeconds) {
             chaseTower();
         }
         //stopDrive();
     }
 
     // Makes the robot rotate to a certain angle
-    public void rotateToPos(int angle, int tolerance) {
+    public void rotateToPos(int angle, int maxSeconds) {
         targetAngle = angle;
         double t = getElapsedTimeSeconds();
-        while(Math.abs(targetAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 8) {
+        while(Math.abs(targetAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 5) {
             adjustAngle();
         }
         t = getElapsedTimeSeconds();
-        while ((/*leftRearPower != 0
-                || rightRearPower != 0
-                || leftFrontPower != 0
-                || rightFrontPower != 0
-                || */Math.abs(targetAngle - gyro.getAngle()) > tolerance)
-                && elapsedTime.seconds() - t < 3) {
+        while ((Math.abs(targetAngle - gyro.getAngle()) > 1)
+                && elapsedTime.seconds() - t < maxSeconds) {
             adjustAngle();
         }
         //stopDrive();
@@ -442,85 +456,41 @@ public class Robot {
         toggleShooter();
     }
 
-    public void shootStep1() {
-        setTargetToTower(95,80);
-        updateObjectValues();
-        double t = getElapsedTimeSeconds();
-        while(Math.abs(targetWidth - objectWidth) > 2 || Math.abs(targetX - objectX) > 2 && elapsedTime.seconds() - t < 4) {
-            chaseTower();
-        }
-    }
-
-    public void shootStep2() {
-        double t = getElapsedTimeSeconds();
-        chaseTower();
-        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
-                || rightFrontPower != 0) && elapsedTime.seconds() - t < 3) {
-            chaseTower();
-        }
-        stopDrive();
-    }
-
-    public void shootStep3() {
-        toggleShooter();
-        wait(1.0);
-        for (int i = 0; i < 3; i++) {
-            launchRing();
-            wait(0.4);
-        }
-        toggleShooter();
-    }
-
     // Toggles the drive speed between 50% and normal
     public void toggleSpeed() {
         speed = (speed == 1 ? 0.5 : 1);
     }
 
     // Turns the shooter motor on or off
-    public void toggleShooter() {
-        shooterPower = (shooterPower == 0 ? 1.0 : 0);
-        shooterMotor.setPower(shooterPower);
-    }
+    public void toggleShooter() { diffy.toggleShooter(0); }
 
     // Turns the intake motor on or off
     public void toggleIntake() {
-        intakePower = (intakePower == 0 ? 1 : 0);
+        intakePower = (intakePower == 0 ? 0.6 : 0);
         intakeMotor.setPower(intakePower);
     }
 
     // Turns the arm
     public void turnArm() {
         // Default angle is 0.5 (which is the up position)
-        armAngle = (armAngle == 0.88 ? 0.5 : 0.88);
+        armAngle = (armAngle == 0.88 ? 0.45 : 0.88);
         armServo.setPosition(armAngle);
     }
 
     // Toggles the wobble gripper
     public void toggleGrab() {
-        // Default angle is 0.25, which means the gripper is closed
-        grabAngle = (grabAngle == 0.25 ? 0 : 0.25);
+        // Default angle is 0.15 (which means the gripper is closed)
+        grabAngle = (grabAngle == 0.48 ? 0.15 : 0.48);
         grabServo.setPosition(grabAngle);
     }
 
     // Launches a ring by moving the shooterServo
     public void launchRing() {
-        shooterAngle = 0.25;
+        shooterAngle = 0.46; // Forward position
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
-        shooterAngle = 0.05;
+        shooterAngle = 0.58; // Back position
         shooterServo.setPosition(shooterAngle);
-    }
-
-    // TO DO: FOR TESTING PURPOSES ONLY
-    public void increaseArmAngle() {
-        armAngle += 0.1;
-        armServo.setPosition(armAngle);
-    }
-
-    // TO DO: FOR TESTING PURPOSES ONLY
-    public void decreaseArmAngle() {
-        armAngle -= 0.1;
-        armServo.setPosition(armAngle);
     }
 
     // Makes robot move forward and pick up wobble goal
@@ -536,17 +506,8 @@ public class Robot {
         turnArm();
     }
 
-    // Calculates shooter motor speed in ticks per second
-    private double findShooterVelocity() {
-        double deltaTicks = (shooterMotor.getCurrentPosition() - previousShooterMotorTicks);
-        double deltaTime = elapsedTime.seconds() - previousElapsedTime;
-        previousShooterMotorTicks = shooterMotor.getCurrentPosition();
-        previousElapsedTime = elapsedTime.seconds();
-        return (deltaTicks / deltaTime);
-    }
-
-    // Classifies the starter stack; TO DO: NEEDS TO BE TESTED ADJUSTED
-    void identifyRingConfig() {
+    // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
+    public void identifyRingConfig() {
         setTargetToRing();
         updateObjectValues();
         if (!(objectWidth == 0)) {
@@ -555,17 +516,17 @@ public class Robot {
     }
 
     // Resets the timer
-    void resetElapsedTime() {
+    public void resetElapsedTime() {
         elapsedTime.reset();
     }
 
     // Returns how many seconds have passed since the timer was last reset
-    double getElapsedTimeSeconds() {
+    public double getElapsedTimeSeconds() {
         return elapsedTime.seconds();
     }
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds
-    void wait(double seconds) {
+    public void wait(double seconds) {
         double start = getElapsedTimeSeconds();
         while (getElapsedTimeSeconds() - start < seconds) {}
     }

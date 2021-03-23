@@ -32,13 +32,12 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode
+@TeleOp(name="MotorTest", group="Iterative Opmode")
+public class MotorTest extends OpMode
 {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-    //Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
@@ -48,6 +47,7 @@ public class Tele1 extends OpMode
         robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        robot.speed = 0.5;
     }
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -64,54 +64,27 @@ public class Tele1 extends OpMode
         //Registers controller input
         controller1.update();
 
-        //Press "x" to toggle speed between 100% and 30%
-        if (controller1.x.equals("pressing")) {
-            robot.toggleSpeed();
-        }
-
-        //Mecanum wheel drive
-        robot.calculateDrivePowers(
-                controller1.left_stick_x,
-                controller1.left_stick_y,
-                controller1.right_stick_x
-        );
-        robot.updateDrive();
-
-        //Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) {
-            robot.toggleShooter();
-        }
-
-        //Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) {
-            robot.launchRing();
-        }
-
-        //Press "y" to turn on/off the intake motor
-        if (controller1.y.equals("pressing")) {
-            robot.toggleIntake();
-        }
-
-        //Press "b" to toggle the wobble gripper
-        if (controller1.b.equals("pressing")) {
-            robot.toggleGrab();
-        }
-
-        //Press "a" to turn the arm
-        if (controller1.a.equals("pressing")) {
-            robot.turnArm();
-        }
-
+        // shooter Servo: 0.58 (regular back) to 0.46 (forward)
         if (controller1.dpad_up.equals("pressing")) {
-            robot.diffy.leftDiffyPower += 0.05;
-            robot.diffy.rightDiffyPower += 0.05;
-            robot.diffy.sendPowers();
+            robot.shooterAngle += 0.02;
+            robot.shooterServo.setPosition(robot.shooterAngle);
         }
         if (controller1.dpad_down.equals("pressing")) {
-            robot.diffy.leftDiffyPower -= 0.05;
-            robot.diffy.rightDiffyPower -= 0.05;
-            robot.diffy.sendPowers();
+            robot.shooterAngle -= 0.02;
+            robot.shooterServo.setPosition(robot.shooterAngle);
         }
+
+        // grab Servo: 0.15 (closed) to 0.48 (open)
+        if (controller1.dpad_right.equals("pressing")) {
+            robot.grabAngle += 0.02;
+            robot.grabServo.setPosition(robot.grabAngle);
+        }
+        if (controller1.dpad_left.equals("pressing")) {
+            robot.grabAngle -= 0.02;
+            robot.grabServo.setPosition(robot.grabAngle);
+        }
+
+        robot.updateDrive();
     }
 
     //Code to run ONCE after the driver hits STOP
