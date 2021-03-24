@@ -38,6 +38,7 @@ public class Tele1 extends OpMode
     //Declare OpMode members
     Robot robot;
     Controller controller1;
+    Controller controller2;
     //Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
@@ -45,6 +46,7 @@ public class Tele1 extends OpMode
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
+        controller2 = new Controller(gamepad2);
         robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -63,13 +65,15 @@ public class Tele1 extends OpMode
     public void loop() {
         //Registers controller input
         controller1.update();
+        controller2.update();
 
-        //Press "x" to toggle speed between 100% and 30%
+
+        //Press "x" to toggle speed between 100% and 30% (Controller1)
         if (controller1.x.equals("pressing")) {
             robot.toggleSpeed();
         }
 
-        //Mecanum wheel drive
+        //Mecanum wheel drive (CONTROLLER1)
         robot.calculateDrivePowers(
                 controller1.left_stick_x,
                 controller1.left_stick_y,
@@ -78,18 +82,18 @@ public class Tele1 extends OpMode
         robot.updateDrive();
         //Eli's Branch
 
-        //Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) {
+        //Press left bumper to turn on/off the shooter motor (CONTROLLER2)
+        if (controller2.left_bumper.equals("pressing")) {
             robot.toggleShooter();
         }
 
-        //Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) {
+        //Press right bumper to launch a ring (CONTROLLER2)
+        if (controller2.right_bumper.equals("pressing")) {
             robot.launchRing();
         }
 
-        //Press dpad right to pick up (already lined up) wobble goal
-        if (controller1.dpad_right.equals("pressing")) {
+        //Press dpad right to pick up (already lined up) wobble goal (CONTROLLER2)
+        if (controller2.dpad_right.equals("pressing")) {
             robot.calculateDrivePowers(0,-0.4,0);
             robot.sendDrivePowers();
             robot.wait(2.0);
@@ -97,25 +101,25 @@ public class Tele1 extends OpMode
             //robot.pickUpWobbleGoal(160);
         }
 
-        //Press "y" to turn on/off the intake motor
+        //Press "y" to turn on/off the intake motor (CONTROLLER1)
         if (controller1.y.equals("pressing")) {
             robot.toggleIntake();
         }
 
-        //Press "b" to toggle the wobble gripper
+        //Press "b" to toggle the wobble gripper (CONTROLLER2)
         if (controller1.b.equals("pressing")) {
             robot.toggleGrab();
         }
 
-        //Press "a" to turn the arm
-        if (controller1.a.equals("pressing")) {
+        //Press "a" to turn the arm (CONTROLLER2)
+        if (controller2.a.equals("pressing")) {
             robot.turnArm();
         }
 
-        if (controller1.dpad_up.equals("pressing")) {
+        if (controller2.dpad_up.equals("pressing")) {
             robot.increaseArmAngle();
         }
-        if (controller1.dpad_down.equals("pressing")) {
+        if (controller2.dpad_down.equals("pressing")) {
             robot.decreaseArmAngle();
         }
     }

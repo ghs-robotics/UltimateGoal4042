@@ -33,50 +33,36 @@ public class Auto1 extends LinearOpMode {
         int stage = 1;
         waitForStart();
 
-
-
-
-
-
-
                     //Determine how many rings in the starting ring stacks
                     robot.identifyRingConfig();
                     robot.config = 1; // For testing purposes
 
-
-
                     //Move forward 6-7 feet until at the edge of launch zone
                     robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
-
-
 
                     //Move sideways until in line with tower goal
                     //aim the robot at the goal and make sure that the robot is within the launch zone
                     //Shoot 3 rings
                     robot.adjustAndShoot();
 
-
-
                     //move forward towards the desired target wobble goal zone
                     //Check distance to tower goal and correct if necessary
                     //Move left or right depending on target wobble goal
                     if (robot.config == 0) {
-                        robot.moveToPos(CONFIG_0_POS, 3);
+                        robot.moveToPos(CONFIG_0_POS, 5);
                     } else if (robot.config == 1) {
-                        robot.moveToPos(CONFIG_1_POS, 3);
+                        robot.moveToPos(CONFIG_1_POS, 8);
                     } else {
                         robot.moveToPos(CONFIG_4_POS, 3);
                     }
 
-
-
                     //once there, place down the wobble goal
                     robot.turnArm();
-                    robot.wait(0.5);
+                    robot.wait(0.3);
                     robot.toggleGrab();
                     robot.wait(0.1);
                     robot.turnArm();
-                    robot.wait(0.4);
+                    robot.wait(0.3);
                     robot.resetServos();
 
 
@@ -86,14 +72,10 @@ public class Auto1 extends LinearOpMode {
 
 
                     // Turn around
-                    robot.rotateToPos(180, 3);
-
-
+                    robot.rotateToPos(180, 6);
 
                     //pick up second wobble goal
                     robot.pickUpWobbleGoal(8);
-
-
 
                     // if starterStack != 0, pickup the starter stack rings
                     if (robot.config == 4) {
@@ -101,14 +83,10 @@ public class Auto1 extends LinearOpMode {
                         robot.moveToPos(STARTER_STACK_AFTER_POS, 5);
                     }
 
-
-
                     //Check that we're in shooting position
                     //Shoot the 3 rings
                     robot.wait(0.01);
                     robot.adjustAndShoot();
-
-
 
                     //move forward towards the desired target wobble goal zone
                     //Check distance to tower goal and correct if necessary
@@ -122,8 +100,6 @@ public class Auto1 extends LinearOpMode {
                         robot.moveToPos(CONFIG_4_POS, 3);
                     }
 
-
-
                     //once there, place down the wobble goal
                     robot.turnArm();
                     robot.wait(0.51);
@@ -132,8 +108,6 @@ public class Auto1 extends LinearOpMode {
                     robot.turnArm();
                     robot.wait(0.4);
                     robot.resetServos();
-
-
 
                     //Move forward to park over launch line
                     robot.moveToPos(PARK_POS, 5);
