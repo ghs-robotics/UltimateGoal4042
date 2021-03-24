@@ -32,31 +32,27 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-// THIS CLASS IS FOR TESTING PURPOSES!!
-
-@TeleOp(name="Tele2", group="Iterative Opmode")
-public class Tele2 extends OpMode {
+@TeleOp(name="MotorTest", group="Iterative Opmode")
+public class MotorTest extends OpMode
+{
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-    //Controller controller2;
-    String target = "none";
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.init();
-        robot.setTargetToTower();
+        robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        robot.speed = 0.5;
     }
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
-    public void init_loop() {
-    }
+    public void init_loop() {}
 
     //Code to run ONCE when the driver hits PLAY
     @Override
@@ -68,63 +64,30 @@ public class Tele2 extends OpMode {
         //Registers controller input
         controller1.update();
 
-        //Press left bumper to turn on/off the shooter motor
-//        if (controller1.left_bumper.equals("pressing")) { robot.toggleShooter(); }
-
-        //Press right bumper to launch a ring
-//        if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
-
-        //Mecanum wheel drive
-        robot.calculateDrivePowers(
-                controller1.left_stick_x,
-                controller1.left_stick_y,
-                controller1.right_stick_x
-        );
-
-        if (target.equals("none")){ robot.updateDrive(); }
-
-        if (controller1.x.equals("pressing")) { robot.stopStreaming(); target = "none"; }
-
-        if (controller1.a.equals("pressing"))
-        {
-            stream();
-            target = "ring";
-            robot.setTargetToRing();
+        // shooter Servo: 0.58 (regular back) to 0.46 (forward)
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.shooterAngle += 0.02;
+            robot.shooterServo.setPosition(robot.shooterAngle);
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.shooterAngle -= 0.02;
+            robot.shooterServo.setPosition(robot.shooterAngle);
         }
 
-        if (controller1.y.equals("pressing"))
-        {
-            stream();
-            target = "tower";
-            robot.setTargetToTower();
+        // grab Servo: 0.15 (closed) to 0.48 (open)
+        if (controller1.dpad_right.equals("pressing")) {
+            robot.grabAngle += 0.02;
+            robot.grabServo.setPosition(robot.grabAngle);
+        }
+        if (controller1.dpad_left.equals("pressing")) {
+            robot.grabAngle -= 0.02;
+            robot.grabServo.setPosition(robot.grabAngle);
         }
 
-        if (controller1.b.equals("pressing"))
-        {
-            stream();
-            target = "tower";
-            robot.setTargetToTower(95, 80);
-            robot.moveToPos(new int[]{95, 80},5);
-        }
-
-        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.001; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.001; }
-
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0001; }
-
-        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0001; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0001; }
-
-        if(target.equals("ring")){ robot.chaseRing(); }
-        if(target.equals("angle")){ robot.adjustAngle(); }
-        if(target.equals("tower")){ robot.chaseTower(); }
+        robot.updateDrive();
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){
-    }
-
-    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.startStreaming(); } }
+    public void stop(){}
 }

@@ -40,6 +40,9 @@ public class ChaseRing extends LinearOpMode
 
         waitForStart();
 
+        robot.wait(1.0);
+//        robot.swap();
+
         while (opModeIsActive())
         {
             robot.chaseRing();
