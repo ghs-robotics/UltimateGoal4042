@@ -85,7 +85,7 @@ public class Tele2 extends OpMode {
 
         if (target.equals("none")){ robot.updateDrive(); }
 
-        if (controller1.x.equals("pressing")) { robot.cameraManager.stopStreaming(); target = "none"; }
+        if (controller1.x.equals("pressing")) { robot.camera.stopStreaming(); target = "none"; }
 
         if (controller1.a.equals("pressing"))
         {
@@ -128,5 +128,5 @@ public class Tele2 extends OpMode {
     public void stop(){
     }
 
-    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.cameraManager.startStreaming(); } }
+    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.camera.startStreaming(); } }
 }

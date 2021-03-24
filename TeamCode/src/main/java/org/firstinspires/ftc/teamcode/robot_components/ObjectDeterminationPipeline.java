@@ -102,7 +102,7 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         }
 
         // Draw largest rect
-        Imgproc.rectangle(src, largest, GREEN, 1); // TODO : comment out?
+//        Imgproc.rectangle(src, largest, GREEN, 1); // TODO : comment out?
 
         return new int[]{largest.x, largest.y, largest.width, largest.height};
     }

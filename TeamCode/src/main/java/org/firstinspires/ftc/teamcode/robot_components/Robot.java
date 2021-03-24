@@ -25,7 +25,7 @@ public class Robot {
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
     private boolean objectNotIdentified = false; // The program will know when the object isn't in view
-    public CameraManager cameraManager;
+    public PhoneCamManager camera;
 
     private int targetX = 100;
     private int targetY = 140;
@@ -100,7 +100,7 @@ public class Robot {
         diffy = new Diffy(hardwareMap);
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
-        cameraManager = new CameraManager(hardwareMap);
+        camera = new PhoneCamManager(hardwareMap);
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         this.telemetry = telemetry;
@@ -115,12 +115,12 @@ public class Robot {
     // To use at the start of each OpMode that uses CV
     public void init() {
         resetServos();
-        cameraManager.initCamera();
+        camera.initCamera();
     }
 
     // Updates the coordinates of the object being detected on the screen
     public void updateObjectValues() {
-        int[] val = cameraManager.getObjectData(currentTargetObject);
+        int[] val = camera.getObjectData(currentTargetObject);
         objectX = val[0];
         objectY = val[1];
         objectWidth = val[2];
