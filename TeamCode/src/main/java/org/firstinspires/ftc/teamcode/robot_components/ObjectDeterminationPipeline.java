@@ -38,12 +38,12 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         objectWidth = coords[2];
         objectHeight = coords[3];
 
-        Imgproc.rectangle(
-                input, // Buffer to draw on
-                new Point(objectX, objectY), // First point which defines the rectangle
-                new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
-                GREEN, // The color the rectangle is drawn in
-                -1); // Negative thickness means solid fill
+//        Imgproc.rectangle(
+//                input, // Buffer to draw on
+//                new Point(objectX, objectY), // First point which defines the rectangle
+//                new Point(objectX + objectWidth, objectY + objectHeight), // Second point which defines the rectangle
+//                GREEN, // The color the rectangle is drawn in
+//                -1); // Negative thickness means solid fill
 
 //        input = showHSVCrosshair(input); //TODO : uncomment?
 
@@ -76,19 +76,20 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
     // Detects the position of the target object on the screen and returns an array with those values
     public int[] findObjectCoordinates(Mat src) {
+        Mat dst = new Mat();
         Imgproc.resize(src, src, new Size(320, 240));
 
         // Convert color from RGB to HSV
-        Imgproc.cvtColor(src, src, Imgproc.COLOR_BGR2HSV);
+        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
 
         // adding a mask to the dst mat
         // filters colors within certain color range
-        Core.inRange(src, Robot.lower, Robot.upper, src);
+        Core.inRange(dst, Robot.lower, Robot.upper, dst);
 
         // Get the contours of the ring
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
-        Imgproc.findContours(src, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
         Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
@@ -102,7 +103,7 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
         }
 
         // Draw largest rect
-//        Imgproc.rectangle(src, largest, GREEN, 1); // TODO : comment out?
+        Imgproc.rectangle(src, largest, GREEN, 1); // TODO : comment out?
 
         return new int[]{largest.x, largest.y, largest.width, largest.height};
     }

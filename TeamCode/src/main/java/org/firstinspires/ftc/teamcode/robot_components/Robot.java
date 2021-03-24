@@ -164,7 +164,7 @@ public class Robot {
     }
 
     // Set a target and use default values for the target position
-    public void setTargetToRing() { setTargetToRing(230, 190); } // Originally: y = 220
+    public void setTargetToRing() { setTargetToRing(180, 190); } // Originally: y = 220
     public void setTargetToWobble() { setTargetToWobble(60, 160); }
     public void setTargetToTower() { setTargetToTower(140, 70); }
 
@@ -275,7 +275,7 @@ public class Robot {
             y = 0;
         }
 
-        chaseObject(x, y, 0);
+        chaseObject(x, 0, 0); // TODO : change back to y
     }
 
     // Makes the robot chase the wobble goal (if called repeatedly); TO DO: NEEDS GYRO IMPLEMENTATION
