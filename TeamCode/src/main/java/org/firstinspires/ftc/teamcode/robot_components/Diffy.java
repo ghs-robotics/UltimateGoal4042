@@ -65,6 +65,23 @@ public class Diffy {
         sendPowers();
     }
 
+    public void stop() {
+        leftDiffyPower = 0;
+        rightDiffyPower = 0;
+        sendPowers();
+    }
+
+    public void toggle() {
+        if (leftDiffyPower != 0 || rightDiffyPower != 0) {
+            leftDiffyPower = 0;
+            rightDiffyPower = 0;
+        } else {
+            leftDiffyPower = 1.0;
+            rightDiffyPower = 1.0;
+        }
+        sendPowers();
+    }
+
     /*
     public double getPosition() {
         return encoder.getCurrentPosition();
