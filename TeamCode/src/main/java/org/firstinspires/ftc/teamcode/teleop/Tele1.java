@@ -41,7 +41,7 @@ public class Tele1 extends OpMode
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-    //Controller controller2;
+    Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
@@ -66,6 +66,7 @@ public class Tele1 extends OpMode
     public void loop() {
         // Registers controller input
         controller1.update();
+        controller2.update();
 
         // Press "x" to toggle speed between 100% and 30%
         if (controller1.x.equals("pressing")) {
@@ -115,6 +116,8 @@ public class Tele1 extends OpMode
             robot.diffy.rightDiffyPower -= 0.05;
             robot.diffy.sendPowers();
         }
+
+        // Controller 2 code
     }
 
     //Code to run ONCE after the driver hits STOP

@@ -45,9 +45,6 @@ public class CameraManager {
 
         phoneCam.setPipeline(phoneCamPipeline);
         webcam.setPipeline(webcamPipeline);
-
-        // The phone camera is the default camera
-//        currentCamera = phoneCam;
     }
 
     // Initialize the camera
