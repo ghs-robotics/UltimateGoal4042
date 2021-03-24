@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -8,10 +8,6 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Scalar;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 
 public class Robot {
     // HSV constants
@@ -28,65 +24,57 @@ public class Robot {
     public static double cover = 0; // The fraction of the top part of the camera screen that is
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
-    boolean objectNotIdentified = false; // The program will know when the object isn't in view
-    int targetX = 100;
-    int targetY = 140;
-    int targetWidth = 95;
-    int objectX = 0;
-    int objectY = 0;
-    int objectWidth = 0;
-    int objectHeight = 0;
-    double x = 0;
-    double y = 0;
-    double targetAngle = 0; // gyroscope will target this angle
+    private boolean objectNotIdentified = false; // The program will know when the object isn't in view
+    public CameraManager cameraManager;
 
-    String currentTargetObject = "ring";
+    private int targetX = 100;
+    private int targetY = 140;
+    private int targetWidth = 95;
+    private int objectX = 0;
+    private int objectY = 0;
+    private int objectWidth = 0;
+    private int objectHeight = 0;
+    private double x = 0;
+    private double y = 0;
+    public double targetAngle = 0; // gyroscope will target this angle
+
+    private String currentTargetObject = "ring";
 
     // Robot variables and objects
-    double leftFrontPower = 0;
-    double rightFrontPower = 0;
-    double leftRearPower = 0;
-    double rightRearPower = 0;
-    double intakePower = 0;
-    double armAngle = 0.45; // Up position
-    double grabAngle = 0.15; // Closed position
-    double shooterAngle = 0.58; // Back (regular) position
-    double speed = 1;
-    double config = 0;
+    private double leftFrontPower = 0;
+    private double rightFrontPower = 0;
+    private double leftRearPower = 0;
+    private double rightRearPower = 0;
+    private double intakePower = 0;
+    public double armAngle = 0.45; // Up position
+    public double grabAngle = 0.15; // Closed position
+    public double shooterAngle = 0.58; // Back (regular) position
+    public double speed = 1;
+    public double config = 0;
 
-    double previousShooterMotorTicks = 0;
-    double previousElapsedTime = 0;
+    public DcMotor leftFrontDrive;
+    public DcMotor rightFrontDrive;
+    public DcMotor leftRearDrive;
+    public DcMotor rightRearDrive;
+    public DcMotor intakeMotor;
+    public Servo armServo;
+    public Servo grabServo;
+    public Servo shooterServo;
 
-    DcMotor leftFrontDrive;
-    DcMotor rightFrontDrive;
-    DcMotor leftRearDrive;
-    DcMotor rightRearDrive;
-    DcMotor intakeMotor;
-    Servo armServo;
-    Servo grabServo;
-    Servo shooterServo;
+    public Diffy diffy;
 
-    Diffy diffy;
-
-    ElapsedTime elapsedTime;
-    Gyro gyro;
-    Telemetry telemetry;
+    public ElapsedTime elapsedTime;
+    public Gyro gyro;
+    public Telemetry telemetry;
 
     // PID controllers
-    PIDController xPID; // For the x-position of the robot
-    PIDController yPID; // For the y-position of the robot
-    PIDController wPID; // For the width of the tower goal
-    PIDController gyroPID; // Controls the angle
-
-    // CV objects
-    OpenCvInternalCamera phoneCam;
-    ObjectDeterminationPipeline pipeline;
-
-//    HardwareMap h; // TODO : get rid of this
+    public PIDController xPID; // For the x-position of the robot
+    public PIDController yPID; // For the y-position of the robot
+    public PIDController wPID; // For the width of the tower goal
+    public PIDController gyroPID; // Controls the angle
 
     // Creates a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
-//        h = hardwareMap;// TODO : get rid of this
 
         // These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
@@ -112,6 +100,7 @@ public class Robot {
         diffy = new Diffy(hardwareMap);
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
+        cameraManager = new CameraManager(hardwareMap);
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         this.telemetry = telemetry;
@@ -121,65 +110,21 @@ public class Robot {
         yPID = new PIDController(0.0200, 0.0025, 0.0010, 2);
         wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
-
-        // Initializing some CV variables/objects
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "cameraMonitorViewId",
-                "id", hardwareMap.appContext.getPackageName());
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        pipeline = new ObjectDeterminationPipeline();
-        phoneCam.setPipeline(pipeline);
     }
-
-//    public void swap() {// TODO : get rid of this
-//        int cameraMonitorViewId = h.appContext.getResources().getIdentifier(
-//                "cameraMonitorViewId",
-//                "id", h.appContext.getPackageName());
-//        phoneCam.stopStreaming();
-//        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-//                OpenCvInternalCamera.CameraDirection.FRONT, cameraMonitorViewId);
-//        phoneCam.setPipeline(pipeline);
-//        initCamera();
-//        startStreaming();
-//    }
 
     // To use at the start of each OpMode that uses CV
     public void init() {
         resetServos();
-        initCamera();
-    }
-
-    // Initializes the phone camera
-    public void initCamera() {
-        // Sets the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        phoneCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                startStreaming();
-            }
-        });
-    }
-
-    // Starts streaming frames on the phone camera
-    public void startStreaming() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-    }
-
-    // Stops streaming frames on the phone camera
-    public void stopStreaming() {
-        phoneCam.stopStreaming();
+        cameraManager.initCamera();
     }
 
     // Updates the coordinates of the object being detected on the screen
     public void updateObjectValues() {
-        objectX = pipeline.objectX;
-        objectY = pipeline.objectY;
-        objectWidth = pipeline.objectWidth;
-        objectHeight = pipeline.objectHeight;
+        int[] val = cameraManager.getObjectData(currentTargetObject);
+        objectX = val[0];
+        objectY = val[1];
+        objectWidth = val[2];
+        objectHeight = val[3];
     }
 
     // Switches the object that the robot is trying to detect to a ring
@@ -219,9 +164,9 @@ public class Robot {
     }
 
     // Set a target and use default values for the target position
-    public void setTargetToRing() { setTargetToRing(100, 140); }
+    public void setTargetToRing() { setTargetToRing(230, 190); } // Originally: y = 220
     public void setTargetToWobble() { setTargetToWobble(60, 160); }
-    public void setTargetToTower() { setTargetToTower(65, 95); }
+    public void setTargetToTower() { setTargetToTower(140, 70); }
 
     // Sets servos to starting positions
     public void resetServos() {
@@ -235,11 +180,8 @@ public class Robot {
         leftFrontPower = 0;
         rightFrontPower = 0;
         leftRearPower = 0;
-        leftRearPower = 0;
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftRearDrive.setPower(leftRearPower);
-        rightRearDrive.setPower(rightRearPower);
+        rightRearPower = 0;
+        sendDrivePowers();
     }
 
     // Calculates powers for mecanum wheel drive
@@ -252,7 +194,7 @@ public class Robot {
         rightRearPower = Range.clip(r * Math.cos(robotAngle) - rotation, -1.0, 1.0) * speed;
     }
 
-    // Sends desired power to drive motors
+    // Sends power to drive motors
     public void sendDrivePowers() {
         leftFrontDrive.setPower(leftFrontPower);
         rightFrontDrive.setPower(rightFrontPower);
@@ -263,10 +205,7 @@ public class Robot {
     // Updates the powers being sent to the drive motors
     public void updateDrive() {
         //Displays motor powers on the phone
-        telemetry.addData("LF", "" + leftFrontPower);
-        telemetry.addData("RF", "" + rightFrontPower);
-        telemetry.addData("LR", "" + leftRearPower);
-        telemetry.addData("RR", "" + rightRearPower);
+//        telemetry.addData("encoderPos", "" + diffy.getPosition());
         telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
         telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
         telemetry.addData("shooterAngle", "" + shooterAngle);
@@ -292,7 +231,7 @@ public class Robot {
         if (objectNotIdentified) {
             telemetry.addData("ATTENTION: ", "OBJECT NOT IDENTIFIED");
         }
-        
+
         if (t.equals("tower")) {
             telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
             telemetry.addData("towerY = ", objectY);
@@ -330,7 +269,8 @@ public class Robot {
         double r = 1.0 * w / h;
 
         // Testing to make sure the detected object is a ring
-        if (!(h > 10 && h < 45 && w > 22 && w < 65 && r > 1.2 && r < 2.5)) {
+        if (!(h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5)) { // 8,23,22,90,1.5,7
+            // TODO: Make sure we aren't double-checking this condition in the pipeline or here!
             x = 0;
             y = 0;
         }
@@ -382,7 +322,7 @@ public class Robot {
         x = xPID.calcVal(targetX - objectX);
         y = -wPID.calcVal(targetWidth - objectWidth);
 
-        if (!(objectWidth > 40 && objectWidth < 230)) {
+        if (!(objectWidth > 40 && objectWidth < 150)) { // TODO : perhaps adjust these values
             x = 0;
             y = 0;
             objectNotIdentified = true;
@@ -390,7 +330,8 @@ public class Robot {
             objectNotIdentified = false;
         }
 
-        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+//        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+        chaseObject(x, y, 0); // TODO : comment out
 //        chaseObject(0, 0, 0);
     }
 

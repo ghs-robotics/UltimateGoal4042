@@ -19,10 +19,13 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp
 public class ChaseRing extends LinearOpMode
@@ -40,7 +43,7 @@ public class ChaseRing extends LinearOpMode
 
         waitForStart();
 
-        robot.wait(1.0);
+//        robot.wait(1.0);
 //        robot.swap();
 
         while (opModeIsActive())

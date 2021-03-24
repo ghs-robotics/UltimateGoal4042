@@ -1,12 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.auto_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-/**
- * This will be the main class that we will put all of our autonomous code into
- * This class is obviously not complete, and the structure of the code is not decided yet
- */
+import org.firstinspires.ftc.teamcode.robot_components.Robot;
+
+
 @Autonomous
 public class Auto1 extends LinearOpMode {
     public static final int[] NEXT_TO_STARTER_STACK_POS = new int[]{170, 90}; // x position, width
