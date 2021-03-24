@@ -127,3 +127,5 @@ public class Tele1 extends OpMode
     @Override
     public void stop(){}
 }
+
+//TO DO: functions that turns robot to face goal, adujust and shoot?
