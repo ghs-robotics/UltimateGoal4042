@@ -83,12 +83,9 @@ public class Tele1 extends OpMode
         robot.updateDrive();
 
         //Press left bumper to turn on/off the shooter motor
-        if (controller2.left_bumper.equals("pressing")) {
-            robot.toggleShooter();
-        }
-
-        //Press right bumper to launch a ring
         if (controller2.right_bumper.equals("pressing")) {
+            robot.toggleShooter();
+            robot.wait(0.5);
             robot.launchRing();
         }
 
@@ -97,13 +94,12 @@ public class Tele1 extends OpMode
             robot.toggleIntake();
         }
 
-        //Press "b" to toggle the wobble gripper
+        //Press "b" to toggle the wobble gripper, could group together toggle wobble and turn arm?
         if (controller2.b.equals("pressing")) {
             robot.toggleGrab();
         }
 
-
-        //Press "a" to turn the arm
+        //Press "a" to turn the arm,
         if (controller2.a.equals("pressing")) {
             robot.turnArm();
         }
@@ -117,6 +113,13 @@ public class Tele1 extends OpMode
             robot.diffy.leftDiffyPower -= 0.05;
             robot.diffy.rightDiffyPower -= 0.05;
             robot.diffy.sendPowers();
+        }
+        //adjusts diffy angle
+        if (controller2.dpad_up.equals("pressing")) {
+            robot.diffy.increaseIncline();
+        }
+        if (controller2.dpad_down.equals("pressing")) {
+            robot.diffy.decreaseIncline();
         }
     }
 

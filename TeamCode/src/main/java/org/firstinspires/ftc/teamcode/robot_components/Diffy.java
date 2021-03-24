@@ -52,7 +52,7 @@ public class Diffy {
         shooterMotorPowered = !shooterMotorPowered;
         sendPowers();
     }
-
+    //inaccurate AF! make better functions later when encoder works
     public void increaseIncline(){
         leftDiffyPower = 0.5;
         rightDiffyPower = 1.0;
@@ -64,6 +64,7 @@ public class Diffy {
         rightDiffyPower = 0.5;
         sendPowers();
     }
+
 
 
     /*
