@@ -38,13 +38,14 @@ public class Tele1 extends OpMode
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-    //Controller controller2;
+    Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
+        controller2 = new Controller(gamepad2);
         robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -63,6 +64,7 @@ public class Tele1 extends OpMode
     public void loop() {
         //Registers controller input
         controller1.update();
+        controller2.update();
 
         //Press "x" to toggle speed between 100% and 30%
         if (controller1.x.equals("pressing")) {
@@ -78,12 +80,12 @@ public class Tele1 extends OpMode
         robot.updateDrive();
 
         //Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) {
+        if (controller2.left_bumper.equals("pressing")) {
             robot.toggleShooter();
         }
 
         //Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) {
+        if (controller2.right_bumper.equals("pressing")) {
             robot.launchRing();
         }
 
@@ -93,12 +95,13 @@ public class Tele1 extends OpMode
         }
 
         //Press "b" to toggle the wobble gripper
-        if (controller1.b.equals("pressing")) {
+        if (controller2.b.equals("pressing")) {
             robot.toggleGrab();
         }
 
+
         //Press "a" to turn the arm
-        if (controller1.a.equals("pressing")) {
+        if (controller2.a.equals("pressing")) {
             robot.turnArm();
         }
 

@@ -60,6 +60,7 @@ public class Diffy {
         sendPowers();
     }
 
+
     /*
     // Calculates shooter motor speed in ticks per second
     private double findShooterVelocity() {
