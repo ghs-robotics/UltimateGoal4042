@@ -41,6 +41,7 @@ public class Tele1 extends OpMode
 {
     //Declare OpMode members
     Robot robot;
+    ChaseTower chasetower;
     Controller controller1;
     Controller controller2;
 
@@ -133,7 +134,7 @@ public class Tele1 extends OpMode
         }
 
         if(controller2.left_bumper.equals("pressing")); {
-            ChaseTower.runOpMode()
+            chasetower.runOpMode();
         }
 
     }
