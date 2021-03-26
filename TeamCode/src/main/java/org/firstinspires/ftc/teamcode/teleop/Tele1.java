@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
+import org.firstinspires.ftc.teamcode.test_opmodes.ChaseTower;
 
 @TeleOp(name="Tele1", group="Iterative Opmode")
 public class Tele1 extends OpMode
@@ -121,6 +122,20 @@ public class Tele1 extends OpMode
         if (controller2.dpad_down.equals("pressing")) {
             robot.diffy.decreaseIncline();
         }
+        //turn 180 might work?
+        if(controller2.x.equals("pressing")); {
+            robot.rotateToPos(180, 1);
+        }
+
+        //turn to face goal might work??
+        if(controller2.y.equals("pressing")); {
+            robot.rotateToPos(0, 1);
+        }
+
+        if(controller2.left_bumper.equals("pressing")); {
+            ChaseTower.runOpMode()
+        }
+
     }
 
     //Code to run ONCE after the driver hits STOP
@@ -129,3 +144,4 @@ public class Tele1 extends OpMode
 }
 
 //TO DO: functions that turns robot to face goal, adujust and shoot?
+//2 shits: if button press, turn to face goal; if button press turn 180
