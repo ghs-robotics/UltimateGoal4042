@@ -28,7 +28,8 @@ public class Robot {
     public static double cover = 0; // The fraction of the top part of the camera screen that is
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
-    boolean objectNotIdentified = false; // The program will know when the object isn't in view
+    boolean objectNotIdentified = false;// The program will know when the object isn't in view
+    public int mode = 1; //0 is POV, 1 is meta, ... (might add more later)
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 95;
@@ -245,7 +246,7 @@ public class Robot {
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rotation) {
         double r = Math.hypot(x, y);
-        double robotAngle = Math.atan2(y, x) - Math.PI / 4;
+        double robotAngle = Math.atan2(y, x) - Math.PI / 4 - (mode == 1 ? gyro.getAngle() : 0);
         leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
         rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rotation, -1.0, 1.0) * speed;
         leftRearPower = Range.clip(r * Math.sin(robotAngle) + rotation, -1.0, 1.0) * speed;

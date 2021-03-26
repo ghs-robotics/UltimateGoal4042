@@ -112,6 +112,11 @@ public class Tele1 extends OpMode
             robot.diffy.rightDiffyPower -= 0.05;
             robot.diffy.sendPowers();
         }
+        if (controller1.dpad_left.equals("pressing")) {
+            robot.mode = (robot.mode == 0) ? 1 : 0;
+        }
+        //End of loop here
+        }
     }
 
     //Code to run ONCE after the driver hits STOP
