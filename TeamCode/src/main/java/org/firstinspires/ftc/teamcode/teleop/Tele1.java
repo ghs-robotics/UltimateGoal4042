@@ -132,9 +132,11 @@ public class Tele1 extends OpMode
         if(controller2.y.equals("pressing")); {
             robot.rotateToPos(0, 1);
         }
-
+        //chases tower...?
         if(controller2.left_bumper.equals("pressing")); {
-            chasetower.runOpMode();
+            robot.setTargetToTower();
+            robot.chaseTower();
+            robot.wait(0.05);
         }
 
     }
