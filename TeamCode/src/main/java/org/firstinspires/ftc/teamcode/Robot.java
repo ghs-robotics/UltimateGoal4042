@@ -30,6 +30,7 @@ public class Robot {
 
     boolean objectNotIdentified = false;// The program will know when the object isn't in view
     public int mode = 1; //0 is POV, 1 is meta, ... (might add more later)
+    public int metaOffset = 0; //Change the direction of meta mode, default will be facing the tower goals
     int targetX = 100;
     int targetY = 140;
     int targetWidth = 95;
@@ -246,7 +247,7 @@ public class Robot {
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rotation) {
         double r = Math.hypot(x, y);
-        double robotAngle = Math.atan2(y, x) - Math.PI / 4 - (mode == 1 ? gyro.getAngle() : 0);
+        double robotAngle = Math.atan2(y, x) - Math.PI / 4 + (mode == 1 ? Math.toRadians(gyro.getAngle() + metaOffset) : 0);
         leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
         rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rotation, -1.0, 1.0) * speed;
         leftRearPower = Range.clip(r * Math.sin(robotAngle) + rotation, -1.0, 1.0) * speed;

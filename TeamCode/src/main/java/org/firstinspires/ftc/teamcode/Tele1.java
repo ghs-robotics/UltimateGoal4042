@@ -115,6 +115,9 @@ public class Tele1 extends OpMode
         if (controller1.dpad_left.equals("pressing")) {
             robot.mode = (robot.mode == 0) ? 1 : 0;
         }
+        if (controller1.dpad_right.equals("pressing")) {
+            robot.metaOffset += (robot.metaOffset < 270) ? 90 : -270;
+        }
         //End of loop here
         }
     }
