@@ -25,7 +25,7 @@ public class Robot {
     // covered, which is useful when we don't want the phone to detect anything beyond the field
 
     private boolean objectNotIdentified = false; // The program will know when the object isn't in view
-    public PhoneCamManager camera;
+    public CameraManager camera;
 
     private int targetX = 100;
     private int targetY = 140;
@@ -36,7 +36,7 @@ public class Robot {
     private int objectHeight = 0;
     private double x = 0;
     private double y = 0;
-    public double targetAngle = 0; // gyroscope will target this angle
+    public double targetAngle = 180; // gyroscope will target this angle
 
     private String currentTargetObject = "ring";
 
@@ -48,9 +48,10 @@ public class Robot {
     private double intakePower = 0;
     public double armAngle = 0.45; // Up position
     public double grabAngle = 0.15; // Closed position
-    public double shooterAngle = 0.58; // Back (regular) position
+    public double shooterAngle = 0.5; // Back position TODO : FIX THIS
     public double speed = 1;
     public double config = 0;
+    double rot = 1;
 
     public DcMotor leftFrontDrive;
     public DcMotor rightFrontDrive;
@@ -100,7 +101,7 @@ public class Robot {
         diffy = new Diffy(hardwareMap);
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
-        camera = new PhoneCamManager(hardwareMap);
+        camera = new CameraManager(hardwareMap);
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
         this.telemetry = telemetry;
@@ -166,7 +167,7 @@ public class Robot {
     // Set a target and use default values for the target position
     public void setTargetToRing() { setTargetToRing(180, 190); } // Originally: y = 220
     public void setTargetToWobble() { setTargetToWobble(60, 160); }
-    public void setTargetToTower() { setTargetToTower(140, 70); }
+    public void setTargetToTower() { setTargetToTower(152, 64); }
 
     // Sets servos to starting positions
     public void resetServos() {
@@ -186,6 +187,7 @@ public class Robot {
 
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rotation) {
+        rotation *= rot;
         double r = Math.hypot(x, y);
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
         leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
@@ -233,6 +235,7 @@ public class Robot {
         }
 
         if (t.equals("tower")) {
+            telemetry.addData("angle = ", gyro.getAngle());
             telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
             telemetry.addData("towerY = ", objectY);
             telemetry.addData("width = ", objectWidth + " (target = " + targetWidth + ")");
@@ -319,10 +322,10 @@ public class Robot {
         if (!currentTargetObject.equals("tower")) { setTargetToTower(); }
         updateObjectValues();
 
-        x = xPID.calcVal(targetX - objectX);
-        y = -wPID.calcVal(targetWidth - objectWidth);
+        x = -xPID.calcVal(targetX - objectX);
+        y = wPID.calcVal(targetWidth - objectWidth);
 
-        if (!(objectWidth > 40 && objectWidth < 150)) { // TODO : perhaps adjust these values
+        if (!(objectWidth > 34 && objectWidth < 150)) { // 34 is back of the field, closest is 150
             x = 0;
             y = 0;
             objectNotIdentified = true;
@@ -331,8 +334,8 @@ public class Robot {
         }
 
 //        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
-        chaseObject(x, y, 0); // TODO : comment out
-//        chaseObject(0, 0, 0);
+        chaseObject(0, 0, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
+//        chaseObject(x, y, 0); // TODO : comment out
     }
 
     public void moveToPos(int[] pos) {
@@ -394,6 +397,21 @@ public class Robot {
         toggleShooter();
     }
 
+    public void switchDriveDirection() {
+        if (leftFrontDrive.getDirection().equals(DcMotor.Direction.FORWARD)) {
+            leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        } else {
+            leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+            leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        }
+        rot *= -1.0;
+    }
+
     // Toggles the drive speed between 50% and normal
     public void toggleSpeed() {
         speed = (speed == 1 ? 0.5 : 1);
@@ -423,11 +441,11 @@ public class Robot {
     }
 
     // Launches a ring by moving the shooterServo
-    public void launchRing() {
-        shooterAngle = 0.46; // Forward position
+    public void launchRing() { // TODO : FIX
+        shooterAngle = 0.9; // Forward position
         shooterServo.setPosition(shooterAngle);
         wait(0.5);
-        shooterAngle = 0.58; // Back position
+        shooterAngle = 0.5; // Back position
         shooterServo.setPosition(shooterAngle);
     }
 

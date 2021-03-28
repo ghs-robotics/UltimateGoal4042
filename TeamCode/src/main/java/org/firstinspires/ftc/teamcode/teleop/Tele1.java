@@ -41,13 +41,14 @@ public class Tele1 extends OpMode
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-//    Controller controller2;
+    Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
+        controller2 = new Controller(gamepad2);
         robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -66,7 +67,7 @@ public class Tele1 extends OpMode
     public void loop() {
         // Registers controller input
         controller1.update();
-//        controller2.update();
+        controller2.update();
 
         // Press "x" to toggle speed between 100% and 50%
         if (controller1.x.equals("pressing")) {
@@ -81,41 +82,56 @@ public class Tele1 extends OpMode
         );
         robot.updateDrive();
 
-        // Press left bumper to turn on/off the shooter motor
-        if (controller1.left_bumper.equals("pressing")) {
-            robot.toggleShooter();
-        }
-
-        // Press right bumper to launch a ring
-        if (controller1.right_bumper.equals("pressing")) {
+        // Press right stick button to move indexer servo
+        if (controller2.right_stick_button.equals("pressing")) {
             robot.launchRing();
         }
 
-        // Press "y" to turn on/off the intake motor
-        if (controller1.y.equals("pressing")) {
+        // Press "x" to toggle the intake motor
+        if (controller2.x.equals("pressing")) {
             robot.toggleIntake();
         }
 
         // Press "b" to toggle the wobble gripper
-        if (controller1.b.equals("pressing")) {
+        if (controller2.right_bumper.equals("pressing")) {
             robot.toggleGrab();
         }
 
         // Press "a" to turn the arm
-        if (controller1.a.equals("pressing")) {
+        if (controller2.left_bumper.equals("pressing")) {
             robot.turnArm();
         }
 
-        if (controller1.dpad_up.equals("pressing")) {
+        // Diffy motors
+        if (controller2.dpad_up.equals("pressing")) {
             robot.diffy.leftDiffyPower += 0.05;
+            robot.diffy.sendPowers();
+        }
+        if (controller2.dpad_down.equals("pressing")) {
+            robot.diffy.leftDiffyPower -= 0.05;
+            robot.diffy.sendPowers();
+        }
+        if (controller2.y.equals("pressing")) {
             robot.diffy.rightDiffyPower += 0.05;
             robot.diffy.sendPowers();
         }
-        if (controller1.dpad_down.equals("pressing")) {
-            robot.diffy.leftDiffyPower -= 0.05;
+        if (controller2.a.equals("pressing")) {
             robot.diffy.rightDiffyPower -= 0.05;
             robot.diffy.sendPowers();
         }
+
+        // Press "b" to toggle the diffy motors on/off
+        if (controller2.b.equals("pressing")) {
+            if (robot.getElapsedTimeSeconds() > 2) {
+                robot.diffy.toggle();
+            }
+        }
+
+        // Press "b" to toggle the diffy motors on/off
+        if (controller1.b.equals("pressing")) {
+            robot.switchDriveDirection();
+        }
+
     }
 
     //Code to run ONCE after the driver hits STOP

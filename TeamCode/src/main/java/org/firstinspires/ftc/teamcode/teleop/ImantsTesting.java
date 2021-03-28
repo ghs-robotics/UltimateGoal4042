@@ -40,14 +40,14 @@ public class ImantsTesting extends OpMode
 {
     //Declare OpMode members
     Robot robot;
-    Controller controller1;
+    Controller controller2;
 //    Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
-        controller1 = new Controller(gamepad1);
+        controller2 = new Controller(gamepad1);
         robot.resetServos();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -65,56 +65,56 @@ public class ImantsTesting extends OpMode
     @Override
     public void loop() {
         // Registers controller input
-        controller1.update();
+        controller2.update();
 
         // Mecanum wheel drive
         robot.calculateDrivePowers(
-                controller1.left_stick_x,
-                controller1.left_stick_y,
-                controller1.right_stick_x
+                controller2.left_stick_x,
+                controller2.left_stick_y,
+                controller2.right_stick_x
         );
         robot.updateDrive();
 
         // Press right stick button to move indexer servo
-        if (controller1.right_stick_button.equals("pressing")) {
+        if (controller2.right_stick_button.equals("pressing")) {
             robot.launchRing();
         }
 
         // Press "x" to toggle the intake motor
-        if (controller1.x.equals("pressing")) {
+        if (controller2.x.equals("pressing")) {
             robot.toggleIntake();
         }
 
         // Press left bumper to turn the arm
-        if (controller1.left_bumper.equals("pressing")) {
+        if (controller2.left_bumper.equals("pressing")) {
             robot.turnArm();
         }
 
         // Press right bumper to toggle the claw
-        if (controller1.right_bumper.equals("pressing")) {
+        if (controller2.right_bumper.equals("pressing")) {
             robot.toggleGrab();
         }
 
         // Diffy motors
-        if (controller1.dpad_up.equals("pressing")) {
+        if (controller2.dpad_up.equals("pressing")) {
             robot.diffy.leftDiffyPower += 0.05;
             robot.diffy.sendPowers();
         }
-        if (controller1.dpad_down.equals("pressing")) {
+        if (controller2.dpad_down.equals("pressing")) {
             robot.diffy.leftDiffyPower -= 0.05;
             robot.diffy.sendPowers();
         }
-        if (controller1.y.equals("pressing")) {
+        if (controller2.y.equals("pressing")) {
             robot.diffy.rightDiffyPower += 0.05;
             robot.diffy.sendPowers();
         }
-        if (controller1.a.equals("pressing")) {
+        if (controller2.a.equals("pressing")) {
             robot.diffy.rightDiffyPower -= 0.05;
             robot.diffy.sendPowers();
         }
 
         // Press "b" to toggle the diffy motors on/off
-        if (controller1.b.equals("pressing")) {
+        if (controller2.b.equals("pressing")) {
             robot.diffy.toggle();
         }
 

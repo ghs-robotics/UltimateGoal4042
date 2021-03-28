@@ -25,8 +25,8 @@ public class Diffy {
         rightDiffyMotor = hardwareMap.get(DcMotor.class, "rightDiffyMotor");
 
         //Defines the forward direction for diffy motors
-        leftDiffyMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightDiffyMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftDiffyMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightDiffyMotor.setDirection(DcMotor.Direction.REVERSE);
 
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
