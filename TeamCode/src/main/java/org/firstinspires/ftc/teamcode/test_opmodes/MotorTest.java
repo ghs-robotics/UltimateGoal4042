@@ -69,12 +69,12 @@ public class MotorTest extends OpMode
 
         // shooter Servo: 0.58 (regular back) to 0.46 (forward)
         if (controller1.dpad_up.equals("pressing")) {
-            robot.shooterAngle += 0.02;
-            robot.shooterServo.setPosition(robot.shooterAngle);
+            robot.indexerAngle += 0.02;
+            robot.indexerServo.setPosition(robot.indexerAngle);
         }
         if (controller1.dpad_down.equals("pressing")) {
-            robot.shooterAngle -= 0.02;
-            robot.shooterServo.setPosition(robot.shooterAngle);
+            robot.indexerAngle -= 0.02;
+            robot.indexerServo.setPosition(robot.indexerAngle);
         }
 
         // grab Servo: 0.15 (closed) to 0.48 (open)

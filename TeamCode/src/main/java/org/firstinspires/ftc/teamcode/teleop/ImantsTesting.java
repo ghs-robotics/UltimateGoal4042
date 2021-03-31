@@ -97,25 +97,25 @@ public class ImantsTesting extends OpMode
 
         // Diffy motors
         if (controller2.dpad_up.equals("pressing")) {
-            robot.diffy.leftDiffyPower += 0.05;
-            robot.diffy.sendPowers();
+            robot.powerLauncher.leftPower += 0.05;
+            robot.powerLauncher.sendPowers();
         }
         if (controller2.dpad_down.equals("pressing")) {
-            robot.diffy.leftDiffyPower -= 0.05;
-            robot.diffy.sendPowers();
+            robot.powerLauncher.leftPower -= 0.05;
+            robot.powerLauncher.sendPowers();
         }
         if (controller2.y.equals("pressing")) {
-            robot.diffy.rightDiffyPower += 0.05;
-            robot.diffy.sendPowers();
+            robot.powerLauncher.rightPower += 0.05;
+            robot.powerLauncher.sendPowers();
         }
         if (controller2.a.equals("pressing")) {
-            robot.diffy.rightDiffyPower -= 0.05;
-            robot.diffy.sendPowers();
+            robot.powerLauncher.rightPower -= 0.05;
+            robot.powerLauncher.sendPowers();
         }
 
         // Press "b" to toggle the diffy motors on/off
         if (controller2.b.equals("pressing")) {
-            robot.diffy.toggle();
+            robot.powerLauncher.toggle();
         }
 
 

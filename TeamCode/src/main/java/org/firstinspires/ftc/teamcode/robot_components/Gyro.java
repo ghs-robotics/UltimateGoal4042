@@ -13,7 +13,7 @@ public class Gyro {
     Orientation lastAngles = new Orientation ();
     double globalAngle;
 
-    Gyro(HardwareMap hardwareMap) {
+    public Gyro(HardwareMap hardwareMap) {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;

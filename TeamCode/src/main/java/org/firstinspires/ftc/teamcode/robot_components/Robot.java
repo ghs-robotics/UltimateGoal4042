@@ -48,7 +48,7 @@ public class Robot {
     private double intakePower = 0;
     public double armAngle = 0.45; // Up position
     public double grabAngle = 0.15; // Closed position
-    public double shooterAngle = 0.5; // Back position TODO : FIX THIS
+    public double indexerAngle = 0.5; // Back position TODO : FIX THIS
     public double speed = 1;
     public double config = 0;
     double rot = 1;
@@ -60,9 +60,9 @@ public class Robot {
     public DcMotor intakeMotor;
     public Servo armServo;
     public Servo grabServo;
-    public Servo shooterServo;
+    public Servo indexerServo;
 
-    public Diffy diffy;
+    public PowerLauncher powerLauncher;
 
     public ElapsedTime elapsedTime;
     public Gyro gyro;
@@ -74,7 +74,7 @@ public class Robot {
     public PIDController wPID; // For the width of the tower goal
     public PIDController gyroPID; // Controls the angle
 
-    // Creates a robot object with methods that we can use in both Auto and TeleOp
+    // Constructs a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
 
         // These are the names to use in the phone config (in quotes below)
@@ -85,7 +85,7 @@ public class Robot {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         grabServo = hardwareMap.get(Servo.class, "grabServo");
-        shooterServo = hardwareMap.get(Servo.class, "shooterServo");
+        indexerServo = hardwareMap.get(Servo.class, "shooterServo"); // TODO : CHANGE IN CONFIG
 
         // Defines the forward direction for each of our motors/servos
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -95,10 +95,10 @@ public class Robot {
         intakeMotor.setDirection(DcMotor.Direction.REVERSE);
         armServo.setDirection(Servo.Direction.FORWARD);
         grabServo.setDirection(Servo.Direction.FORWARD);
-        shooterServo.setDirection(Servo.Direction.FORWARD);
+        indexerServo.setDirection(Servo.Direction.FORWARD);
 
         // Initializes some other useful tools for our robot (the gyroscope, the timer, etc.)
-        diffy = new Diffy(hardwareMap);
+        powerLauncher = new PowerLauncher(hardwareMap);
         gyro = new Gyro(hardwareMap);
         gyro.resetAngle();
         camera = new CameraManager(hardwareMap);
@@ -173,7 +173,7 @@ public class Robot {
     public void resetServos() {
         armServo.setPosition(armAngle);
         grabServo.setPosition(grabAngle);
-        shooterServo.setPosition(shooterAngle);
+        indexerServo.setPosition(indexerAngle);
     }
 
     // Makes the robot stop driving
@@ -208,9 +208,9 @@ public class Robot {
     public void updateDrive() {
         //Displays motor powers on the phone
 //        telemetry.addData("encoderPos", "" + diffy.getPosition());
-        telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
-        telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
-        telemetry.addData("shooterAngle", "" + shooterAngle);
+        telemetry.addData("leftDiffy", "" + powerLauncher.leftPower);
+        telemetry.addData("rightDiffy", "" + powerLauncher.rightPower);
+        telemetry.addData("shooterAngle", "" + indexerAngle);
         telemetry.addData("angle", "" + gyro.getAngle());
         telemetry.addData("config: ", "" + config);
         telemetry.update();
@@ -412,25 +412,10 @@ public class Robot {
         rot *= -1.0;
     }
 
-    // Toggles the drive speed between 50% and normal
-    public void toggleSpeed() {
-        speed = (speed == 1 ? 0.5 : 1);
-    }
-
-    // Turns the shooter motor on or off
-    public void toggleShooter() { diffy.toggleShooter(0); }
-
     // Turns the intake motor on or off
     public void toggleIntake() {
         intakePower = (intakePower == 0 ? 0.6 : 0);
         intakeMotor.setPower(intakePower);
-    }
-
-    // Turns the arm
-    public void turnArm() {
-        // Default angle is 0.5 (which is the up position)
-        armAngle = (armAngle == 0.88 ? 0.45 : 0.88);
-        armServo.setPosition(armAngle);
     }
 
     // Toggles the wobble gripper
@@ -440,13 +425,28 @@ public class Robot {
         grabServo.setPosition(grabAngle);
     }
 
+    // Toggles the drive speed between 50% and normal
+    public void toggleSpeed() {
+        speed = (speed == 1 ? 0.5 : 1);
+    }
+
+    // Turns the shooter motor on or off
+    public void toggleShooter() { powerLauncher.toggle(); }
+
+    // Turns the arm
+    public void turnArm() {
+        // Default angle is 0.5 (which is the up position)
+        armAngle = (armAngle == 0.88 ? 0.45 : 0.88);
+        armServo.setPosition(armAngle);
+    }
+
     // Launches a ring by moving the shooterServo
     public void launchRing() { // TODO : FIX
-        shooterAngle = 0.9; // Forward position
-        shooterServo.setPosition(shooterAngle);
+        indexerAngle = 0.9; // Forward position
+        indexerServo.setPosition(indexerAngle);
         wait(0.5);
-        shooterAngle = 0.5; // Back position
-        shooterServo.setPosition(shooterAngle);
+        indexerAngle = 0.5; // Back position
+        indexerServo.setPosition(indexerAngle);
     }
 
     // Makes robot move forward and pick up wobble goal

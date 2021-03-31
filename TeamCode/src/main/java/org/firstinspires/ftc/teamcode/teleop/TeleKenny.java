@@ -75,23 +75,6 @@ public class TeleKenny extends OpMode
             robot.turnArm();
         }
 
-        if (controller1.dpad_up.equals("pressing")) {
-            robot.diffy.leftDiffyPower += 0.05;
-            robot.diffy.rightDiffyPower += 0.05;
-            robot.diffy.sendPowers();
-        }
-        if (controller1.dpad_down.equals("pressing")) {
-            robot.diffy.leftDiffyPower -= 0.05;
-            robot.diffy.rightDiffyPower -= 0.05;
-            robot.diffy.sendPowers();
-        }
-        //adjusts diffy angle
-        if (controller2.dpad_up.equals("pressing")) {
-            robot.diffy.increaseIncline();
-        }
-        if (controller2.dpad_down.equals("pressing")) {
-            robot.diffy.decreaseIncline();
-        }
         //turn 180 might work?
         if(controller2.x.equals("pressing")); {
             robot.rotateToPos(180, 1);
