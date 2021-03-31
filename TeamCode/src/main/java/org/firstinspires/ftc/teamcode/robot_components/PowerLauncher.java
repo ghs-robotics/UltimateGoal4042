@@ -38,7 +38,7 @@ public class PowerLauncher {
         launcherServo = hardwareMap.get(Servo.class, "launcherServo"); // TODO : ADD TO CONFIG
 
         // Defines the forward direction for diffy motors
-        leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftMotor.setDirection(DcMotor.Direction.REVERSE);
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // Initialize and reset the timer

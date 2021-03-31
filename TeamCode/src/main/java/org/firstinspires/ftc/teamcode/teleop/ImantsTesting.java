@@ -118,7 +118,14 @@ public class ImantsTesting extends OpMode
             robot.powerLauncher.toggle();
         }
 
-
+        if (controller2.dpad_right.equals("pressing")) {
+            double a = robot.powerLauncher.launcherServo.getPosition();
+            robot.powerLauncher.launcherServo.setPosition(a + 0.01);
+        }
+        if (controller2.dpad_left.equals("pressing")) {
+            double a = robot.powerLauncher.launcherServo.getPosition();
+            robot.powerLauncher.launcherServo.setPosition(a - 0.01);
+        }
 
     }
 

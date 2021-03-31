@@ -208,8 +208,9 @@ public class Robot {
     public void updateDrive() {
         //Displays motor powers on the phone
 //        telemetry.addData("encoderPos", "" + diffy.getPosition());
-        telemetry.addData("leftDiffy", "" + powerLauncher.leftPower);
-        telemetry.addData("rightDiffy", "" + powerLauncher.rightPower);
+        telemetry.addData("leftLaunchPower", "" + powerLauncher.leftPower);
+        telemetry.addData("rightLaunchPower", "" + powerLauncher.rightPower);
+        telemetry.addData("launchAngle", "" + powerLauncher.launcherServo.getDirection());
         telemetry.addData("shooterAngle", "" + indexerAngle);
         telemetry.addData("angle", "" + gyro.getAngle());
         telemetry.addData("config: ", "" + config);
@@ -414,7 +415,7 @@ public class Robot {
 
     // Turns the intake motor on or off
     public void toggleIntake() {
-        intakePower = (intakePower == 0 ? 0.6 : 0);
+        intakePower = (intakePower == 0 ? 1.0 : (intakePower == 1.0 ? -1.0 : 0));
         intakeMotor.setPower(intakePower);
     }
 
