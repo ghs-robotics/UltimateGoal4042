@@ -38,36 +38,57 @@ import org.firstinspires.ftc.teamcode.robot_components.Robot;
 @TeleOp(name="Tele1", group="Iterative Opmode")
 public class Tele1 extends OpMode
 {
-    //Declare OpMode members
+    // Declare OpMode members
     Robot robot;
     Controller controller1;
     Controller controller2;
 
-    //Code to run ONCE when the driver hits INIT
+    // Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         controller2 = new Controller(gamepad2);
         robot.resetServos();
+        robot.resetGyroAngle();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
 
-    //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
+    // Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
     @Override
     public void init_loop() {}
 
-    //Code to run ONCE when the driver hits PLAY
+    // Code to run ONCE when the driver hits PLAY
     @Override
-    public void start() { robot.resetElapsedTime(); }
+    public void start() {
+        robot.resetElapsedTime();
+        robot.switchDriveDirection(); // Default is when the front is the launcher side
+    }
 
-    //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
+    // Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
     @Override
     public void loop() {
+
         // Registers controller input
         controller1.update();
         controller2.update();
+
+        // -----------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
+        // ------------------------------   CONTROLLER 1 FUNCTIONS   -------------------------------
+        // -----------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
+
+        // Press "a" to toggle the intake motor
+        if (controller1.a.equals("pressing")) {
+            robot.toggleIntake();
+        }
+
+        // Press "b" to flip the drive direction
+        if (controller1.b.equals("pressing")) {
+            robot.switchDriveDirection();
+        }
 
         // Press "x" to toggle speed between 100% and 50%
         if (controller1.x.equals("pressing")) {
@@ -80,56 +101,78 @@ public class Tele1 extends OpMode
                 controller1.left_stick_y,
                 controller1.right_stick_x
         );
-        robot.updateDrive();
+        robot.updateDrive(); // Also updates telemetry
 
-        // Press right stick button to move indexer servo
+        // Rotate to face tower goal
+        if (controller1.left_bumper.equals("pressing")) {
+            robot.rotateToPos(0,1);
+        }
+
+        // Rotate to face away from tower goal
+        if (controller1.left_bumper.equals("pressing")) {
+            robot.rotateToPos(180,1);
+        }
+
+        if (controller1.dpad_up.equals("pressing")) {
+            robot.powerLauncher.launchAngle += 0.1;
+            robot.powerLauncher.resetServos();
+        }
+        if (controller1.dpad_down.equals("pressing")) {
+            robot.powerLauncher.launchAngle -= 0.1;
+            robot.powerLauncher.resetServos();
+        }
+
+        /*
+        //chases tower...?
+        if(controller2.left_bumper.equals("pressing")); {
+            robot.setTargetToTower();
+            robot.chaseTower();
+            robot.wait(0.05);
+        }
+         */
+
+        // -----------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
+        // ------------------------------   CONTROLLER 2 FUNCTIONS   -------------------------------
+        // -----------------------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
+
+        // Right stick button moves indexer servo
         if (controller2.right_stick_button.equals("pressing")) {
-            robot.launchRing();
+            robot.launchRing(1);
         }
 
-        // Press "x" to toggle the intake motor
-        if (controller2.x.equals("pressing")) {
-            robot.toggleIntake();
-        }
-
-        // Press "b" to toggle the wobble gripper
+        // Right bumper toggles the claw
         if (controller2.right_bumper.equals("pressing")) {
-            robot.toggleGrab();
+            robot.toggleClaw();
         }
 
-        // Press "a" to turn the arm
+        // Left bumper turns arm
         if (controller2.left_bumper.equals("pressing")) {
             robot.turnArm();
         }
 
-        // Diffy motors
+        // Launch motors
         if (controller2.dpad_up.equals("pressing")) {
-            robot.powerLauncher.leftPower += 0.05;
+            robot.powerLauncher.leftPower += 0.2;
             robot.powerLauncher.sendPowers();
         }
         if (controller2.dpad_down.equals("pressing")) {
-            robot.powerLauncher.leftPower -= 0.05;
+            robot.powerLauncher.leftPower -= 0.2;
             robot.powerLauncher.sendPowers();
         }
         if (controller2.y.equals("pressing")) {
-            robot.powerLauncher.rightPower += 0.05;
+            robot.powerLauncher.rightPower += 0.2;
             robot.powerLauncher.sendPowers();
         }
         if (controller2.a.equals("pressing")) {
-            robot.powerLauncher.rightPower -= 0.05;
+            robot.powerLauncher.rightPower -= 0.2;
             robot.powerLauncher.sendPowers();
         }
 
-        // Press "b" to toggle the diffy motors on/off
+        // Press "b" to toggle the launch motors on/off
         if (controller2.b.equals("pressing")) {
-            if (robot.getElapsedTimeSeconds() > 2) {
-                robot.powerLauncher.toggle();
-            }
-        }
-
-        // Press "b" to toggle the diffy motors on/off
-        if (controller1.b.equals("pressing")) {
-            robot.switchDriveDirection();
+            robot.powerLauncher.toggle();
         }
     }
 

@@ -10,17 +10,18 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 
 public class CameraManager {
 
-    // CAUTION, I changed the type of the camera to OpenCvCamera so I can make the cameras interchangeable
-//    public OpenCvInternalCamera phoneCam;
+    // Cameras
     public OpenCvCamera phoneCam;
     public OpenCvCamera webcam;
 
+    // Pipelines for image processing
     public ObjectDeterminationPipeline phoneCamPipeline;
     public ObjectDeterminationPipeline webcamPipeline;
 
+    // Constructs a CameraManager with two cameras
     public CameraManager(HardwareMap hardwareMap) {
 
-        // Initializing some CV variables/objects
+        // Initializes some CV variables/objects
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId",
                 "id",
@@ -34,11 +35,13 @@ public class CameraManager {
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"webcam"), viewportContainerIds[1]);
+                hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
 
+        // Opens cameras
         phoneCam.openCameraDevice();
         webcam.openCameraDevice();
 
+        // Creates and assigns each camera a pipeline
         phoneCamPipeline = new ObjectDeterminationPipeline();
         webcamPipeline = new ObjectDeterminationPipeline();
 
@@ -46,36 +49,25 @@ public class CameraManager {
         webcam.setPipeline(webcamPipeline);
     }
 
-    // Initialize the camera
+    // Initializes the camera
     public void initCamera() {
         startStreaming();
-        /*
-        // Sets the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-        currentCamera.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        currentCamera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                startStreaming();
-            }
-        });
-        */
     }
 
-    //Start streaming frames on the phone camera
+    // Starts streaming frames on the phone camera
     public void startStreaming() {
 //        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
         webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
-    //Stop streaming frames on the phone camera
+    // Stops streaming frames on the phone camera
     public void stopStreaming() {
         phoneCam.stopStreaming();
         webcam.stopStreaming();
     }
 
+    // Returns the coordinates of the target object using CV
     public int[] getObjectData(String target) {
         if (target.equals("tower")) {
             return webcamPipeline.getObjectData();

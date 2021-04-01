@@ -10,6 +10,8 @@ public class PowerLauncher {
 
     public double leftPower = 0;
     public double rightPower = 0;
+    public double launchAngle = 0; // TODO : CALIBRATE
+    public double indexerAngle = 0.5; // Back position TODO : CALIBRATE
     public boolean running = false;
 
     // Target speed for the two motors in ticks per second
@@ -24,24 +26,28 @@ public class PowerLauncher {
 
     private ElapsedTime elapsedTime;
 
-    // PowerLauncher's motors plus a servo for adjusting shot angle
+    // Motors and servos
     public DcMotor leftMotor;
     public DcMotor rightMotor;
-    public Servo launcherServo;
+    public Servo launchAngleServo;
+    public Servo indexerServo;
 
     // Constructs a PowerLauncher object
     public PowerLauncher(HardwareMap hardwareMap) {
 
-        // Initializes motors and servo and add them to the phone config
-        leftMotor = hardwareMap.get(DcMotor.class, "leftDiffyMotor"); // TODO : CHANGE CONFIG
-        rightMotor = hardwareMap.get(DcMotor.class, "rightDiffyMotor"); // TODO : CHANGE CONFIG
-        launcherServo = hardwareMap.get(Servo.class, "launcherServo"); // TODO : ADD TO CONFIG
+        // Initializes motors and servos and adds them to the phone config
+        leftMotor = hardwareMap.get(DcMotor.class, "leftLaunchMotor");
+        rightMotor = hardwareMap.get(DcMotor.class, "rightLaunchMotor");
+        launchAngleServo = hardwareMap.get(Servo.class, "launchAngleServo");
+        indexerServo = hardwareMap.get(Servo.class, "indexerServo");
 
-        // Defines the forward direction for diffy motors
+        // Defines the forward direction for motors and servos
         leftMotor.setDirection(DcMotor.Direction.REVERSE);
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
+        launchAngleServo.setDirection(Servo.Direction.FORWARD);
+        indexerServo.setDirection(Servo.Direction.FORWARD);
 
-        // Initialize and reset the timer
+        // Initializes and resets the timer
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
     }
@@ -78,12 +84,26 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
+    // Moves the indexer servo, which launches a ring
+    public void index() {
+        indexerAngle = 0.9; // Forward position
+        indexerServo.setPosition(indexerAngle);
+        wait(0.3); // TODO : CHANGE
+        indexerAngle = 0.5; // Back position
+        indexerServo.setPosition(indexerAngle);
+    }
+
     // Resets the encoder encoder position's of the motors to zero
-    public void resetDiffyMotors() { // TODO : USE???
+    public void resetMotors() { // TODO : USE???
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void resetServos() {
+        indexerServo.setPosition(indexerAngle);
+        launchAngleServo.setPosition(launchAngle);
     }
 
     // Sends powers to the actual motors
@@ -108,5 +128,11 @@ public class PowerLauncher {
         } else {
             sendPowers(1.0);
         }
+    }
+
+    // Makes the robot wait (i.e. do nothing) for a specified number of seconds
+    public void wait(double seconds) {
+        double start = elapsedTime.seconds();
+        while (elapsedTime.seconds() - start < seconds) {}
     }
 }

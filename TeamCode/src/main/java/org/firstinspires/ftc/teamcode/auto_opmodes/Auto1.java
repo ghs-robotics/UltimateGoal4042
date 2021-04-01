@@ -66,11 +66,11 @@ public class Auto1 extends LinearOpMode {
         //once there, place down the wobble goal
         robot.turnArm();
         robot.wait(0.4);
-        robot.toggleGrab();
+        robot.toggleClaw();
         robot.wait(0.4);
         robot.turnArm();
         robot.wait(0.1);
-        robot.toggleGrab();
+        robot.toggleClaw();
 
         madeIt("set down first wobble goal");
 
@@ -87,7 +87,7 @@ public class Auto1 extends LinearOpMode {
 
         //pick up second wobble goal
         robot.pickUpWobbleGoal(1.0);
-        robot.targetAngle = 0;
+        robot.targetGyroAngle = 0;
 
         madeIt("picked up the second wobble goal");
 
@@ -120,11 +120,11 @@ public class Auto1 extends LinearOpMode {
         //once there, place down the wobble goal
         robot.turnArm();
         robot.wait(0.4);
-        robot.toggleGrab();
+        robot.toggleClaw();
         robot.wait(0.4);
         robot.turnArm();
         robot.wait(0.1);
-        robot.toggleGrab();
+        robot.toggleClaw();
 
         madeIt("delivered the second wobble");
 
