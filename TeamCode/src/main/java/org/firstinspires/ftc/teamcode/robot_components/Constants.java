@@ -14,8 +14,8 @@ public interface Constants {
     Scalar UPPER_TOWER_HSV = new Scalar(80, 255, 220); // original values: 54, 212, 255
 
     // Wobble goal HSV values
-    Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
-    Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
+    Scalar LOWER_WOBBLE_HSV = new Scalar(0, 0, 0);
+    Scalar UPPER_WOBBLE_HSV = new Scalar(255, 255, 36);
 
 }
 

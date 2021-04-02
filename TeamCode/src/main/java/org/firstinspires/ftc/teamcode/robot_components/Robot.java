@@ -431,38 +431,21 @@ public class Robot implements Constants {
 
     // Makes the robot chase the wobble goal (if called repeatedly); TO DO: NEEDS GYRO IMPLEMENTATION
     public void chaseWobble() {
-        if (!currentTargetObject.equals("wobble")) { setTargetToWobble(); }
+        if (!currentTargetObject.equals("wobble")) { setTargetToRing(); }
         updateObjectValues();
 
-        double dy = targetY - objectY;
-        double dx = targetX - objectX;
+        int OFFSET = 80;
 
-        // Adjust x and y values according to how far away the robot is from the target
-        if (Math.abs(dx) < 10) {
-            x = 0;
-        } else {
-            x += Range.clip(dx / 400.0, -0.2, 0.2);
-        }
-        if (Math.abs(dy) < 10) {
-            y = 0;
-        } else {
-            y -= Range.clip(dy / 400.0, -0.2, 0.2);
-        }
-
-        // Make sure the robot doesn't go too fast
-        y = Range.clip(y, -0.6, 0.6);
-        x = Range.clip(x, -0.6, 0.6);
+        x = xPID.calcVal((targetX + OFFSET) - objectX);
+        y = -yPID.calcVal(targetY - objectY);
 
         double h = objectHeight;
         double w = objectWidth;
+        double r = 1.0 * w / h;
 
-        // Testing to make sure the detected object is a wobble goal
-        if (!(h > 10 && h < 200 && w > 10 && w < 200)) {
-            x = 0;
-            y = 0;
-        }
 
-        chaseObject(x, y, 0);
+
+        chaseObject(x, 0, 0); // TODO : change back to y
     }
 
     public void moveToPos(int[] pos) {
