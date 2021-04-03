@@ -8,15 +8,22 @@ import com.qualcomm.robotcore.util.Range;
 
 public class PowerLauncher {
 
+    public static final double PERFECT_LAUNCH_ANGLE = 0.783; // Perfect launch angle
+    public static final double INDEXER_BACK_POS = 0.500;
+    public static final double INDEXER_FORWARD_POS = 0.910;
+
     public double leftPower = 0;
     public double rightPower = 0;
-    public double launchAngle = 0; // TODO : CALIBRATE
-    public double indexerAngle = 0.5; // Back position TODO : CALIBRATE
+
+    // launchAngle should range between 0.7 (horizontal) and 0.85 (very steep); launcher vertical at 1.0
+    public double launchAngle = PERFECT_LAUNCH_ANGLE;
+    public double indexerAngle = INDEXER_BACK_POS;
+
     public boolean running = false;
 
     // Target speed for the two motors in ticks per second
-    public double leftTargetVelocity = 0;
-    public double rightTargetVelocity = 0;
+    public double leftTargetVelocity = 1700;
+    public double rightTargetVelocity = 1700;
 
     // Variables for calculating the motor velocities
     private long prevLeftPos = 0;
@@ -52,22 +59,20 @@ public class PowerLauncher {
         elapsedTime.reset();
     }
 
-     public void adjustShooterVelocity(){
-         if (getLeftVelocity() > leftTargetVelocity){
-             leftPower -= 0.001;
-         } else {
-             leftPower += 0.001;
-         }
-         if (getRightVelocity() > rightTargetVelocity){
-             rightPower -= 0.001;
-         } else {
-             rightPower += 0.001;
-         }
-         sendPowers();
-     }
+    // Tries to achieve target velocities
+    public void adjustShooterVelocity(){
+        if (getRightVelocity() > rightTargetVelocity){
+            leftPower -= 0.001;
+            rightPower -= 0.001;
+        } else {
+            leftPower += 0.001;
+            rightPower += 0.001;
+        }
+        sendPowers();
+    }
 
     // Calculates left motor speed in ticks per second
-    private double getLeftVelocity() {
+    public double getLeftVelocity() {
         long deltaTicks = (leftMotor.getCurrentPosition() - prevLeftPos);
         double deltaTime = elapsedTime.seconds() - prevLeftSeconds;
         prevLeftPos = leftMotor.getCurrentPosition();
@@ -76,7 +81,7 @@ public class PowerLauncher {
     }
 
     // Calculates right motor speed in ticks per second
-    private double getRightVelocity() {
+    public double getRightVelocity() {
         long deltaTicks = (rightMotor.getCurrentPosition() - prevRightPos);
         double deltaTime = elapsedTime.seconds() - prevRightSeconds;
         prevRightPos = rightMotor.getCurrentPosition();
@@ -86,11 +91,15 @@ public class PowerLauncher {
 
     // Moves the indexer servo, which launches a ring
     public void index() {
-        indexerAngle = 0.9; // Forward position
+        indexerAngle = INDEXER_FORWARD_POS;
         indexerServo.setPosition(indexerAngle);
-        wait(0.3); // TODO : CHANGE
-        indexerAngle = 0.5; // Back position
+        wait(0.6); // TODO : CHANGE
+        indexerAngle = INDEXER_BACK_POS;
         indexerServo.setPosition(indexerAngle);
+    }
+
+    public void changeLaunchAngle(double change) {
+        setLaunchAngle(launchAngle + change);
     }
 
     // Resets the encoder encoder position's of the motors to zero
@@ -101,7 +110,10 @@ public class PowerLauncher {
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    // Rotate servos to default positions
     public void resetServos() {
+        indexerAngle = INDEXER_BACK_POS;
+        launchAngle = PERFECT_LAUNCH_ANGLE;
         indexerServo.setPosition(indexerAngle);
         launchAngleServo.setPosition(launchAngle);
     }
@@ -121,6 +133,12 @@ public class PowerLauncher {
         sendPowers();
     }
 
+    // Sets a launch angle
+    public void setLaunchAngle(double angle) {
+        launchAngle = angle;
+        launchAngleServo.setPosition(launchAngle);
+    }
+
     // Toggles the two launcher motors between off and full power
     public void toggle() {
         if (leftPower != 0 || rightPower != 0) {
@@ -128,6 +146,23 @@ public class PowerLauncher {
         } else {
             sendPowers(1.0);
         }
+        running = !running;
+    }
+
+    // Turn launcher off
+    public void toggleOff() {
+        sendPowers(0.0);
+        running = false;
+    }
+
+    // Turn launcher on
+    public void toggleOn() {
+        sendPowers(0.85);
+        running = true;
+//        double start = elapsedTime.seconds();
+//        while (elapsedTime.seconds() - start < 2) {
+//            adjustShooterVelocity();
+//        }
     }
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds

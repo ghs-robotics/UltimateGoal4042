@@ -35,8 +35,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
-@TeleOp(name="Tele1", group="Linear Opmode")
-public class Tele1 extends LinearOpMode {
+@TeleOp(name="TeleCV", group="Linear Opmode")
+public class TeleCV extends LinearOpMode {
 
     // Declare OpMode members
     Robot robot;
@@ -50,8 +50,8 @@ public class Tele1 extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1); // Whoever presses start + a
         controller2 = new Controller(gamepad2); // Whoever presses start + b
-        robot.resetServos();
-        robot.resetGyroAngle();
+        robot.init();
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.switchDriveDirection(); // Default is when the front is the launcher side
@@ -64,14 +64,13 @@ public class Tele1 extends LinearOpMode {
             // Registers controller input
             controller1.update();
             controller2.update();
+            robot.updateObjectValues();
 
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
             // ------------------------------   CONTROLLER 1 FUNCTIONS   -------------------------------
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
-
-            // NOTE: TO USE THESE FUNCTIONS PRESS START A
 
             // Press "a" to toggle the intake motor
             if (controller1.a.equals("pressing")) {
@@ -88,7 +87,6 @@ public class Tele1 extends LinearOpMode {
                 robot.toggleSpeed();
             }
 
-            // Press "y" to launch 3 rings
             if (controller1.y.equals("pressing")) {
                 robot.launchRings(3);
             }
@@ -111,14 +109,14 @@ public class Tele1 extends LinearOpMode {
                 robot.rotateToPos(180,1);
             }
 
-            /*
-            //chases tower...?
-            if(controller2.left_bumper.equals("pressing")); {
-                robot.setTargetToTower();
-                robot.chaseTower();
-                robot.wait(0.05);
-            }
-            */
+        /*
+        //chases tower...?
+        if(controller2.left_bumper.equals("pressing")); {
+            robot.setTargetToTower();
+            robot.chaseTower();
+            robot.wait(0.05);
+        }
+         */
 
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
@@ -126,7 +124,11 @@ public class Tele1 extends LinearOpMode {
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
 
-            // NOTE: TO USE THESE FUNCTIONS, PRESS START B
+            // Right stick button moves indexer servo
+            if (controller2.x.equals("pressing")) {
+//            robot.launchRings(1);
+                robot.powerLauncher.index();
+            }
 
             // Right bumper toggles the claw
             if (controller2.right_bumper.equals("pressing")) {
@@ -136,12 +138,6 @@ public class Tele1 extends LinearOpMode {
             // Left bumper turns arm
             if (controller2.left_bumper.equals("pressing")) {
                 robot.turnArm();
-            }
-
-            // Pressing x moves indexer servo
-            if (controller2.x.equals("pressing")) {
-//            robot.launchRings(1);
-                robot.powerLauncher.index();
             }
 
             // Toggle launch motors on/off

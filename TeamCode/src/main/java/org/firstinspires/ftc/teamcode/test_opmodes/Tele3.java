@@ -30,15 +30,18 @@ import org.firstinspires.ftc.teamcode.robot_components.Robot;
 @TeleOp
 public class Tele3 extends LinearOpMode
 {
-    public static final int[] NEXT_TO_STARTER_STACK_POS = new int[]{170, 90}; // x position, width
-    public static final int[] SHOOTER_POS = new int[]{100, 80};
-    public static final int[] CONFIG_0_POS = new int[]{30, 107};
-    public static final int[] CONFIG_1_POS = new int[]{103, 115}; //TO DO: CAN BARELY SEE TOWER GOAL FROM HERE!
-    public static final int[] CONFIG_4_POS = new int[]{100, 80}; // TO DO: CAN'T SEE TOWER GOAL FROM THIS POS!
-    public static final int[] SECOND_WOBBLE_POS = new int[]{43, 73};
-    public static final int[] STARTER_STACK_BEFORE_POS = new int[]{100, 80};
-    public static final int[] STARTER_STACK_AFTER_POS = new int[]{100, 60};
-    public static final int[] PARK_POS = new int[]{100, 95};
+    public static final int[] NEXT_TO_STARTER_STACK_POS = new int[]{198, 65}; // x position, width // DONE
+    public static final int[] SHOOTER_POS = new int[]{138, 57}; // DONE Perfect launch position
+    public static final int[] CONFIG_0_POS_I = new int[]{78, 78}; // DONE Deliver first wobble goal
+    public static final int[] CONFIG_0_POS_II = new int[]{112, 78}; // DONE Deliver second wobble goal
+    public static final int[] CONFIG_1_POS_I = new int[]{156, 119}; // DONE
+    public static final int[] CONFIG_1_POS_II = new int[]{186, 119}; // DONE
+    public static final int[] CONFIG_4_POS_I = new int[]{135, 33}; // DONE Move forward one foot!
+    public static final int[] CONFIG_4_POS_II = new int[]{135, 66}; // DONE Move forward one foot!
+    public static final int[] SECOND_WOBBLE_POS = new int[]{138, 45}; // DONE
+    public static final int[] STARTER_STACK_BEFORE_POS = new int[]{138, 57}; // DONE
+    public static final int[] STARTER_STACK_AFTER_POS = new int[]{138, 45}; // DONE
+    public static final int[] PARK_POS = new int[]{138, 65}; // DONE
 
     Robot robot;
     Controller controller1;
@@ -49,14 +52,13 @@ public class Tele3 extends LinearOpMode
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setTargetToTower(95,80);
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
 
         robot.updateObjectValues();
-
         robot.resetElapsedTime();
 
         //Determine how many rings in the starting ring stacks
@@ -73,19 +75,34 @@ public class Tele3 extends LinearOpMode
         //Move sideways until in line with tower goal
         //aim the robot at the goal and make sure that the robot is within the launch zone
         //Shoot 3 rings
-        robot.adjustAndShoot();
+        if (robot.config == 1) {
+            robot.adjustAndShoot(1);
+        }
 
-        madeIt("shot three goals");
+        madeIt("shot " + robot.config + "goal(s)");
+
+        // if starterStack != 0, pickup the starter stack rings
+        if (robot.config == 1) {
+            robot.moveToPos(STARTER_STACK_BEFORE_POS, 2.0);
+            robot.toggleIntake("on");
+            robot.calculateDrivePowers(0, -0.4, 0);
+            robot.sendDrivePowers();
+            robot.wait(3.0);
+            robot.stopDrive();
+            robot.toggleIntake("off");
+        }
+
+        madeIt("gathered rings");
 
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS);
+            robot.moveToPos(CONFIG_0_POS_I);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS);
+            robot.moveToPos(CONFIG_1_POS_I, 1.0, true);
         } else {
-            robot.moveToPos(CONFIG_4_POS);
+            robot.moveToPos(CONFIG_4_POS_I, 1.0, true);
         }
 
         madeIt("next to wobble goal drop zone");
@@ -103,29 +120,16 @@ public class Tele3 extends LinearOpMode
 
         //Head back to location where we shot the rings
         //Move left or right and then backward towards second wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS);
+        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0.0);
+        robot.moveToPos(SECOND_WOBBLE_POS, 3.0);
 
         madeIt("going for the second wobble goal");
 
-        // Turn around
-        robot.rotateToPos(180, 5);
-
-        madeIt("turned around");
-
         //pick up second wobble goal
         robot.pickUpWobbleGoal(1.0);
-        robot.targetGyroAngle = 0;
+
 
         madeIt("picked up the second wobble goal");
-
-        // if starterStack != 0, pickup the starter stack rings
-        if (robot.config == 1) {
-            robot.moveToPos(STARTER_STACK_BEFORE_POS);
-            robot.moveToPos(STARTER_STACK_AFTER_POS);
-        }
-
-        madeIt("gathered rings");
-
 
         //Check that we're in shooting position
         //Shoot the 3 rings
@@ -135,11 +139,11 @@ public class Tele3 extends LinearOpMode
         //Move left or right depending on target wobble goal
         robot.wait(0.01);
         if (robot.config == 0) {
-            robot.moveToPos(CONFIG_0_POS);
+            robot.moveToPos(CONFIG_0_POS_II);
         } else if (robot.config == 1) {
-            robot.moveToPos(CONFIG_1_POS);
+            robot.moveToPos(CONFIG_1_POS_II, 1.0, true);
         } else {
-            robot.moveToPos(CONFIG_4_POS);
+            robot.moveToPos(CONFIG_4_POS_II, 1.0, true);
         }
 
         madeIt("brought second wobble goal to drop zone");
@@ -158,7 +162,7 @@ public class Tele3 extends LinearOpMode
         if(robot.getElapsedTimeSeconds() <= 26) {
 
             robot.wait(0.01);
-            robot.adjustAndShoot();
+            robot.adjustAndShoot(3);
             madeIt("shot more rings");
         } else {
             madeIt("Skipped shooting second ring set");
@@ -173,13 +177,14 @@ public class Tele3 extends LinearOpMode
 
         madeIt("parked");
 
+        /*
         while (opModeIsActive()) {
             controller1.update();
             if (controller1.a.equals("pressing")) {
                 robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 10);
             }
             if (controller1.b.equals("pressing")) {
-                robot.adjustAndShoot();
+                robot.adjustAndShoot(3);
             }
             if (controller1.y.equals("pressing")) {
                 robot.moveToPos(new int[]{170, 90}, 3);
@@ -188,7 +193,6 @@ public class Tele3 extends LinearOpMode
                 robot.moveToPos(new int[]{100, 105}, 3);
             }
 
-            /*
             if (controller1.dpad_down.equals("pressing")) {
                 double[] list = Robot.lower.val;
                 Robot.lower = new Scalar(list[0], list[1], list[2] - 2);
@@ -200,16 +204,16 @@ public class Tele3 extends LinearOpMode
 
             robot.telemetry.addData("HSV MIN, MAX: ", Robot.lower + ", " + Robot.upper);
             robot.telemetry.update();
-            */
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
         }
+        */
     }
 
     public void madeIt(String s) {
         robot.telemetry.addData("Made it! Status: ", s);
         robot.telemetry.update();
-        robot.wait(0.0);
+        robot.wait(1.0);
     }
 }

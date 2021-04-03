@@ -57,7 +57,7 @@ public class CameraManager {
     // Starts streaming frames on the phone camera
     public void startStreaming() {
 //        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+//        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
         webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 

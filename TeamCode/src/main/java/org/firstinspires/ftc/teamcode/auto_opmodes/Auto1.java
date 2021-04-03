@@ -46,7 +46,7 @@ public class Auto1 extends LinearOpMode {
         //Move sideways until in line with tower goal
         //aim the robot at the goal and make sure that the robot is within the launch zone
         //Shoot 3 rings
-        robot.adjustAndShoot();
+        robot.adjustAndShoot(3);
 
         madeIt("shot three goals");
 
@@ -131,7 +131,7 @@ public class Auto1 extends LinearOpMode {
         if(robot.getElapsedTimeSeconds() <= 26) {
 
             robot.wait(0.01);
-            robot.adjustAndShoot();
+            robot.adjustAndShoot(3);
             madeIt("shot more rings");
         } else {
             madeIt("Skipped shooting second ring set");

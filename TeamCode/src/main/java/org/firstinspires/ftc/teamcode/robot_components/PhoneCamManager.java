@@ -10,7 +10,6 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 public class PhoneCamManager {
 
     public OpenCvCamera phoneCam;
-
     public ObjectDeterminationPipeline phoneCamPipeline;
 
     public PhoneCamManager(HardwareMap hardwareMap) {

@@ -25,13 +25,17 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
     public int objectWidth = 0;
     public int objectHeight = 0;
 
+    // Auxiliary Mat objects
+    private Mat dst = new Mat();
+    private Mat hierarchy = new Mat();
+
     @Override
     public void init(Mat firstFrame) {
     }
 
     @Override
     public Mat processFrame(Mat input) {
-        // Update ring coordinates
+        // Update object coordinates
         int[] coords = findObjectCoordinates(input);
         objectX = coords[0];
         objectY = coords[1];
@@ -71,12 +75,13 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
         input.get(targetX,targetY);
 
+        dst.release(); // Avoid leaking memory
+
         return input;
     }
 
     // Detects the position of the target object on the screen and returns an array with those values
     public int[] findObjectCoordinates(Mat src) {
-        Mat dst = new Mat();
         Imgproc.resize(src, src, new Size(320, 240));
 
         // Convert color from RGB to HSV
@@ -88,7 +93,6 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
         // Get the contours of the ring
         List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
@@ -118,7 +122,6 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
     public int[] getObjectCoordinates2(Mat src) {
         Scalar GREEN = new Scalar(0, 255, 0);
 
-        Mat dst = new Mat();
         Imgproc.resize(src, src, new Size(320, 240));
 
         //Cover up background noise
@@ -141,7 +144,6 @@ public class ObjectDeterminationPipeline extends OpenCvPipeline {
 
         //get the contours of the ring
         List<MatOfPoint> contours = new ArrayList<>();
-        Mat hierarchy = new Mat();
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         //draw a contour on the src image
