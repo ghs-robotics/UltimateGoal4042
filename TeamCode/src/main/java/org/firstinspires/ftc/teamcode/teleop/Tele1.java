@@ -130,12 +130,14 @@ public class Tele1 extends LinearOpMode {
 
             // Right bumper toggles the claw
             if (controller2.right_bumper.equals("pressing")) {
-                robot.toggleClaw();
+//                robot.toggleClaw();
+                robot.powerLauncher.rightTargetVelocity += 50;
             }
 
             // Left bumper turns arm
             if (controller2.left_bumper.equals("pressing")) {
-                robot.turnArm();
+//                robot.turnArm();
+                robot.powerLauncher.rightTargetVelocity -= 50;
             }
 
             // Pressing x moves indexer servo
@@ -151,12 +153,26 @@ public class Tele1 extends LinearOpMode {
 
             // Angle the launcher up a bit
             if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(0.002);
+                // Smaller launchAngle means the tilt is higher
+                robot.powerLauncher.changeLaunchAngle(-0.01);
             }
 
             // Angle the launcher down a bit
             if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.002);
+                robot.powerLauncher.changeLaunchAngle(0.01);
+            }
+
+            // TODO : TESTING
+            if (controller2.dpad_left.equals("pressing")) {
+                robot.powerLauncher.changeIndexerAngle(-0.02);
+            }
+
+            if (controller2.dpad_right.equals("pressing")) {
+                robot.powerLauncher.changeIndexerAngle(0.02);
+            }
+
+            if (robot.powerLauncher.running) {
+                robot.powerLauncher.adjustShooterVelocity();
             }
         }
     }

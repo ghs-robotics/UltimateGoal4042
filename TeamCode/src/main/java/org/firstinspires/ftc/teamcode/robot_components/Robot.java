@@ -44,7 +44,7 @@ public class Robot implements Constants {
     public double clawAngle = 0.15; // Closed position
     public double speed = 1;
     public double config = 0;
-    double rot = 1;
+    double rot = 1; // Drive orientation (+1 means intake side is front, -1 means launcher side is front)
 
     public DcMotor leftFrontDrive;
     public DcMotor rightFrontDrive;
@@ -153,6 +153,14 @@ public class Robot implements Constants {
         gyro.resetAngle();
     }
 
+    // Resets all PID controllers
+    public void resetPIDs() {
+        xPID.resetValues();
+        yPID.resetValues();
+        wPID.resetValues();
+        gyroPID.resetValues();
+    }
+
     // Sets servos to starting positions
     public void resetServos() {
         armServo.setPosition(armAngle);
@@ -176,8 +184,7 @@ public class Robot implements Constants {
     // Switches the object that the robot is trying to detect to a ring
     public void setTargetToRing(int x, int y) {
         currentTargetObject = "ring";
-        xPID.resetValues();
-        yPID.resetValues();
+        resetPIDs();
         cover = 0;
         lower = LOWER_RING_HSV;
         upper = UPPER_RING_HSV;
@@ -188,8 +195,7 @@ public class Robot implements Constants {
     // Switches the object that the robot is trying to detect to the tower goal
     public void setTargetToTower(int x, int w) {
         currentTargetObject = "tower";
-        xPID.resetValues();
-        wPID.resetValues();
+        resetPIDs();
         cover = 0;
         lower = LOWER_TOWER_HSV;
         upper = UPPER_TOWER_HSV;
@@ -200,8 +206,7 @@ public class Robot implements Constants {
     // Switches the object that the robot is trying to detect to the wobble goal
     public void setTargetToWobble(int x, int y) {
         currentTargetObject = "wobble";
-        xPID.resetValues();
-        yPID.resetValues();
+        resetPIDs();
         cover = 0;
         lower = LOWER_WOBBLE_HSV;
         upper = UPPER_WOBBLE_HSV;
@@ -268,13 +273,10 @@ public class Robot implements Constants {
     }
 
     // Makes robot move forward and pick up wobble goal
-    public void pickUpWobbleGoal(double sec) {
+    public void pickUpWobbleGoal(double seconds) {
         turnArm();
         toggleClaw();
-        calculateDrivePowers(0,-0.4,0);
-        sendDrivePowers();
-        wait(sec); //Adjust this later
-        stopDrive();
+        move(0, -0.4, seconds);
         toggleClaw();
         wait(0.6);
         turnArm();
@@ -459,56 +461,39 @@ public class Robot implements Constants {
         chaseObject(x, y, 0);
     }
 
+    public void move(double x, double y, double seconds) {
+        calculateDrivePowers(x, y, 0);
+        sendDrivePowers();
+        wait(seconds);
+        stopDrive();
+    }
+
     public void moveToPos(int[] pos) {
         moveToPos(pos, 1.0);
     }
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double maxSeconds) {
-        setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
-        xPID.resetValues();
-        wPID.resetValues();
-        gyroPID.resetValues();
-        updateObjectValues();
-        double t = getElapsedTimeSeconds();
-        while((Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8)
-                && elapsedTime.seconds() - t < 5) {
-            chaseTower();
-        }
-        t = getElapsedTimeSeconds();
-
-        // Start fresh by resetting these
-        xPID.resetValues();
-        wPID.resetValues();
-
-        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
-                || rightFrontPower != 0) && elapsedTime.seconds() - t < maxSeconds) {
-            chaseTower();
-        }
-        stopDrive();
+        moveToPos(pos, maxSeconds, false);
     }
 
+    // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double maxSeconds, boolean backup) {
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
-        xPID.resetValues();
-        wPID.resetValues();
-        gyroPID.resetValues();
+        resetPIDs();
         updateObjectValues();
         double t = getElapsedTimeSeconds();
         while((Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8)
                 && elapsedTime.seconds() - t < 5) {
             chaseTower();
             if (objectNotIdentified && backup) {
-                calculateDrivePowers(0,-0.4, 0);
-                sendDrivePowers();
-                wait(0.1);
+                move(0, -0.4, 0.5);
             }
         }
         t = getElapsedTimeSeconds();
 
         // Start fresh by resetting these
-        xPID.resetValues();
-        wPID.resetValues();
+        resetPIDs();
 
         while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
                 || rightFrontPower != 0) && elapsedTime.seconds() - t < maxSeconds) {
@@ -520,13 +505,13 @@ public class Robot implements Constants {
     // Makes the robot rotate to a certain angle
     public void rotateToPos(int angle, int maxSeconds) {
         targetGyroAngle = angle;
-        gyroPID.resetValues();
+        resetPIDs();
         double t = getElapsedTimeSeconds();
         while(Math.abs(targetGyroAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 5) {
             adjustAngle();
         }
         t = getElapsedTimeSeconds();
-        gyroPID.resetValues(); // TODO : TEST THIS LINE
+        resetPIDs(); // TODO : TEST THIS LINE
         while ((Math.abs(targetGyroAngle - gyro.getAngle()) > 1)
                 && elapsedTime.seconds() - t < maxSeconds) {
             adjustAngle();

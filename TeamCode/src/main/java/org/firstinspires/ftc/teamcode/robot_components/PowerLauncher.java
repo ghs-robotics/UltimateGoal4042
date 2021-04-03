@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.util.Range;
 
 public class PowerLauncher {
 
-    public static final double PERFECT_LAUNCH_ANGLE = 0.783; // Perfect launch angle
-    public static final double INDEXER_BACK_POS = 0.500;
-    public static final double INDEXER_FORWARD_POS = 0.910;
+    public static final double PERFECT_LAUNCH_ANGLE = 0.421; // Perfect launch angle
+    public static final double INDEXER_BACK_POS = 0.400;
+    public static final double INDEXER_FORWARD_POS = 0.810;
 
     public double leftPower = 0;
     public double rightPower = 0;
@@ -71,6 +71,16 @@ public class PowerLauncher {
         sendPowers();
     }
 
+    // Increase/decrease the launch angle
+    public void changeLaunchAngle(double change) {
+        setLaunchAngle(launchAngle + change);
+    }
+
+    // Increase/decrease the indexer angle
+    public void changeIndexerAngle(double change) {
+        setIndexerAngle(indexerAngle + change);
+    }
+
     // Calculates left motor speed in ticks per second
     public double getLeftVelocity() {
         long deltaTicks = (leftMotor.getCurrentPosition() - prevLeftPos);
@@ -96,10 +106,6 @@ public class PowerLauncher {
         wait(0.6); // TODO : CHANGE
         indexerAngle = INDEXER_BACK_POS;
         indexerServo.setPosition(indexerAngle);
-    }
-
-    public void changeLaunchAngle(double change) {
-        setLaunchAngle(launchAngle + change);
     }
 
     // Resets the encoder encoder position's of the motors to zero
@@ -137,6 +143,12 @@ public class PowerLauncher {
     public void setLaunchAngle(double angle) {
         launchAngle = angle;
         launchAngleServo.setPosition(launchAngle);
+    }
+
+    // Sets indexer angle
+    public void setIndexerAngle(double angle) {
+        indexerAngle = angle;
+        indexerServo.setPosition(indexerAngle);
     }
 
     // Toggles the two launcher motors between off and full power

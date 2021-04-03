@@ -25,23 +25,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp
-public class Tele3 extends LinearOpMode
-{
-    public static final int[] NEXT_TO_STARTER_STACK_POS = new int[]{198, 65}; // x position, width // DONE
-    public static final int[] SHOOTER_POS = new int[]{138, 57}; // DONE Perfect launch position
-    public static final int[] CONFIG_0_POS_I = new int[]{78, 78}; // DONE Deliver first wobble goal
-    public static final int[] CONFIG_0_POS_II = new int[]{112, 78}; // DONE Deliver second wobble goal
-    public static final int[] CONFIG_1_POS_I = new int[]{156, 119}; // DONE
-    public static final int[] CONFIG_1_POS_II = new int[]{186, 119}; // DONE
-    public static final int[] CONFIG_4_POS_I = new int[]{135, 33}; // DONE Move forward one foot!
-    public static final int[] CONFIG_4_POS_II = new int[]{135, 66}; // DONE Move forward one foot!
-    public static final int[] SECOND_WOBBLE_POS = new int[]{138, 45}; // DONE
-    public static final int[] STARTER_STACK_BEFORE_POS = new int[]{138, 57}; // DONE
-    public static final int[] STARTER_STACK_AFTER_POS = new int[]{138, 45}; // DONE
-    public static final int[] PARK_POS = new int[]{138, 65}; // DONE
+public class Tele3 extends LinearOpMode implements FieldPositions {
 
     Robot robot;
     Controller controller1;
@@ -83,12 +71,9 @@ public class Tele3 extends LinearOpMode
 
         // if starterStack != 0, pickup the starter stack rings
         if (robot.config == 1) {
-            robot.moveToPos(STARTER_STACK_BEFORE_POS, 2.0);
+            robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
             robot.toggleIntake("on");
-            robot.calculateDrivePowers(0, -0.4, 0);
-            robot.sendDrivePowers();
-            robot.wait(3.0);
-            robot.stopDrive();
+            robot.move(0, -0.3, 3.0);
             robot.toggleIntake("off");
         }
 
