@@ -9,28 +9,29 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Scalar;
 
-public class Robot implements Constants {
+public class Robot implements HSVConstants, FieldPositions {
 
     // CV detection variables
     public static Scalar lower = LOWER_RING_HSV; // We identify rings by default to start out
     public static Scalar upper = UPPER_RING_HSV;
+
     // The fraction of the top part of the camera screen that is covered,
     // useful when we don't want the phone to detect anything beyond the field
     public static double cover = 0;
 
     private boolean objectNotIdentified = false; // The program will know when the object isn't in view
-    public CameraManager camera;
+    public CameraManager camera; // Manages the webcam and phone camera
 
     private int targetX = 100;
     private int targetY = 140;
     private int targetWidth = 95;
+    public double targetGyroAngle = 0; // gyroscope will target this angle
     private int objectX = 0;
     private int objectY = 0;
     private int objectWidth = 0;
     private int objectHeight = 0;
-    private double x = 0;
-    private double y = 0;
-    public double targetGyroAngle = 0; // gyroscope will target this angle
+    private double x = 0; // Used in several methods
+    private double y = 0; // Used in several methods
 
     private String currentTargetObject = "ring";
 
@@ -44,7 +45,9 @@ public class Robot implements Constants {
     public double clawAngle = 0.15; // Closed position
     public double speed = 1;
     public double config = 0;
-    double rot = 1; // Drive orientation (+1 means intake side is front, -1 means launcher side is front)
+
+    // Drive orientation (+1 means launcher side is front, -1 means intake side is front)
+    private double orientation = 1;
 
     public DcMotor leftFrontDrive;
     public DcMotor rightFrontDrive;
@@ -78,7 +81,7 @@ public class Robot implements Constants {
         armServo = hardwareMap.get(Servo.class, "armServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
 
-        // Defines the forward direction for each of our motors/servos
+        // Defines the forward direction for each of our motors/servos; default is launcher
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -123,7 +126,7 @@ public class Robot implements Constants {
 
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rotation) {
-        rotation *= rot;
+        rotation *= orientation;
         double r = Math.hypot(x, y);
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
         leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
@@ -178,7 +181,7 @@ public class Robot implements Constants {
 
     // Set a target and use default values for the target position
     public void setTargetToRing() { setTargetToRing(180, 190); } // Originally: y = 220
-    public void setTargetToTower() { setTargetToTower(145, 55); }
+    public void setTargetToTower() { setTargetToTower(PERFECT_LAUNCH_POS[0], PERFECT_LAUNCH_POS[1]); }
     public void setTargetToWobble() { setTargetToWobble(60, 160); }
 
     // Switches the object that the robot is trying to detect to a ring
@@ -267,7 +270,7 @@ public class Robot implements Constants {
         wait(1.0);
         for (int i = 0; i < rings; i++) {
             powerLauncher.index();
-            wait(0.6);
+            wait(0.4);
         }
         powerLauncher.toggleOff();
     }
@@ -282,6 +285,12 @@ public class Robot implements Constants {
         turnArm();
     }
 
+    // Run intake with specified power; negative values make intake run backward
+    public void runIntake(double power) {
+        intakePower = power;
+        intakeMotor.setPower(intakePower);
+    }
+
     public void switchDriveDirection() {
         if (leftFrontDrive.getDirection().equals(DcMotor.Direction.FORWARD)) {
             leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -294,7 +303,24 @@ public class Robot implements Constants {
             leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
             rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
         }
-        rot *= -1.0;
+        orientation *= -1.0;
+    }
+
+    public void setForwardDirection(String dir) {
+
+        if (dir.equals("launcher")) {
+            leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+            rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+            orientation = 1;
+        } else if (dir.equals("intake")) {
+            leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+            leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
+            rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
+            orientation = -1;
+        }
     }
 
     // Toggles the wobble gripper/claw
@@ -304,19 +330,10 @@ public class Robot implements Constants {
         clawServo.setPosition(clawAngle);
     }
 
-    // Turns the intake motor on or off
-    public void toggleIntake() {
-        intakePower = (intakePower == 0 ? 1.0 : (intakePower == 1.0 ? -1.0 : 0));
-        intakeMotor.setPower(intakePower);
-    }
-
-    public void toggleIntake(String turn) {
-        intakePower = (turn.equalsIgnoreCase("on") ? 1.0 : 0.0);
-        intakeMotor.setPower(intakePower);
-    }
-
     // Turns the power launcher motors on or off
-    public void togglePowerLauncher() { powerLauncher.toggle(); }
+    public void togglePowerLauncher() {
+        powerLauncher.toggle();
+    }
 
     // Toggles the drive speed between 50% and normal
     public void toggleSpeed() {
@@ -355,7 +372,7 @@ public class Robot implements Constants {
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
-        moveToPos(new int[]{145, 55}, 3);
+        moveToPos(PERFECT_LAUNCH_POS, 3.0);
         launchRings(rings);
     }
 
@@ -480,6 +497,7 @@ public class Robot implements Constants {
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double maxSeconds, boolean backup) {
+        setForwardDirection("launcher");
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
         updateObjectValues();

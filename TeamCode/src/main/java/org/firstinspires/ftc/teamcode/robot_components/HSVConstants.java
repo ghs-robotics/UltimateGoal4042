@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 import org.opencv.core.Scalar;
 
 // Interface containing HSV constants for the robot class
-public interface Constants {
+public interface HSVConstants {
 
     // Ring HSV values
     Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); // original values: 74, 153, 144

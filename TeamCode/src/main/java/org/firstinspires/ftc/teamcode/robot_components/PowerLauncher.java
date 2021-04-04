@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // VELOCITY         PERFECT LAUNCH ANGLE (FROM PERFECT_LAUNCH_POSITION)
-    // 1700             0.421
+    // 1700             0.429
     // 1600             0.416
     // 1500             0.385
-    public static final double PERFECT_LAUNCH_ANGLE = 0.421; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.429; // Default launch angle
 
     public static final double INDEXER_BACK_POS = 0.520;
     public static final double INDEXER_FORWARD_POS = 0.760;
@@ -30,6 +30,8 @@ public class PowerLauncher {
 
     public boolean running = false; // If the launcher is running
 
+    private int queue = 0; // Keeps track of how many rings are "in line" to be launched
+
     // Target speed for the two motors in ticks per second
     public double leftTargetVelocity = PERFECT_SHOOTER_VELOCITY; // Not currently used because encoder isn't working
     public double rightTargetVelocity = PERFECT_SHOOTER_VELOCITY;
@@ -39,6 +41,8 @@ public class PowerLauncher {
     private long prevRightPos = 0;
     private double prevLeftSeconds = 0;
     private double prevRightSeconds = 0;
+    private double timeStamp = 0; // For regulating the speed of changing the incline
+    private double queueTimeStamp = 0; // For the queue
 
     private ElapsedTime elapsedTime;
 
@@ -85,6 +89,13 @@ public class PowerLauncher {
         setLaunchAngle(launchAngle + change);
     }
 
+    public void changeLaunchAngleGradually(double change) {
+        if (elapsedTime.seconds() - timeStamp > 0.03) { // TODO : ADJUST
+            changeLaunchAngle(change);
+            timeStamp = elapsedTime.seconds();
+        }
+    }
+
     // Increase/decrease the indexer angle
     public void changeIndexerAngle(double change) {
         setIndexerAngle(indexerAngle + change);
@@ -108,13 +119,28 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
+    public int handleQueue(int queue) {
+        this.queue = queue;
+        if (!running) {
+            toggleOn(); // TODO : DO WE NEED A WAIT TIME?
+        }
+        if (elapsedTime.seconds() - queueTimeStamp > 0.8) { // TODO : ADJUST
+            setIndexerAngle(INDEXER_BACK_POS);
+            queueTimeStamp = elapsedTime.seconds();
+            this.queue--;
+            return this.queue;
+        }
+        else if (elapsedTime.seconds() - queueTimeStamp > 0.4) { // TODO : ADJUST
+            setIndexerAngle(INDEXER_FORWARD_POS);
+        }
+        return queue;
+    }
+
     // Moves the indexer servo, which launches a ring
     public void index() {
-        indexerAngle = INDEXER_FORWARD_POS;
-        indexerServo.setPosition(indexerAngle);
-        wait(0.6); // TODO : CHANGE
-        indexerAngle = INDEXER_BACK_POS;
-        indexerServo.setPosition(indexerAngle);
+        setIndexerAngle(INDEXER_FORWARD_POS);
+        wait(0.4); // TODO : CHANGE
+        setIndexerAngle(INDEXER_BACK_POS);
     }
 
     // Resets the encoder encoder position's of the motors to zero
@@ -148,16 +174,26 @@ public class PowerLauncher {
         sendPowers();
     }
 
-    // Sets a launch angle
-    public void setLaunchAngle(double angle) {
-        launchAngle = angle;
-        launchAngleServo.setPosition(launchAngle);
+    // Updates the default angle
+    public void setCurrentAngleToDefault() {
+        PERFECT_LAUNCH_ANGLE = launchAngle;
     }
 
     // Sets indexer angle
     public void setIndexerAngle(double angle) {
         indexerAngle = angle;
         indexerServo.setPosition(indexerAngle);
+    }
+
+    // Sets a launch angle
+    public void setLaunchAngle(double angle) {
+        launchAngle = angle;
+        launchAngleServo.setPosition(launchAngle);
+    }
+
+    // Sets a launch angle
+    public void setPerfectLaunchAngle() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE);
     }
 
     // Toggles the two launcher motors between off and full power
@@ -180,10 +216,6 @@ public class PowerLauncher {
     public void toggleOn() {
         sendPowers(0.85);
         running = true;
-//        double start = elapsedTime.seconds();
-//        while (elapsedTime.seconds() - start < 2) {
-//            adjustShooterVelocity();
-//        }
     }
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds

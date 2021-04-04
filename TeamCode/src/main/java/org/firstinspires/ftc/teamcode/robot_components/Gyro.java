@@ -13,6 +13,7 @@ public class Gyro {
     Orientation lastAngles = new Orientation ();
     double globalAngle;
 
+    // Constructs a gyro object which keeps track of the robot's angle
     public Gyro(HardwareMap hardwareMap) {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
@@ -23,12 +24,27 @@ public class Gyro {
         gyro.initialize(parameters);
     }
 
+    // Sets angle to zero degrees; call at the begin of any opmode
     public void resetAngle () {
         lastAngles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         globalAngle = 0;
     }
 
+    // Returns an angle between -90 and 270 degrees
     public double getAngle () {
+        double angle = getOverallAngle();
+        while (angle < -90 || angle > 270) {
+            if (angle < -90) {
+                angle += 360;
+            } else {
+                angle -= 360;
+            }
+        }
+        return angle;
+    }
+
+    // Returns the overall angle in degrees (not taken mod 360)
+    public double getOverallAngle() {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
         if (deltaAngle < -180) { deltaAngle += 360; }

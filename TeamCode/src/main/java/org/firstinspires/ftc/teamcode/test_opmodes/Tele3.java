@@ -72,9 +72,9 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
         // if starterStack != 0, pickup the starter stack rings
         if (robot.config == 1) {
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
-            robot.toggleIntake("on");
+            robot.toggleIntakeForward();
             robot.move(0, -0.3, 3.0);
-            robot.toggleIntake("off");
+            robot.toggleIntakeForward();
         }
 
         madeIt("gathered rings");
