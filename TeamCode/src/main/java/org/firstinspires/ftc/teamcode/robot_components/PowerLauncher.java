@@ -90,7 +90,7 @@ public class PowerLauncher {
     }
 
     public void changeLaunchAngleGradually(double change) {
-        if (elapsedTime.seconds() - timeStamp > 0.03) { // TODO : ADJUST
+        if (elapsedTime.seconds() - timeStamp > 0.01) { // TODO : ADJUST
             changeLaunchAngle(change);
             timeStamp = elapsedTime.seconds();
         }
@@ -122,15 +122,19 @@ public class PowerLauncher {
     public int handleQueue(int queue) {
         this.queue = queue;
         if (!running) {
-            toggleOn(); // TODO : DO WE NEED A WAIT TIME?
+            toggleOn();
+            queueTimeStamp = elapsedTime.seconds();
         }
-        if (elapsedTime.seconds() - queueTimeStamp > 0.8) { // TODO : ADJUST
+        if (elapsedTime.seconds() - queueTimeStamp > 1.4) { // TODO : ADJUST
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             this.queue--;
+            if (this.queue == 0) {
+                toggleOff();
+            }
             return this.queue;
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 0.4) { // TODO : ADJUST
+        else if (elapsedTime.seconds() - queueTimeStamp > 0.7) { // TODO : ADJUST
             setIndexerAngle(INDEXER_FORWARD_POS);
         }
         return queue;
@@ -223,4 +227,13 @@ public class PowerLauncher {
         double start = elapsedTime.seconds();
         while (elapsedTime.seconds() - start < seconds) {}
     }
+
+    // Adjust shooter velocity while waiting
+    public void waitAndAdjustVelocity(double seconds) {
+        double start = elapsedTime.seconds();
+        while (elapsedTime.seconds() - start < seconds) {
+            adjustShooterVelocity();
+        }
+    }
+
 }

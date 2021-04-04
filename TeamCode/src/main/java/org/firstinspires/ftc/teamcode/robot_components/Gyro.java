@@ -33,8 +33,8 @@ public class Gyro {
     // Returns an angle between -90 and 270 degrees
     public double getAngle () {
         double angle = getOverallAngle();
-        while (angle < -90 || angle > 270) {
-            if (angle < -90) {
+        while (angle < -110 || angle > 290) {
+            if (angle < -110) {
                 angle += 360;
             } else {
                 angle -= 360;

@@ -66,15 +66,24 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         if (target.equals("ring")) {
             lowerHSV = LOWER_RING_HSV;
             upperHSV = UPPER_RING_HSV;
+            cover = 0.65;
+        }
+        else if (target.equals("stack")) {
+            lowerHSV = LOWER_STACK_HSV;
+            upperHSV = UPPER_STACK_HSV;
+            cover = 0.70;
         }
         else if (target.equals("tower")) {
             lowerHSV = LOWER_TOWER_HSV;
             upperHSV = UPPER_TOWER_HSV;
+            cover = 0;
         }
         else if (target.equals("wobble")) {
             lowerHSV = LOWER_WOBBLE_HSV;
             upperHSV = UPPER_WOBBLE_HSV;
-        } else {
+            cover = 0.63;
+        }
+        else {
             throw new IllegalArgumentException("Target must be ring, tower, or wobble!");
         }
         targetObject = target;
@@ -103,12 +112,12 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     public int[] findObjectCoordinates(Mat src) {
         Imgproc.resize(src, src, new Size(320, 240));
 
-        // Convert color from RGB to HSV
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-
         //Cover up background noise
         //creates rectangle
-        Imgproc.rectangle(src, new Point(0, 0), new Point(320, (int) (cover * 240)), GREEN, -1);
+        Imgproc.rectangle(src, new Point(0, 0), new Point(320, (int) (cover * 240)), GREEN_BGR, -1);
+
+        // Convert color from RGB to HSV
+        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
 
         // adding a mask to the dst mat
         // filters colors within certain color range
@@ -119,7 +128,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
-        Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+        Imgproc.drawContours(src, contours, -1, GREEN_BGR, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
 
         Rect largest = new Rect();
         for (int i = 0; i < contours.size(); i++) {
@@ -129,6 +138,11 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
                 // Check which object should be found and make sure it has a reasonable size
                 if (targetObject.equals("ring")) {
                     if (passesRingTest(rect.width, rect.height)) {
+                        largest = rect;
+                    }
+                }
+                else if (targetObject.equals("stack")) {
+                    if (passesStackTest(rect.width, rect.height)) {
                         largest = rect;
                     }
                 }
@@ -146,7 +160,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Draw largest rect
-        Imgproc.rectangle(src, largest, GREEN, 1); // TODO : comment out?
+        Imgproc.rectangle(src, largest, GREEN_BGR, 1); // TODO : comment out?
 
         return new int[]{largest.x, largest.y, largest.width, largest.height};
     }
@@ -157,6 +171,11 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         return (h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5); // 8,23,22,90,1.5,7
     }
 
+    // Testing to make sure the detected object is a ring stack
+    private boolean passesStackTest(double w, double h) {
+        return (4 < w && 4 < h && h < 35);
+    }
+
     // Testing to make sure the detected object is the tower goal
     private boolean passesTowerTest(double w) {
         // width 34 is back of the field, closest is 150
@@ -164,9 +183,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     }
 
     // Testing to make sure the detected object is a wobble goal
-    private boolean passesWobbleTest(double w, double h) { // TODO : IMPLEMENT
-        double r = 1.0 * w / h;
-        return (h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5);
+    private boolean passesWobbleTest(double w, double h) {
+        return (40 < w && w < 95);
     }
 
     // A comprehensive backup

@@ -55,7 +55,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
         robot.init();
-        robot.setTargetToTower();
+        robot.setTargetToStack(); // TODO : CHANGE BACK TO TOWER
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.setForwardDirection("intake"); // Default is when the front is the launcher side
@@ -87,8 +87,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
                 queue = robot.powerLauncher.handleQueue(queue);
-            } else {
-                robot.powerLauncher.toggleOff();
             }
 
             // -----------------------------------------------------------------------------------------
@@ -118,7 +116,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
-                robot.moveToPos(PERFECT_LAUNCH_POS);
+                robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
                 robot.powerLauncher.setPerfectLaunchAngle();
                 robot.setForwardDirection("intake");
             }
@@ -151,12 +149,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Rotate to face tower goal (north)
             if (controller1.dpad_up.equals("pressing")) {
-                robot.rotateToPos(0,1);
+                robot.rotateToPos(180,1);
             }
 
             // Rotate to face away from tower goal (south)
             if (controller1.dpad_down.equals("pressing")) {
-                robot.rotateToPos(180,1);
+                robot.rotateToPos(0,1);
             }
 
             // Rotate to face east
@@ -167,6 +165,11 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Rotate to face west
             if (controller1.dpad_left.equals("pressing")) {
                 robot.rotateToPos(-90,1);
+            }
+
+            // Reset gyro in case of emergency
+            if (controller1.left_trigger + controller1.right_trigger > 1.8) {
+                robot.resetGyroAngle();
             }
 
             // -----------------------------------------------------------------------------------------
@@ -233,7 +236,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Change current launch Angle (but keep default the same)
             if (controller2.left_stick_y != 0) {
-                robot.powerLauncher.changeLaunchAngleGradually(controller2.left_stick_y / 1000);
+                robot.powerLauncher.changeLaunchAngleGradually(controller2.left_stick_y / 200);
             }
 
             // Go to default launch angle

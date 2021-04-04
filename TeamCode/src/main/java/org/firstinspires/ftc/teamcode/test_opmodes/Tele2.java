@@ -51,8 +51,9 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setForwardDirection("intake");
 
-        robot.setTargetToTower();
+        robot.setTargetToRing();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -70,6 +71,7 @@ public class Tele2 extends OpMode {
     public void loop() {
         //Registers controller input
         controller1.update();
+        robot.updateObjectValues();
 
         //Mecanum wheel drive
         robot.calculateDrivePowers(
@@ -83,28 +85,28 @@ public class Tele2 extends OpMode {
         }
 
         if (controller1.a.equals("pressing")) {
-            target = "wobble";
-            robot.setTargetToWobble();
+            target = "ring";
+            robot.setTargetToRing(33, 80);
         }
 
         if (controller1.y.equals("pressing")) {
-            target = "wobble";
-            robot.setTargetToWobble();
+            target = "ring";
+            robot.setTargetToRing(33, 80);
         }
 
         if (controller1.b.equals("pressing")) {
-            target = "wobble";
-            robot.setTargetToWobble();
+            target = "ring";
+            robot.setTargetToRing(63, 60);
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.yPID.k_P -= 0.005; }
-        if (controller1.right_bumper.equals("pressing")) { robot.yPID.k_P += 0.005; }
+        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.005; }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_I -= 0.0005; }
-        if (controller1.dpad_up.equals("pressing")) { robot.yPID.k_I += 0.0005; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.yPID.k_D -= 0.0005; }
-        if (controller1.dpad_right.equals("pressing")) { robot.yPID.k_D += 0.0005; }
+        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0005; }
 
 
         if (target.equals("none")){ robot.updateDrive(); }

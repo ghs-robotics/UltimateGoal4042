@@ -24,7 +24,7 @@ public class Robot implements HSVConstants, FieldPositions {
     private double y = 0; // Used in several methods
 
     private String targetObject = "ring"; // Default targetObject
-    private static boolean objectNotIdentified = false; // The program will know when the object isn't in view
+    private static boolean objectIdentified = false; // The program will know when the object isn't in view
 
     // Robot variables and objects
     private double leftFrontPower = 0;
@@ -55,9 +55,10 @@ public class Robot implements HSVConstants, FieldPositions {
     public Telemetry telemetry;
 
     // PID controllers
-    public PIDController xPID; // For the x-position of the robot
-    public PIDController yPID; // For the y-position of the robot
-    public PIDController wPID; // For the width of the tower goal
+    public PIDController towerXPID; // For the x-position of the tower goal
+    public PIDController towerWPID; // For the width of the tower goal
+    public PIDController xPID;
+    public PIDController wPID; // For the y-position of the robot
     public PIDController gyroPID; // Controls the angle
 
     // Constructs a robot object with methods that we can use in both Auto and TeleOp
@@ -94,14 +95,17 @@ public class Robot implements HSVConstants, FieldPositions {
 
         // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
-        xPID = new PIDController(0.0900, 0.0000, 0.0000, 2);
-
-        // TODO: CALIBRATE
-        yPID = new PIDController(0.0200, 0.0025, 0.0010, 2);
+        towerXPID = new PIDController(0.0900, 0.0000, 0.0000, 2);
 
         // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
-        wPID = new PIDController(0.0750, 0.0000, 0.0000, 2);
+        towerWPID = new PIDController(0.0750, 0.0000, 0.0000, 2);
+
+        // Could be better
+        xPID = new PIDController(0.0200, 0.0010, 0.0000, 2);
+
+        // Could be better
+        wPID = new PIDController(0.0250, 0.0010, 0.0000, 3);
 
         // gyroPID works best when Ki = 0
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2);
@@ -124,6 +128,14 @@ public class Robot implements HSVConstants, FieldPositions {
         rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rotation, -1.0, 1.0) * speed;
         leftRearPower = Range.clip(r * Math.sin(robotAngle) + rotation, -1.0, 1.0) * speed;
         rightRearPower = Range.clip(r * Math.cos(robotAngle) - rotation, -1.0, 1.0) * speed;
+    }
+
+    private void checkIfObjectIdentified() {
+        objectIdentified = (objectWidth != 0);
+        if (!objectIdentified) {
+            x = 0;
+            y = 0;
+        }
     }
 
     // Returns how many seconds have passed since the timer was last reset
@@ -149,8 +161,9 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Resets all PID controllers
     public void resetPIDs() {
+        towerXPID.resetValues();
+        towerWPID.resetValues();
         xPID.resetValues();
-        yPID.resetValues();
         wPID.resetValues();
         gyroPID.resetValues();
     }
@@ -179,14 +192,19 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     // Set a target and use default values for the target position
-    public void setTargetToRing() { setTargetToRing(180, 190); } // Originally: y = 220
+    public void setTargetToRing() { setTargetToRing(140, 70); } // Originally: y = 220
     public void setTargetToTower() { setTargetToTower(PERFECT_LAUNCH_POS[0], PERFECT_LAUNCH_POS[1]); }
-    public void setTargetToWobble() { setTargetToWobble(60, 160); }
+    public void setTargetToWobble() { setTargetToWobble(33, 80); } // originally y = 160 (before changed to width)
 
     // Switches the object that the robot is trying to detect to a ring
-    public void setTargetToRing(int x, int y) {
+    public void setTargetToRing(int x, int w) {
         camera.phoneCamPipeline.setTargetTo("ring");
-        setTargetCoordinates(x, y, 0, "ring");
+        setTargetCoordinates(x, 0, w, "ring");
+    }
+
+    public void setTargetToStack() {
+        camera.webcamPipeline.setTargetTo("stack");
+        targetObject = "stack";
     }
 
     // Switches the object that the robot is trying to detect to the tower goal
@@ -196,9 +214,9 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     // Switches the object that the robot is trying to detect to the wobble goal
-    public void setTargetToWobble(int x, int y) {
+    public void setTargetToWobble(int x, int w) {
         camera.phoneCamPipeline.setTargetTo("wobble");
-        setTargetCoordinates(x, y, 0, "wobble");
+        setTargetCoordinates(x, 0, w, "wobble");
     }
 
     // Makes the robot stop driving
@@ -221,6 +239,7 @@ public class Robot implements HSVConstants, FieldPositions {
         telemetry.addData("objectX = ", "" + objectX);
         telemetry.addData("objectY = ", "" + objectY);
         telemetry.addData("width = ", "" + objectWidth);
+        telemetry.addData("height = ", "" + objectHeight);
         telemetry.update();
         sendDrivePowers();
     }
@@ -252,22 +271,12 @@ public class Robot implements HSVConstants, FieldPositions {
     // Launches a ring by moving the shooterServo
     public void launchRings(int rings) { // TODO : CUT DOWN ON TIME
         powerLauncher.toggleOn();
-        wait(1.0);
+        powerLauncher.waitAndAdjustVelocity(0.5);
         for (int i = 0; i < rings; i++) {
             powerLauncher.index();
-            wait(0.4);
+            powerLauncher.waitAndAdjustVelocity(0.4);
         }
         powerLauncher.toggleOff();
-    }
-
-    // Makes robot move forward and pick up wobble goal
-    public void pickUpWobbleGoal(double seconds) {
-        turnArm();
-        toggleClaw();
-        move(0, -0.4, seconds);
-        toggleClaw();
-        wait(0.6);
-        turnArm();
     }
 
     // Run intake with specified power; negative values make intake run backward
@@ -368,8 +377,8 @@ public class Robot implements HSVConstants, FieldPositions {
 
         String t = targetObject;
 
-        if (objectNotIdentified) {
-            telemetry.addData("ATTENTION: ", "OBJECT NOT IDENTIFIED");
+        if (!objectIdentified) {
+            telemetry.addData("NOTE: ", "OBJECT NOT IDENTIFIED");
         }
 
         telemetry.addData("angle = ", gyro.getAngle());
@@ -378,9 +387,9 @@ public class Robot implements HSVConstants, FieldPositions {
         telemetry.addData("width = ", objectWidth + " (target = " + targetWidth + ")");
         telemetry.addData("height = ", objectHeight);
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-        telemetry.addData("Kp (x): ", xPID.k_P);
-        telemetry.addData("Ki (x): ", xPID.k_I);
-        telemetry.addData("Kd (x): ", xPID.k_D);
+        telemetry.addData("Kp (w): ", wPID.k_P);
+        telemetry.addData("Ki (w): ", wPID.k_I);
+        telemetry.addData("Kd (w): ", wPID.k_D);
         telemetry.update();
     }
 
@@ -388,93 +397,30 @@ public class Robot implements HSVConstants, FieldPositions {
     public void chaseRing() {
         if (!camera.phoneCamPipeline.targetObject.equals("ring")) { setTargetToRing(); }
         updateObjectValues();
-
-        x = xPID.calcVal(targetX - objectX);
-        y = -yPID.calcVal(targetY - objectY);
-
-        /*
-        double h = objectHeight;
-        double w = objectWidth;
-        double r = 1.0 * w / h;
-
-        // Testing to make sure the detected object is a ring
-        if (!(h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5)) { // 8,23,22,90,1.5,7
-            // TODO: Make sure we aren't double-checking this condition in the pipeline or here!
-            x = 0;
-            y = 0;
-        }
-
-         */
-
-        // TODO : DOES THIS WORK INSTEAD?
-        if (objectX == 0 && objectY == 0) {
-            x = 0;
-            y = 0;
-            objectNotIdentified = true;
-        } else {
-            objectNotIdentified = false;
-        }
-
-        chaseObject(x, 0, 0); // TODO : change back to y
+        x = -xPID.calcVal(targetX - objectX);
+        y = wPID.calcVal(targetWidth - objectWidth);
+        checkIfObjectIdentified();
+        chaseObject(x, y, -gyroPID.calcVal(targetGyroAngle - gyro.getAngle())); // TODO : change back
     }
 
     // Makes the robot line up with the tower goal (if called repeatedly)
     public void chaseTower() {
         if (!camera.webcamPipeline.targetObject.equals("tower")) { setTargetToTower(); }
         updateObjectValues();
-
-        x = -xPID.calcVal(targetX - objectX);
-        y = wPID.calcVal(targetWidth - objectWidth);
-
-        /*
-        if (!(objectWidth > 34 && objectWidth < 150)) {
-            x = 0;
-            y = 0;
-            objectNotIdentified = true;
-        } else {
-            objectNotIdentified = false;
-        }
-
-         */
-
-
-        // TODO : DOES THIS WORK INSTEAD?
-        if (objectX == 0 && objectY == 0) {
-            x = 0;
-            y = 0;
-            objectNotIdentified = true;
-        } else {
-            objectNotIdentified = false;
-        }
-
-        // TODO : FINISH TESTING
+        x = -towerXPID.calcVal(targetX - objectX);
+        y = towerWPID.calcVal(targetWidth - objectWidth);
+        checkIfObjectIdentified();
         chaseObject(x, y, -gyroPID.calcVal(targetGyroAngle - gyro.getAngle()));
-//        chaseObject(0, 0, 0);
     }
 
     // Makes the robot chase the wobble goal (if called repeatedly)
     public void chaseWobble() {
         if (!camera.phoneCamPipeline.targetObject.equals("wobble")) { setTargetToWobble(); }
         updateObjectValues();
-
-        x = xPID.calcVal(targetX - objectX);
-        y = -yPID.calcVal(targetY - objectY);
-
-        double h = objectHeight;
-        double w = objectWidth;
-        double r = 1.0 * w / h;
-
-        /*
-        // Testing to make sure the detected object is a wobble goal
-        if (!(h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5)) {
-            x = 0;
-            y = 0;
-        }
-
-         */
-
-//        chaseObject(x, y, -gyroPID.calcVal(targetGyroAngle - gyro.getAngle()));
-        chaseObject(0, 0, 0); // TODO : CHANGE BACK
+        x = -xPID.calcVal(targetX - objectX);
+        y = wPID.calcVal(targetWidth - objectWidth);
+        checkIfObjectIdentified();
+        chaseObject(x, y, -gyroPID.calcVal(targetGyroAngle - gyro.getAngle()));
     }
 
     // Calling move(0, 0.4, 3.0) makes the robot move forward 3.5 feet (a little over 1 ft/sec)
@@ -496,16 +442,23 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double maxSeconds, boolean backup) {
+        moveToPos(pos, 0.0, maxSeconds, backup);
+    }
+
+    // Makes the robot move to a certain position relative to the tower goal
+    public void moveToPos(int[] pos, double minSeconds, double maxSeconds, boolean backup) {
         setForwardDirection("launcher");
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
         updateObjectValues();
         double t = getElapsedTimeSeconds();
-        while((Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8)
+        while((Math.abs(targetWidth - objectWidth) > 8
+                || Math.abs(targetX - objectX) > 8
+                || Math.abs(targetGyroAngle - gyro.getAngle()) > 8)
                 && elapsedTime.seconds() - t < 5) {
             chaseTower();
-            if (objectNotIdentified && backup) {
-                move(0, -0.4, 0.5);
+            if (objectIdentified && backup) {
+                move(0, -0.5, 1.0);
             }
         }
         t = getElapsedTimeSeconds();
@@ -513,11 +466,30 @@ public class Robot implements HSVConstants, FieldPositions {
         // Start fresh by resetting these
         resetPIDs();
 
-        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
-                || rightFrontPower != 0) && elapsedTime.seconds() - t < maxSeconds) {
+        while (elapsedTime.seconds() - t < minSeconds || elapsedTime.seconds() - t < maxSeconds &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
             chaseTower();
         }
         stopDrive();
+    }
+
+    // Makes robot move forward and pick up wobble goal
+    public void pickUpWobbleGoal() {
+        setTargetToWobble();
+        resetPIDs();
+        updateObjectValues();
+        double t = getElapsedTimeSeconds();
+        while (elapsedTime.seconds() - t < 1.0 || elapsedTime.seconds() - t < 2.0 &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
+            chaseWobble();
+        }
+        stopDrive();
+        turnArm();
+        toggleClaw();
+        move(0, 0.45, 1.9);
+        toggleClaw();
+        wait(0.6);
+        turnArm();
     }
 
     // Makes the robot rotate to a certain angle

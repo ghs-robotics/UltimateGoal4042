@@ -106,12 +106,12 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
         //Head back to location where we shot the rings
         //Move left or right and then backward towards second wobble goal
         robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0.0);
-        robot.moveToPos(SECOND_WOBBLE_POS, 3.0);
+        robot.moveToPos(SECOND_WOBBLE_POS, 2.0);
 
         madeIt("going for the second wobble goal");
 
         //pick up second wobble goal
-        robot.pickUpWobbleGoal(1.0);
+        robot.pickUpWobbleGoal();
 
 
         madeIt("picked up the second wobble goal");

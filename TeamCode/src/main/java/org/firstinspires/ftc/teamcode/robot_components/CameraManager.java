@@ -27,6 +27,7 @@ public class CameraManager implements HSVConstants {
                 "id",
                 hardwareMap.appContext.getPackageName());
 
+        /*
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
                         2, // The number of sub-containers to create
@@ -36,6 +37,17 @@ public class CameraManager implements HSVConstants {
                 OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
+
+         */
+
+
+        // --------------- testing ----------------
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
+        // --------------- testing ----------------
+
 
         // Opens cameras
         phoneCam.openCameraDevice();
@@ -51,7 +63,7 @@ public class CameraManager implements HSVConstants {
 
     // Returns the coordinates of the target object using CV
     public int[] getObjectData(String target) {
-        if (target.equals("tower")) {
+        if (target.equals("tower") || target.equals("stack")) {
             return webcamPipeline.getObjectData();
         }
         return phoneCamPipeline.getObjectData();
@@ -65,7 +77,7 @@ public class CameraManager implements HSVConstants {
     // Starts streaming frames on the phone camera
     public void startStreaming() {
 //        phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-//        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+//        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
         webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
