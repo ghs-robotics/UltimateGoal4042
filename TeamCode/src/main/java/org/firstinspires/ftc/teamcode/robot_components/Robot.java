@@ -461,6 +461,7 @@ public class Robot implements Constants {
         chaseObject(x, y, 0);
     }
 
+    // Calling move(0, 0.4, 3.0) makes the robot move forward 3.5 feet (a little over 1 ft/sec)
     public void move(double x, double y, double seconds) {
         calculateDrivePowers(x, y, 0);
         sendDrivePowers();

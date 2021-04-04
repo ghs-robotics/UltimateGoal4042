@@ -8,22 +8,31 @@ import com.qualcomm.robotcore.util.Range;
 
 public class PowerLauncher {
 
+    // VELOCITY         PERFECT LAUNCH ANGLE (FROM PERFECT_LAUNCH_POSITION)
+    // 1700             0.421
+    // 1600             0.416
+    // 1500             0.385
     public static final double PERFECT_LAUNCH_ANGLE = 0.421; // Perfect launch angle
-    public static final double INDEXER_BACK_POS = 0.400;
-    public static final double INDEXER_FORWARD_POS = 0.810;
 
+    public static final double INDEXER_BACK_POS = 0.520;
+    public static final double INDEXER_FORWARD_POS = 0.760;
+
+    // 1700 ticks per second (or anything higher) gives the best results
+    public static final double PERFECT_SHOOTER_VELOCITY = 1700; // Ticks per second
+
+    // Motor powers
     public double leftPower = 0;
     public double rightPower = 0;
 
-    // launchAngle should range between 0.7 (horizontal) and 0.85 (very steep); launcher vertical at 1.0
+    // launchAngle should range between 0.600 (horizontal) and 0.300 (very steep); launcher vertical at 0.010
     public double launchAngle = PERFECT_LAUNCH_ANGLE;
     public double indexerAngle = INDEXER_BACK_POS;
 
-    public boolean running = false;
+    public boolean running = false; // If the launcher is running
 
     // Target speed for the two motors in ticks per second
-    public double leftTargetVelocity = 1700;
-    public double rightTargetVelocity = 1700;
+    public double leftTargetVelocity = PERFECT_SHOOTER_VELOCITY; // Not currently used because encoder isn't working
+    public double rightTargetVelocity = PERFECT_SHOOTER_VELOCITY;
 
     // Variables for calculating the motor velocities
     private long prevLeftPos = 0;

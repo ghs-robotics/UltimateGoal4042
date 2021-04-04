@@ -50,8 +50,8 @@ public class Tele1 extends LinearOpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1); // Whoever presses start + a
         controller2 = new Controller(gamepad2); // Whoever presses start + b
-        robot.resetServos();
-        robot.resetGyroAngle();
+        robot.init();
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.switchDriveDirection(); // Default is when the front is the launcher side
@@ -64,6 +64,12 @@ public class Tele1 extends LinearOpMode {
             // Registers controller input
             controller1.update();
             controller2.update();
+            robot.updateObjectValues();
+
+            // Constantly adjusts launch velocity
+            if (robot.powerLauncher.running) {
+                robot.powerLauncher.adjustShooterVelocity();
+            }
 
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
@@ -130,14 +136,12 @@ public class Tele1 extends LinearOpMode {
 
             // Right bumper toggles the claw
             if (controller2.right_bumper.equals("pressing")) {
-//                robot.toggleClaw();
-                robot.powerLauncher.rightTargetVelocity += 50;
+                robot.toggleClaw();
             }
 
             // Left bumper turns arm
             if (controller2.left_bumper.equals("pressing")) {
-//                robot.turnArm();
-                robot.powerLauncher.rightTargetVelocity -= 50;
+                robot.turnArm();
             }
 
             // Pressing x moves indexer servo
@@ -153,26 +157,12 @@ public class Tele1 extends LinearOpMode {
 
             // Angle the launcher up a bit
             if (controller2.dpad_up.equals("pressing")) {
-                // Smaller launchAngle means the tilt is higher
-                robot.powerLauncher.changeLaunchAngle(-0.01);
+                robot.powerLauncher.changeLaunchAngle(0.002);
             }
 
             // Angle the launcher down a bit
             if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(0.01);
-            }
-
-            // TODO : TESTING
-            if (controller2.dpad_left.equals("pressing")) {
-                robot.powerLauncher.changeIndexerAngle(-0.02);
-            }
-
-            if (controller2.dpad_right.equals("pressing")) {
-                robot.powerLauncher.changeIndexerAngle(0.02);
-            }
-
-            if (robot.powerLauncher.running) {
-                robot.powerLauncher.adjustShooterVelocity();
+                robot.powerLauncher.changeLaunchAngle(-0.002);
             }
         }
     }
