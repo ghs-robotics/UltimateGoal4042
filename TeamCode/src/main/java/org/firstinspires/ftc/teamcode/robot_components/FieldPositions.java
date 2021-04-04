@@ -9,7 +9,7 @@ public interface FieldPositions {
     int[] PARK_POS = new int[]{138, 65}; // Where to park during autonomous
 
     // Position pertaining to the wobble goals
-    int[] CONFIG_0_POS_I = new int[]{78, 78}; // Where to drop first wobble goal
+    int[] CONFIG_0_POS_I = new int[]{83, 78}; // Where to drop first wobble goal
     int[] CONFIG_0_POS_II = new int[]{112, 78}; // Where to drop second wobble goal
 
     int[] CONFIG_1_POS_I = new int[]{156, 119};

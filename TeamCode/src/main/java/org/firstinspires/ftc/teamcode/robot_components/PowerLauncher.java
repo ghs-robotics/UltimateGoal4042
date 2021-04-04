@@ -12,13 +12,13 @@ public class PowerLauncher {
     // 1700             0.429
     // 1600             0.416
     // 1500             0.385
-    public static double PERFECT_LAUNCH_ANGLE = 0.429; // Default launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.421; // Default launch angle
 
     public static final double INDEXER_BACK_POS = 0.520;
     public static final double INDEXER_FORWARD_POS = 0.760;
 
     // 1700 ticks per second (or anything higher) gives the best results
-    public static final double PERFECT_SHOOTER_VELOCITY = 1700; // Ticks per second
+    public static final double PERFECT_SHOOTER_VELOCITY = 1800; // Ticks per second
 
     // Motor powers
     public double leftPower = 0;

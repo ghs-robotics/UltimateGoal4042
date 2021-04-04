@@ -179,7 +179,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // Testing to make sure the detected object is the tower goal
     private boolean passesTowerTest(double w) {
         // width 34 is back of the field, closest is 150
-        return (w > 34 && w < 150);
+        return true;
     }
 
     // Testing to make sure the detected object is a wobble goal

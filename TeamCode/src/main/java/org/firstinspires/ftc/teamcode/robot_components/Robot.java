@@ -170,8 +170,9 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Sets servos to starting positions
     public void resetServos() {
-        armServo.setPosition(armAngle);
         clawServo.setPosition(clawAngle);
+        wait(0.4);
+        armServo.setPosition(armAngle);
         powerLauncher.resetServos();
     }
 
@@ -370,7 +371,7 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
-        moveToPos(PERFECT_LAUNCH_POS, 3.0);
+        moveToPos(PERFECT_LAUNCH_POS, 1.0, 3.0, false);
         launchRings(rings);
     }
 
@@ -451,6 +452,11 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minSeconds, double maxSeconds, boolean backup) {
+        moveToPos(pos, minSeconds, maxSeconds, 5.0, backup);
+    }
+
+    // Makes the robot move to a certain position relative to the tower goal
+    public void moveToPos(int[] pos, double minSeconds, double maxSeconds, double otherMax, boolean backup) {
         setForwardDirection("launcher");
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
@@ -459,10 +465,10 @@ public class Robot implements HSVConstants, FieldPositions {
         while((Math.abs(targetWidth - objectWidth) > 8
                 || Math.abs(targetX - objectX) > 8
                 || Math.abs(targetGyroAngle - gyro.getAngle()) > 8)
-                && elapsedTime.seconds() - t < 5) {
+                && elapsedTime.seconds() - t < otherMax) {
             chaseTower();
-            if (objectIdentified && backup) {
-                move(0, -0.5, 1.0);
+            if ((!objectIdentified) && backup) {
+                move(0, -0.5, 0.3);
             }
         }
         t = getElapsedTimeSeconds();
@@ -479,18 +485,19 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes robot move forward and pick up wobble goal
     public void pickUpWobbleGoal() {
+        setForwardDirection("intake");
         setTargetToWobble();
         resetPIDs();
         updateObjectValues();
         double t = getElapsedTimeSeconds();
-        while (elapsedTime.seconds() - t < 1.0 || elapsedTime.seconds() - t < 2.0 &&
+        while (elapsedTime.seconds() - t < 1.5 || elapsedTime.seconds() - t < 2.5 &&
                 (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
             chaseWobble();
         }
         stopDrive();
         turnArm();
         toggleClaw();
-        move(0, 0.45, 1.9);
+        move(0, 0.6, 1.5);
         toggleClaw();
         wait(0.6);
         turnArm();
