@@ -27,7 +27,7 @@ public class CameraManager implements HSVConstants {
                 "id",
                 hardwareMap.appContext.getPackageName());
 
-        /*
+
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
                         2, // The number of sub-containers to create
@@ -38,9 +38,8 @@ public class CameraManager implements HSVConstants {
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
 
-         */
 
-
+        /*
         // --------------- testing ----------------
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK);
@@ -48,6 +47,7 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
         // --------------- testing ----------------
 
+         */
 
         // Opens cameras
         phoneCam.openCameraDevice();

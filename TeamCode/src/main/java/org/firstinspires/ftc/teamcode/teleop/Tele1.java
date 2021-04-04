@@ -55,7 +55,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
         robot.init();
-        robot.setTargetToStack(); // TODO : CHANGE BACK TO TOWER
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.setForwardDirection("intake"); // Default is when the front is the launcher side

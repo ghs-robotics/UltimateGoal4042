@@ -24,6 +24,7 @@ package org.firstinspires.ftc.teamcode.test_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.robot_components.Config;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
@@ -40,7 +41,7 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setTargetToTower();
+        robot.setTargetToStack();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -49,11 +50,14 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
         robot.updateObjectValues();
         robot.resetElapsedTime();
 
-        //Determine how many rings in the starting ring stacks
-//        robot.identifyRingConfig();
-        robot.config = 1; // For testing purposes
+        // Determine how many rings in the starting ring stacks
+        Config config = robot.identifyRingConfig();
 
-        madeIt("config identified");
+        madeIt("config identified" + config);
+        if (config.equals(Config.FOUR)) {
+            madeIt("This was the extra checkpoint!");
+        }
+        /*
 
         //Move forward 6-7 feet until at the edge of launch zone
         robot.moveToPos(NEXT_TO_STARTER_STACK_POS);

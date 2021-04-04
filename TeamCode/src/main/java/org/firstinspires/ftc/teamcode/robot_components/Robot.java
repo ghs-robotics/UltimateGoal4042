@@ -342,11 +342,15 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
-    public void identifyRingConfig() {
-        setTargetToRing();
+    public Config identifyRingConfig() {
+        setTargetToStack();
         updateObjectValues();
-        if (!(objectWidth == 0)) {
-            config = 1.0 * objectHeight / objectWidth;
+        if (5 <= objectHeight && objectHeight <= 15) { // typically about 10
+            return Config.ONE;
+        } else if (16 <= objectHeight && objectHeight <= 30) { // typically about 21
+            return Config.FOUR;
+        } else {
+            return Config.ZERO;
         }
     }
 
