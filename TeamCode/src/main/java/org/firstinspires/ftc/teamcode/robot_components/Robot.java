@@ -102,10 +102,10 @@ public class Robot implements HSVConstants, FieldPositions {
         towerWPID = new PIDController(0.0750, 0.0000, 0.0000, 2);
 
         // Could be better
-        xPID = new PIDController(0.0200, 0.0010, 0.0000, 2);
+        xPID = new PIDController(0.0200, 0.0000, 0.0000, 2);
 
         // Could be better
-        wPID = new PIDController(0.0250, 0.0010, 0.0000, 3);
+        wPID = new PIDController(0.0250, 0.0000, 0.0000, 3);
 
         // gyroPID works best when Ki = 0
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2);
@@ -272,10 +272,10 @@ public class Robot implements HSVConstants, FieldPositions {
     // Launches a ring by moving the shooterServo
     public void launchRings(int rings) { // TODO : CUT DOWN ON TIME
         powerLauncher.toggleOn();
-        powerLauncher.waitAndAdjustVelocity(0.5);
+        wait(0.7);
         for (int i = 0; i < rings; i++) {
             powerLauncher.index();
-            powerLauncher.waitAndAdjustVelocity(0.4);
+            wait(0.7);
         }
         powerLauncher.toggleOff();
     }
@@ -287,35 +287,27 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     public void switchDriveDirection() {
-        if (leftFrontDrive.getDirection().equals(DcMotor.Direction.FORWARD)) {
-            leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-            rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-            leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-            rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        if (orientation == -1) {
+            setLauncherSideToBeForward();
         } else {
-            leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-            leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
+            setIntakeSideToBeForward();
         }
-        orientation *= -1.0;
     }
 
-    public void setForwardDirection(String dir) {
+    public void setIntakeSideToBeForward() {
+        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        orientation = -1;
+    }
 
-        if (dir.equals("launcher")) {
-            leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-            rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-            leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-            rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
-            orientation = 1;
-        } else if (dir.equals("intake")) {
-            leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-            leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
-            rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
-            orientation = -1;
-        }
+    public void setLauncherSideToBeForward() {
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        orientation = 1;
     }
 
     // Toggles the wobble gripper/claw
@@ -371,7 +363,7 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
-        moveToPos(PERFECT_LAUNCH_POS, 1.0, 3.0, false);
+        moveToPos(PERFECT_LAUNCH_POS, 1.5, 3.5, false);
         launchRings(rings);
     }
 
@@ -457,7 +449,11 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minSeconds, double maxSeconds, double otherMax, boolean backup) {
-        setForwardDirection("launcher");
+//        setForwardDirection("launcher");
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
         updateObjectValues();
@@ -468,7 +464,7 @@ public class Robot implements HSVConstants, FieldPositions {
                 && elapsedTime.seconds() - t < otherMax) {
             chaseTower();
             if ((!objectIdentified) && backup) {
-                move(0, -0.5, 0.3);
+                move(0, -0.5, 0.1);
             }
         }
         t = getElapsedTimeSeconds();
@@ -485,21 +481,12 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes robot move forward and pick up wobble goal
     public void pickUpWobbleGoal() {
-        setForwardDirection("intake");
-        setTargetToWobble();
-        resetPIDs();
-        updateObjectValues();
-        double t = getElapsedTimeSeconds();
-        while (elapsedTime.seconds() - t < 1.5 || elapsedTime.seconds() - t < 2.5 &&
-                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
-            chaseWobble();
-        }
         stopDrive();
         turnArm();
         toggleClaw();
-        move(0, 0.6, 1.5);
+        move(0, -0.7, 1.0);
         toggleClaw();
-        wait(0.6);
+        wait(0.4);
         turnArm();
     }
 

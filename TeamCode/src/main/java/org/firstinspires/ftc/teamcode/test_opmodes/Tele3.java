@@ -208,7 +208,7 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
                 } else if (config.equals(Config.ONE)) {
                     robot.moveToPos(CONFIG_1_POS_I, 0.0, 1.0, 4.0, false);
                 } else {
-                    robot.moveToPos(CONFIG_4_POS_I, 0.0, 1.0, 4.0, true);
+                    robot.moveToPos(CONFIG_4_POS_I, 0.0, 1.0, 4.0, false);
                 }
 
                 madeIt("next to wobble goal drop zone");

@@ -28,26 +28,28 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.appContext.getPackageName());
 
 
+        /*
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
                         2, // The number of sub-containers to create
                         OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
 
+
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
+        */
 
 
-        /*
         // --------------- testing ----------------
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK);
+                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
+                hardwareMap.get(WebcamName.class,"Webcam 1"));
         // --------------- testing ----------------
 
-         */
+
 
         // Opens cameras
         phoneCam.openCameraDevice();

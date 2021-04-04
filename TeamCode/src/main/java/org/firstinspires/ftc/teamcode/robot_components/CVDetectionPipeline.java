@@ -81,7 +81,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         else if (target.equals("wobble")) {
             lowerHSV = LOWER_WOBBLE_HSV;
             upperHSV = UPPER_WOBBLE_HSV;
-            cover = 0.63;
+            cover = 0.65;
         }
         else {
             throw new IllegalArgumentException("Target must be ring, tower, or wobble!");

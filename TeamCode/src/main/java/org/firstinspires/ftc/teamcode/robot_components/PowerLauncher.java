@@ -9,10 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // VELOCITY         PERFECT LAUNCH ANGLE (FROM PERFECT_LAUNCH_POSITION)
-    // 1700             0.429
-    // 1600             0.416
-    // 1500             0.385
-    public static double PERFECT_LAUNCH_ANGLE = 0.421; // Default launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.600; // Default launch angle
 
     public static final double INDEXER_BACK_POS = 0.520;
     public static final double INDEXER_FORWARD_POS = 0.760;

@@ -58,7 +58,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        robot.setForwardDirection("intake"); // Default is when the front is the launcher side
+        robot.setIntakeSideToBeForward(); // Default is when the front is the launcher side
         DriveMode.setController(controller1);
 
         // Wait for the game to start (driver presses PLAY)
@@ -80,9 +80,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             robot.updateObjectValues();
 
             // Constantly adjusts launch velocity
-            if (robot.powerLauncher.running) {
-                robot.powerLauncher.adjustShooterVelocity();
-            }
+//            if (robot.powerLauncher.running) {
+//                robot.powerLauncher.adjustShooterVelocity();
+//            }
 
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
@@ -99,10 +99,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             //
             if (controller1.a.equals("pressing")) {
+                robot.setLauncherSideToBeForward();
             }
 
             //
             if (controller1.b.equals("pressing")) {
+                robot.setIntakeSideToBeForward();
             }
 
             // Toggle speed between 100% and 50%
@@ -116,15 +118,17 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
+                robot.setLauncherSideToBeForward();
                 robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
                 robot.powerLauncher.setPerfectLaunchAngle();
-                robot.setForwardDirection("intake");
+                robot.setIntakeSideToBeForward();
             }
 
             // Adjust and shoot
             if (controller1.right_bumper.equals("pressing")) {
+                robot.setLauncherSideToBeForward();
                 robot.adjustAndShoot(3);
-                robot.setForwardDirection("intake");
+                robot.setIntakeSideToBeForward();
             }
 
             // Mecanum wheel drive
@@ -171,6 +175,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             if (controller1.left_trigger + controller1.right_trigger > 1.8) {
                 robot.resetGyroAngle();
             }
+
 
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------

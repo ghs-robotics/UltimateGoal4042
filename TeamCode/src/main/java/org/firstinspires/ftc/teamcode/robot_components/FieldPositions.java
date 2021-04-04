@@ -18,5 +18,5 @@ public interface FieldPositions {
     int[] CONFIG_4_POS_I = new int[]{135, 33}; // Move forward one foot before dropping wobble goal!
     int[] CONFIG_4_POS_II = new int[]{135, 66}; // Move forward one foot before dropping wobble goal!
 
-    int[] SECOND_WOBBLE_POS = new int[]{138, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int[] SECOND_WOBBLE_POS = new int[]{142, 50}; // Where to go before moving forward and grabbing 2nd wobble
 }

@@ -30,21 +30,21 @@ public class Gyro {
         globalAngle = 0;
     }
 
-    // Returns an angle between -90 and 270 degrees
-    public double getAngle () {
-        double angle = getOverallAngle();
-        while (angle < -110 || angle > 290) {
-            if (angle < -110) {
-                angle += 360;
-            } else {
-                angle -= 360;
-            }
-        }
-        return angle;
-    }
+//    // Returns an angle between -90 and 270 degrees
+//    public double getAngle () {
+//        double angle = getOverallAngle();
+//        while (angle < -110 || angle > 290) {
+//            if (angle < -110) {
+//                angle += 360;
+//            } else {
+//                angle -= 360;
+//            }
+//        }
+//        return angle;
+//    }
 
     // Returns the overall angle in degrees (not taken mod 360)
-    public double getOverallAngle() {
+    public double getAngle() {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
         if (deltaAngle < -180) { deltaAngle += 360; }
