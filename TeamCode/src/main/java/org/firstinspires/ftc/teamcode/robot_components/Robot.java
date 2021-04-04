@@ -95,11 +95,11 @@ public class Robot implements HSVConstants, FieldPositions {
 
         // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0900, 0.0000, 0.0000, 2);
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 2);
 
         // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0750, 0.0000, 0.0000, 2);
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 2);
 
         // Could be better
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 2);
@@ -363,7 +363,7 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
-        moveToPos(PERFECT_LAUNCH_POS, 1.5, 3.5, false);
+        moveToPos(PERFECT_LAUNCH_POS, 1.8, 0.8, 3.0);
         launchRings(rings);
     }
 
@@ -429,14 +429,43 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     public void moveToPos(int[] pos) {
-        moveToPos(pos, 1.0);
+        moveToPos(pos, 2.0, 0.5, 5.0);
+    }
+
+    public void moveToPos(int[] pos, double maxSeconds) {
+        moveToPos(pos, maxSeconds, 0.5, 5.0);
     }
 
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double maxSeconds) {
-        moveToPos(pos, maxSeconds, false);
+    public void moveToPos(int[] pos, double maxSeconds, double minSeconds, double firstMax) {
+        setLauncherSideToBeForward();
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
+        resetPIDs();
+        updateObjectValues();
+        double t = getElapsedTimeSeconds();
+        while((Math.abs(targetWidth - objectWidth) > 8
+                || Math.abs(targetX - objectX) > 8
+                || Math.abs(targetGyroAngle - gyro.getAngle()) > 8)
+                && elapsedTime.seconds() - t < firstMax) {
+            chaseTower();
+        }
+        t = getElapsedTimeSeconds();
+
+        // Start fresh by resetting these
+        resetPIDs();
+
+        while (elapsedTime.seconds() - t < minSeconds || elapsedTime.seconds() - t < maxSeconds &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
+            chaseTower();
+        }
+        stopDrive();
     }
 
+    /*
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double maxSeconds, boolean backup) {
         moveToPos(pos, 0.0, maxSeconds, backup);
@@ -479,12 +508,14 @@ public class Robot implements HSVConstants, FieldPositions {
         stopDrive();
     }
 
+     */
+
     // Makes robot move forward and pick up wobble goal
     public void pickUpWobbleGoal() {
         stopDrive();
         turnArm();
         toggleClaw();
-        move(0, -0.7, 1.0);
+        move(0, -0.7, 0.5);
         toggleClaw();
         wait(0.4);
         turnArm();

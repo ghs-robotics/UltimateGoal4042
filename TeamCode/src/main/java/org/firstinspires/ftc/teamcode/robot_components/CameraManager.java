@@ -44,9 +44,9 @@ public class CameraManager implements HSVConstants {
 
         // --------------- testing ----------------
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+                OpenCvInternalCamera.CameraDirection.BACK);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"Webcam 1"));
+                hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
         // --------------- testing ----------------
 
 

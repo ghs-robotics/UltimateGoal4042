@@ -55,7 +55,9 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         // Determine how many rings in the starting ring stacks
         Config config = robot.identifyRingConfig();
 
+        robot.resetGyroAngle();
         madeIt("config identified: " + config);
+        robot.wait(1.0);
 
         if (!config.equals(Config.ZERO)) {
             //Move forward 6-7 feet until at the edge of launch zone
@@ -82,7 +84,6 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
             robot.setLauncherSideToBeForward();
             robot.runIntake(0.8);
             robot.move(0, -0.2, 3.3);
-            robot.runIntake(0.0);
             madeIt("gathered rings");
 
             robot.setLauncherSideToBeForward();
@@ -91,6 +92,7 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
             } else {
                 robot.adjustAndShoot(3);
             }
+            robot.runIntake(0.0);
         }
 
 
@@ -101,20 +103,22 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         if (config.equals(Config.ZERO)) {
             robot.moveToPos(CONFIG_0_POS_I);
         } else if (config.equals(Config.ONE)) {
-            robot.moveToPos(CONFIG_1_POS_I, 1.0, 2.0, 4.0, false);
+            robot.moveToPos(CONFIG_1_POS_I, 3.0, 0.5, 3.0);
+            robot.move(0, 0.6, 1.0);
         } else {
-            robot.moveToPos(CONFIG_4_POS_I, 1.0, 2.0, 4.0, false);
+            robot.moveToPos(CONFIG_4_POS_I, 3.0, 0.5, 3.0);
+            robot.move(0, 0.6, 1.0);
         }
 
         madeIt("next to wobble goal drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(0.4);
+        robot.wait(0.3);
         robot.toggleClaw();
-        robot.wait(0.4);
+        robot.wait(0.3);
         robot.turnArm();
-        robot.wait(0.1);
+        robot.wait(0.3);
         robot.toggleClaw();
 
         madeIt("set down first wobble goal");
@@ -144,23 +148,29 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         if (config.equals(Config.ZERO)) {
             robot.moveToPos(CONFIG_0_POS_II);
         } else if (config.equals(Config.ONE)) {
-            robot.moveToPos(CONFIG_1_POS_II);
+            robot.moveToPos(CONFIG_1_POS_II, 3.0, 0.5, 3.0);
+            robot.move(0, 0.6, 1.0);
         } else {
-            robot.moveToPos(CONFIG_4_POS_II);
+            robot.moveToPos(CONFIG_4_POS_II, 3.0, 0.5, 3.0);
+            robot.move(0, 0.6, 1.0);
         }
 
         madeIt("brought second wobble goal to drop zone");
 
         //once there, place down the wobble goal
         robot.turnArm();
-        robot.wait(0.4);
+        robot.wait(0.3);
         robot.toggleClaw();
-        robot.wait(0.4);
+        robot.wait(0.3);
         robot.turnArm();
-        robot.wait(0.1);
+        robot.wait(0.3);
         robot.toggleClaw();
 
         madeIt("delivered the second wobble");
+
+        if (!config.equals(Config.ZERO)) {
+            robot.move(0, -0.7, 0.7);
+        }
 
         //Move forward to park over launch line
         robot.setLauncherSideToBeForward();
