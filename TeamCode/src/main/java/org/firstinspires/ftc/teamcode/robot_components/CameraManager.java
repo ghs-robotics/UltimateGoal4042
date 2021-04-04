@@ -8,15 +8,15 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
-public class CameraManager {
+public class CameraManager implements HSVConstants {
 
     // Cameras
     public OpenCvCamera phoneCam;
     public OpenCvCamera webcam;
 
     // Pipelines for image processing
-    public ObjectDeterminationPipeline phoneCamPipeline;
-    public ObjectDeterminationPipeline webcamPipeline;
+    public CVDetectionPipeline phoneCamPipeline;
+    public CVDetectionPipeline webcamPipeline;
 
     // Constructs a CameraManager with two cameras
     public CameraManager(HardwareMap hardwareMap) {
@@ -42,11 +42,19 @@ public class CameraManager {
         webcam.openCameraDevice();
 
         // Creates and assigns each camera a pipeline
-        phoneCamPipeline = new ObjectDeterminationPipeline();
-        webcamPipeline = new ObjectDeterminationPipeline();
+        phoneCamPipeline = new CVDetectionPipeline();
+        webcamPipeline = new CVDetectionPipeline();
 
         phoneCam.setPipeline(phoneCamPipeline);
         webcam.setPipeline(webcamPipeline);
+    }
+
+    // Returns the coordinates of the target object using CV
+    public int[] getObjectData(String target) {
+        if (target.equals("tower")) {
+            return webcamPipeline.getObjectData();
+        }
+        return phoneCamPipeline.getObjectData();
     }
 
     // Initializes the camera
@@ -65,13 +73,5 @@ public class CameraManager {
     public void stopStreaming() {
         phoneCam.stopStreaming();
         webcam.stopStreaming();
-    }
-
-    // Returns the coordinates of the target object using CV
-    public int[] getObjectData(String target) {
-        if (target.equals("tower")) {
-            return webcamPipeline.getObjectData();
-        }
-        return phoneCamPipeline.getObjectData();
     }
 }

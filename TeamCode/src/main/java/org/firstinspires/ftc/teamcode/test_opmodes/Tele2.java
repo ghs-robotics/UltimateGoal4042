@@ -83,42 +83,37 @@ public class Tele2 extends OpMode {
         }
 
         if (controller1.a.equals("pressing")) {
-//            robot.targetGyroAngle = (robot.targetGyroAngle == 0 ? 180 : 0);
-//            target = "angle";
-            target = "tower";
-            robot.moveToPos(new int[]{130, 40}, 2);
+            target = "wobble";
+            robot.setTargetToWobble();
         }
 
         if (controller1.y.equals("pressing")) {
-            target = "tower";
-            robot.moveToPos(new int[]{145, 55}, 3);
+            target = "wobble";
+            robot.setTargetToWobble();
         }
 
         if (controller1.b.equals("pressing")) {
-            target = "tower";
-            robot.moveToPos(new int[]{195, 54}, 2);
+            target = "wobble";
+            robot.setTargetToWobble();
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.xPID.k_P -= 0.005; }
-        if (controller1.right_bumper.equals("pressing")) { robot.xPID.k_P += 0.005; }
+        if (controller1.left_bumper.equals("pressing")) { robot.yPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.yPID.k_P += 0.005; }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.xPID.k_I -= 0.0005; }
-        if (controller1.dpad_up.equals("pressing")) { robot.xPID.k_I += 0.0005; }
+        if (controller1.dpad_down.equals("pressing")) { robot.yPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.yPID.k_I += 0.0005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.xPID.k_D -= 0.0005; }
-        if (controller1.dpad_right.equals("pressing")) { robot.xPID.k_D += 0.0005; }
+        if (controller1.dpad_left.equals("pressing")) { robot.yPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.yPID.k_D += 0.0005; }
 
 
         if (target.equals("none")){ robot.updateDrive(); }
-//        if (target.equals("angle")){ robot.adjustAngle(); }
-//        if (target.equals("ring")){ robot.chaseRing(); }
-//        if (target.equals("tower")){ robot.chaseTower(); }
+        if (target.equals("wobble")){ robot.chaseWobble(); }
+        if (target.equals("ring")){ robot.chaseRing(); }
+        if (target.equals("tower")){ robot.chaseTower(); }
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){
-    }
-
-    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.camera.startStreaming(); } }
+    public void stop(){}
 }
