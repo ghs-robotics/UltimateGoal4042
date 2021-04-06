@@ -55,7 +55,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
         robot.init();
-        robot.setTargetToTower();
+        robot.setTargetToTower(); // TODO : Change
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.setIntakeSideToBeForward(); // Default is when the front is the launcher side
@@ -219,13 +219,13 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Angle the launcher up a tiny bit and set to default angle
             if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.001);
+                robot.powerLauncher.changeLaunchAngle(0.003);
                 robot.powerLauncher.setCurrentAngleToDefault();
             }
 
             // Angle the launcher down a tiny bit and set to default angle
             if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(0.001);
+                robot.powerLauncher.changeLaunchAngle(-0.003);
                 robot.powerLauncher.setCurrentAngleToDefault();
             }
 
@@ -234,14 +234,14 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.powerLauncher.setCurrentAngleToDefault();
             }
 
-            // Set current launch angle to the default TODO : REPEATED
+            // Set current launch angle to the default TODO : EXPLAIN
             if (controller2.dpad_left.equals("pressing")) {
-                robot.powerLauncher.setCurrentAngleToDefault();
+                robot.powerLauncher.setLaunchAnglePowershot();
             }
 
             // Change current launch Angle (but keep default the same)
             if (controller2.left_stick_y != 0) {
-                robot.powerLauncher.changeLaunchAngleGradually(controller2.left_stick_y / 200);
+                robot.powerLauncher.changeLaunchAngleGradually(-controller2.left_stick_y / 200);
             }
 
             // Go to default launch angle

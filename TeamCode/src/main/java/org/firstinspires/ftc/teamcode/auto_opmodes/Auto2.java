@@ -8,8 +8,8 @@ import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 
-@Autonomous
-public class Auto1 extends LinearOpMode implements FieldPositions {
+@Autonomous(name="Auto2", group="Linear Opmode")
+public class Auto2 extends LinearOpMode implements FieldPositions {
 
     // Declare OpMode members
     Robot robot;
@@ -25,8 +25,8 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         Config config = robot.identifyRingConfig(); // TODO : Comment out
         telemetry.addData("Status: ", "Initialized");
         telemetry.addData("Config: ", config);
-        robot.stopDrive();
         robot.updateDrive();
+
 
         waitForStart();
 
@@ -38,6 +38,9 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         int c = getNum(config);
 
         robot.resetGyroAngle();
+        madeIt("config identified: " + config + " (" + c + " rings)");
+
+        robot.resetGyroAngle();
         robot.powerLauncher.setPerfectLaunchAngle();
 
         //Move forward 6-7 feet until at the edge of launch zone
@@ -45,36 +48,45 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 //        robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
 
         robot.move(-0.8, 0.8, 1.0);
-        if (c > 0) {
+        if (c == 4) {
             robot.move(0, 0.8, 0.5);
         }
 
         if (c == 0) {
             robot.moveToPos(CONFIG_0_POS_I, 1.0, 3.0);
-            placeWobble();
+        } else if (c == 1) {
+            robot.moveToPos(CONFIG_1_POS_I, 1.0, 3.0, 3.0);
+        }
 
+        if (c != 4) {
+            //once there, place down the wobble goal
+            robot.turnArm();
+            robot.wait(0.3);
+            robot.toggleClaw();
+            robot.wait(0.3);
+            robot.turnArm();
+            robot.wait(0.5);
+            robot.toggleClaw();
+            robot.move(0, -0.7, 0.5);
+        }
+
+        if (c == 1) {
             robot.setLauncherSideToBeForward();
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
             robot.setLauncherSideToBeForward();
             robot.launchRings(3);
             madeIt("shot 3 goals");
         } else {
-            if (c == 1) {
-                robot.moveToPos(CONFIG_1_POS_I, 1.0, 3.0, 3.0);
-                robot.move(0, 0.7, 0.3);
-                placeWobble();
-            }
+            getPowerShots();
+        }
 
-            robot.setLauncherSideToBeForward();
-            robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
-            robot.setLauncherSideToBeForward();
-            robot.launchRings(3);
-            madeIt("shot 3 goals");
-
+        // if starterStack != 0, pickup the starter stack rings
+        if (c > 0) {
+            robot.moveToPos(PERFECT_LAUNCH_POS, 1.5, 3.0);
             robot.setLauncherSideToBeForward();
             robot.powerLauncher.setLaunchAngleHorizontal();
             robot.setLauncherSideToBeForward();
-            robot.runIntake(1.0);
+            robot.runIntake(0.9);
             robot.move(0, -0.17, 1.8);
             madeIt("gathered rings");
 
@@ -96,6 +108,9 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         // Move back to park over launch line
         robot.setLauncherSideToBeForward();
+        if (c == 1) {
+            robot.move(-0.7, 0, 0.5);
+        }
         robot.moveToPos(PARK_POS);
         robot.stopDrive();
     }
@@ -128,17 +143,5 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.telemetry.addData("Made it! Status: ", s);
         robot.telemetry.update();
         robot.wait(0.0);
-    }
-
-    private void placeWobble() {
-        //once there, place down the wobble goal
-        robot.turnArm();
-        robot.wait(0.3);
-        robot.toggleClaw();
-        robot.wait(0.3);
-        robot.turnArm();
-        robot.wait(0.5);
-        robot.toggleClaw();
-        robot.move(-0.7, 0, 0.5);
     }
 }

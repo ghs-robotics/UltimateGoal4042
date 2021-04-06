@@ -148,6 +148,7 @@ public class Robot implements HSVConstants, FieldPositions {
         resetServos();
         resetGyroAngle();
         camera.initCamera();
+        wait(1.0);
     }
 
     // Resets the timer
@@ -232,6 +233,7 @@ public class Robot implements HSVConstants, FieldPositions {
     // Updates the powers being sent to the drive motors
     public void updateDrive() {
         //Displays motor powers on the phone
+//        telemetry.addData("config: ", identifyRingConfig());
         telemetry.addData("rightLaunchPower: ", "" + powerLauncher.rightPower);
         telemetry.addData("rightLaunchVelocity: ", "" + powerLauncher.getRightVelocity());
         telemetry.addData("launchAngle: ", "" + powerLauncher.launchAngle);
@@ -317,11 +319,6 @@ public class Robot implements HSVConstants, FieldPositions {
         clawServo.setPosition(clawAngle);
     }
 
-    // Turns the power launcher motors on or off
-    public void togglePowerLauncher() {
-        powerLauncher.toggle();
-    }
-
     // Toggles the drive speed between 50% and normal
     public void toggleSpeed() {
         speed = (speed == 1 ? 0.5 : 1);
@@ -338,9 +335,9 @@ public class Robot implements HSVConstants, FieldPositions {
     public Config identifyRingConfig() {
         setTargetToStack();
         updateObjectValues();
-        if (5 <= objectHeight && objectHeight <= 15) { // typically about 10
+        if (5 <= objectHeight && objectHeight <= 18) { // typically about 10
             return Config.ONE;
-        } else if (16 <= objectHeight && objectHeight <= 30) { // typically about 21
+        } else if (19 <= objectHeight && objectHeight <= 30) { // typically about 21
             return Config.FOUR;
         } else {
             return Config.ZERO;
@@ -363,7 +360,7 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
-        moveToPos(PERFECT_LAUNCH_POS, 1.8, 0.8, 3.0);
+        moveToPos(PERFECT_LAUNCH_POS, 0.8, 2.0, 5.0);
         launchRings(rings);
     }
 
@@ -429,28 +426,29 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     public void moveToPos(int[] pos) {
-        moveToPos(pos, 2.0, 0.5, 5.0);
+        moveToPos(pos, 0.0, 2.0, 5.0);
     }
 
-    public void moveToPos(int[] pos, double maxSeconds) {
-        moveToPos(pos, maxSeconds, 0.5, 5.0);
+    public void moveToPos(int[] pos, double maxFineTuning) {
+        moveToPos(pos, 0.0, maxFineTuning, 5.0);
+    }
+
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning) {
+        moveToPos(pos, minFineTuning, maxFineTuning, 5.0);
     }
 
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double maxSeconds, double minSeconds, double firstMax) {
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         setLauncherSideToBeForward();
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
+        rotateToPos(0.0, 0.0);
         updateObjectValues();
         double t = getElapsedTimeSeconds();
         while((Math.abs(targetWidth - objectWidth) > 8
                 || Math.abs(targetX - objectX) > 8
                 || Math.abs(targetGyroAngle - gyro.getAngle()) > 8)
-                && elapsedTime.seconds() - t < firstMax) {
+                && elapsedTime.seconds() - t < maxBroadTuning) {
             chaseTower();
         }
         t = getElapsedTimeSeconds();
@@ -458,31 +456,18 @@ public class Robot implements HSVConstants, FieldPositions {
         // Start fresh by resetting these
         resetPIDs();
 
-        while (elapsedTime.seconds() - t < minSeconds || elapsedTime.seconds() - t < maxSeconds &&
-                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
+        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
             chaseTower();
         }
         stopDrive();
     }
 
     /*
-    // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double maxSeconds, boolean backup) {
-        moveToPos(pos, 0.0, maxSeconds, backup);
-    }
-
-    // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double minSeconds, double maxSeconds, boolean backup) {
-        moveToPos(pos, minSeconds, maxSeconds, 5.0, backup);
-    }
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minSeconds, double maxSeconds, double otherMax, boolean backup) {
-//        setForwardDirection("launcher");
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        setForwardDirection("launcher");
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
         updateObjectValues();
@@ -522,7 +507,15 @@ public class Robot implements HSVConstants, FieldPositions {
     }
 
     // Makes the robot rotate to a certain angle
-    public void rotateToPos(int angle, int maxSeconds) {
+    public void rotateToPos(double angle, double maxFineTuning) {
+        double actualAngle = gyro.getAngle();
+        while (Math.abs(actualAngle - angle)  > 190) {
+            if (angle < actualAngle) {
+                angle += 360;
+            } else {
+                angle -= 360;
+            }
+        }
         targetGyroAngle = angle;
         resetPIDs();
         double t = getElapsedTimeSeconds();
@@ -530,9 +523,9 @@ public class Robot implements HSVConstants, FieldPositions {
             adjustAngle();
         }
         t = getElapsedTimeSeconds();
-        resetPIDs(); // TODO : TEST THIS LINE
+        resetPIDs();
         while ((Math.abs(targetGyroAngle - gyro.getAngle()) > 1)
-                && elapsedTime.seconds() - t < maxSeconds) {
+                && elapsedTime.seconds() - t < maxFineTuning) {
             adjustAngle();
         }
         stopDrive();
