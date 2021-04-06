@@ -4,7 +4,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 public interface FieldPositions {
 
     // Generally useful positions
-    int[] PERFECT_LAUNCH_POS = new int[]{145, 58}; // Perfect launch position
+    int[] PERFECT_LAUNCH_POS = new int[]{140, 58}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{190, 60}; // Where to go to avoid first starter stack
     int[] PARK_POS = new int[]{134, 73}; // Where to park during autonomous
     int[] RIGHT_POWERSHOT_POS = new int[]{180, 58}; // TODO : CALIBRATE

@@ -321,7 +321,7 @@ public class Robot implements HSVConstants, FieldPositions {
 
     // Toggles the drive speed between 50% and normal
     public void toggleSpeed() {
-        speed = (speed == 1 ? 0.5 : 1);
+        speed = (speed == 1 ? 0.65 : 1);
     }
 
     // Turns the arm

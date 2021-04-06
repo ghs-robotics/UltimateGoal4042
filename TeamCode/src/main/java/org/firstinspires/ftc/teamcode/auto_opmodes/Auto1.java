@@ -61,8 +61,9 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         } else {
             if (c == 1) {
                 robot.moveToPos(CONFIG_1_POS_I, 1.0, 3.0, 3.0);
-                robot.move(0, 0.7, 0.3);
+                robot.move(0, 0.3, 0.5);
                 placeWobble();
+                robot.move(0, -1.0, 0.5);
             }
 
             robot.setLauncherSideToBeForward();

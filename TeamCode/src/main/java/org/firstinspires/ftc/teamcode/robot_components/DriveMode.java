@@ -32,7 +32,7 @@ public class DriveMode {
                 running = true;
                 elapsedTime.reset();
             } else {
-                factor = Math.min(1.0, elapsedTime.seconds());
+                factor = Math.min(1.0, 0.3 + 0.7 * elapsedTime.seconds());
             }
         } else { // No drive motors running
             running = false;

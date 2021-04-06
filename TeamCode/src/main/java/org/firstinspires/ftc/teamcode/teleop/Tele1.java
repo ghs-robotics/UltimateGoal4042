@@ -212,6 +212,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             //
             if (controller2.y.equals("pressing")) {
+                robot.powerLauncher.setLaunchAngleHorizontal();
             }
 
             // Run intake with right joystick
