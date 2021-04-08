@@ -51,6 +51,8 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
+        robot.setIntakeSideToBeForward();
+
         robot.setTargetToRing();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -69,12 +71,7 @@ public class Tele2 extends OpMode {
     public void loop() {
         //Registers controller input
         controller1.update();
-
-        //Press left bumper to turn on/off the shooter motor
-//        if (controller1.left_bumper.equals("pressing")) { robot.toggleShooter(); }
-
-        //Press right bumper to launch a ring
-//        if (controller1.right_bumper.equals("pressing")) { robot.launchRing(); }
+        robot.updateObjectValues();
 
         //Mecanum wheel drive
         robot.calculateDrivePowers(
@@ -83,50 +80,42 @@ public class Tele2 extends OpMode {
                 controller1.right_stick_x
         );
 
-        if (target.equals("none")){ robot.updateDrive(); }
+        if (controller1.x.equals("pressing")) {
+            target = "none";
+        }
 
-        if (controller1.x.equals("pressing")) { robot.cameraManager.stopStreaming(); target = "none"; }
-
-        if (controller1.a.equals("pressing"))
-        {
-            stream();
+        if (controller1.a.equals("pressing")) {
             target = "ring";
-            robot.setTargetToRing();
+            robot.setTargetToRing(33, 80);
         }
 
-        if (controller1.y.equals("pressing"))
-        {
-            stream();
-            target = "tower";
-            robot.setTargetToTower();
+        if (controller1.y.equals("pressing")) {
+            target = "ring";
+            robot.setTargetToRing(33, 80);
         }
 
-        if (controller1.b.equals("pressing"))
-        {
-            stream();
-            target = "tower";
-            robot.setTargetToTower(95, 80);
-            robot.moveToPos(new int[]{95, 80},5);
+        if (controller1.b.equals("pressing")) {
+            target = "ring";
+            robot.setTargetToRing(63, 60);
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.001; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.001; }
+        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.005; }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0001; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0001; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0001; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0001; }
+        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0005; }
 
-        if(target.equals("ring")){ robot.chaseRing(); }
-        if(target.equals("angle")){ robot.adjustAngle(); }
-        if(target.equals("tower")){ robot.chaseTower(); }
+
+        if (target.equals("none")){ robot.updateDrive(); }
+        if (target.equals("wobble")){ robot.chaseWobble(); }
+        if (target.equals("ring")){ robot.chaseRing(); }
+        if (target.equals("tower")){ robot.chaseTower(); }
     }
 
     //Code to run ONCE after the driver hits STOP
     @Override
-    public void stop(){
-    }
-
-    public void stream(){ if (target.equals("none") || target.equals("angle")){ robot.cameraManager.startStreaming(); } }
+    public void stop(){}
 }

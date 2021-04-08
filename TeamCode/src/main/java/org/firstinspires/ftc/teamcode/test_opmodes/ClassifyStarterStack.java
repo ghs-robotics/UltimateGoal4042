@@ -88,7 +88,7 @@ public class ClassifyStarterStack extends LinearOpMode
         {
             FOUR,
             ONE,
-            NONE
+            ZERO
         }
 
         /*
@@ -165,7 +165,7 @@ public class ClassifyStarterStack extends LinearOpMode
             }else if (avg1 > ONE_RING_THRESHOLD){
                 position = RingPosition.ONE;
             }else{
-                position = RingPosition.NONE;
+                position = RingPosition.ZERO;
             }
 
             Imgproc.rectangle(

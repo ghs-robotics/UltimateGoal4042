@@ -29,122 +29,231 @@
 
 package org.firstinspires.ftc.teamcode.teleop;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.DriveMode;
+import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
-import org.firstinspires.ftc.teamcode.test_opmodes.ChaseTower;
 
-@TeleOp(name="Tele1", group="Iterative Opmode")
-public class Tele1 extends OpMode
-{
-    //Declare OpMode members
+@TeleOp(name="Tele1", group="Linear Opmode")
+public class Tele1 extends LinearOpMode implements FieldPositions {
+
+    // Declare OpMode members
     Robot robot;
-    ChaseTower chasetower;
     Controller controller1;
     Controller controller2;
 
     //Code to run ONCE when the driver hits INIT
     @Override
-    public void init() {
+    public void runOpMode() {
+
+        // Code to run ONCE when the driver hits INIT
         robot = new Robot(hardwareMap, telemetry);
-        controller1 = new Controller(gamepad1);
-        controller2 = new Controller(gamepad2);
-        robot.resetServos();
+        controller1 = new Controller(gamepad1); // Whoever presses start + a
+        controller2 = new Controller(gamepad2); // Whoever presses start + b
+        int queue = 0; // Keeps track of how many rings are "in line" to be shot
+
+        robot.init();
+        robot.setTargetToTower(); // TODO : Change
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+        robot.setIntakeSideToBeForward(); // Default is when the front is the launcher side
+        DriveMode.setController(controller1);
+
+        // Wait for the game to start (driver presses PLAY)
+        waitForStart();
+        robot.resetGyroAngle();
+        robot.resetElapsedTime();
+
+        while (opModeIsActive()) {
+
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+            // --------------------------------   CONTINUOUS UPDATES   ---------------------------------
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+
+            // Registers controller input
+            controller1.update();
+            controller2.update();
+            robot.updateObjectValues();
+
+            // Constantly adjusts launch velocity
+//            if (robot.powerLauncher.running) {
+//                robot.powerLauncher.adjustShooterVelocity();
+//            }
+
+            // Checks if any rings need to be shot and takes care of indexing
+            if (queue > 0) {
+                queue = robot.powerLauncher.handleQueue(queue);
+            }
+
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+            // ------------------------------   CONTROLLER 1 FUNCTIONS   -------------------------------
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+
+            // NOTE: TO USE THESE FUNCTIONS PRESS START A
+
+            //
+            if (controller1.a.equals("pressing")) {
+                robot.setLauncherSideToBeForward();
+            }
+
+            //
+            if (controller1.b.equals("pressing")) {
+                robot.setIntakeSideToBeForward();
+            }
+
+            // Toggle speed between 100% and 50%
+            if (controller1.x.equals("pressing")) {
+                robot.toggleSpeed();
+            }
+
+            //
+            if (controller1.y.equals("pressing")) {
+            }
+
+            // Go to perfect launch position and set launch angle
+            if (controller1.left_bumper.equals("pressing")) {
+                robot.setLauncherSideToBeForward();
+                robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
+                robot.powerLauncher.setPerfectLaunchAngle();
+                robot.setIntakeSideToBeForward();
+            }
+
+            // Adjust and shoot
+            if (controller1.right_bumper.equals("pressing")) {
+                robot.setLauncherSideToBeForward();
+                robot.adjustAndShoot(3);
+                robot.setIntakeSideToBeForward();
+            }
+
+            // Mecanum wheel drive
+            DriveMode.update();
+            robot.calculateDrivePowers(
+                    controller1.left_stick_x * DriveMode.getFactor(),
+                    controller1.left_stick_y * DriveMode.getFactor(),
+                    controller1.right_stick_x * DriveMode.getFactor()
+            );
+
+            robot.updateDrive(); // Also updates telemetry
+
+            // Flip the drive direction
+            if (controller1.right_stick_button.equals("pressing")) {
+                robot.switchDriveDirection();
+            }
+
+            // Toggles between strong/smooth mode
+            if (controller1.left_stick_button.equals("pressing")) {
+                DriveMode.switchMode();
+            }
+
+            // Rotate to face tower goal (north)
+            if (controller1.dpad_up.equals("pressing")) {
+                robot.rotateToPos(180,1);
+            }
+
+            // Rotate to face away from tower goal (south)
+            if (controller1.dpad_down.equals("pressing")) {
+                robot.rotateToPos(0,1);
+            }
+
+            // Rotate to face east
+            if (controller1.dpad_right.equals("pressing")) {
+                robot.rotateToPos(90,1);
+            }
+
+            // Rotate to face west
+            if (controller1.dpad_left.equals("pressing")) {
+                robot.rotateToPos(-90,1);
+            }
+
+            // Reset gyro in case of emergency
+            if (controller1.left_trigger + controller1.right_trigger > 1.8) {
+                robot.resetGyroAngle();
+            }
+
+
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+            // ------------------------------   CONTROLLER 2 FUNCTIONS   -------------------------------
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+
+            // NOTE: TO USE THESE FUNCTIONS, PRESS START B
+
+            // Right bumper toggles the claw
+            if (controller2.right_bumper.equals("pressing")) {
+                robot.toggleClaw();
+            }
+
+            // Left bumper turns arm
+            if (controller2.left_bumper.equals("pressing")) {
+                robot.turnArm();
+            }
+
+            // Launch one ring
+            if (controller2.a.equals("pressing")) {
+                queue++;
+            }
+
+            // Toggle launcher
+            if (controller2.b.equals("pressing")) {
+                robot.powerLauncher.toggle();
+            }
+
+            // Index TODO : NOT NEEDED
+            if (controller2.x.equals("pressing")) {
+                robot.powerLauncher.index();
+            }
+
+            //
+            if (controller2.y.equals("pressing")) {
+                robot.powerLauncher.setLaunchAngleHorizontal();
+            }
+
+            // Run intake with right joystick
+            robot.runIntake(controller2.right_stick_y);
+
+            // Angle the launcher up a tiny bit and set to default angle
+            if (controller2.dpad_up.equals("pressing")) {
+                robot.powerLauncher.changeLaunchAngle(0.003);
+                robot.powerLauncher.setCurrentAngleToDefault();
+            }
+
+            // Angle the launcher down a tiny bit and set to default angle
+            if (controller2.dpad_down.equals("pressing")) {
+                robot.powerLauncher.changeLaunchAngle(-0.003);
+                robot.powerLauncher.setCurrentAngleToDefault();
+            }
+
+            // Set current launch angle to the default TODO : REPEATED
+            if (controller2.dpad_right.equals("pressing")) {
+                robot.powerLauncher.setCurrentAngleToDefault();
+            }
+
+            // Set current launch angle to the default TODO : EXPLAIN
+            if (controller2.dpad_left.equals("pressing")) {
+                robot.powerLauncher.setLaunchAnglePowershot();
+            }
+
+            // Change current launch Angle (but keep default the same)
+            if (controller2.left_stick_y != 0) {
+                robot.powerLauncher.changeLaunchAngleGradually(-controller2.left_stick_y / 200);
+            }
+
+            // Go to default launch angle
+            if (controller2.left_stick_button.equals("pressed")) {
+                robot.powerLauncher.setPerfectLaunchAngle();
+            }
+        }
     }
-
-    //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
-    @Override
-    public void init_loop() {}
-
-    //Code to run ONCE when the driver hits PLAY
-    @Override
-    public void start() { robot.resetElapsedTime(); }
-
-    //Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
-    @Override
-    public void loop() {
-        //Registers controller input
-        controller1.update();
-        controller2.update();
-
-        //Press "x" to toggle speed between 100% and 30%
-        if (controller1.x.equals("pressing")) {
-            robot.toggleSpeed();
-        }
-
-        //Mecanum wheel drive
-        robot.calculateDrivePowers(
-                controller1.left_stick_x,
-                controller1.left_stick_y,
-                controller1.right_stick_x
-        );
-        robot.updateDrive();
-
-        //Press left bumper to turn on/off the shooter motor
-        if (controller2.right_bumper.equals("pressing")) {
-            robot.toggleShooter();
-            robot.wait(0.5);
-            robot.launchRing();
-        }
-
-        //Press "y" to turn on/off the intake motor
-        if (controller1.y.equals("pressing")) {
-            robot.toggleIntake();
-        }
-
-        //Press "b" to toggle the wobble gripper, could group together toggle wobble and turn arm?
-        if (controller2.b.equals("pressing")) {
-            robot.toggleGrab();
-        }
-
-        //Press "a" to turn the arm,
-        if (controller2.a.equals("pressing")) {
-            robot.turnArm();
-        }
-
-        if (controller1.dpad_up.equals("pressing")) {
-            robot.diffy.leftDiffyPower += 0.05;
-            robot.diffy.rightDiffyPower += 0.05;
-            robot.diffy.sendPowers();
-        }
-        if (controller1.dpad_down.equals("pressing")) {
-            robot.diffy.leftDiffyPower -= 0.05;
-            robot.diffy.rightDiffyPower -= 0.05;
-            robot.diffy.sendPowers();
-        }
-        //adjusts diffy angle
-        if (controller2.dpad_up.equals("pressing")) {
-            robot.diffy.increaseIncline();
-        }
-        if (controller2.dpad_down.equals("pressing")) {
-            robot.diffy.decreaseIncline();
-        }
-        //turn 180 might work?
-        if(controller2.x.equals("pressing")); {
-            robot.rotateToPos(180, 1);
-        }
-
-        //turn to face goal might work??
-        if(controller2.y.equals("pressing")); {
-            robot.rotateToPos(0, 1);
-        }
-        //chases tower...?
-        if(controller2.left_bumper.equals("pressing")); {
-            robot.setTargetToTower();
-            robot.chaseTower();
-            robot.wait(0.05);
-        }
-
-    }
-
-    //Code to run ONCE after the driver hits STOP
-    @Override
-    public void stop(){}
 }
+
 
 //TO DO: functions that turns robot to face goal, adujust and shoot?
 //2 shits: if button press, turn to face goal; if button press turn 180

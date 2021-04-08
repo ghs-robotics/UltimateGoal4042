@@ -87,7 +87,7 @@ public class Controller {
         right_trigger = gamepad.right_trigger;
     }
 
-    public String check(String previous, Boolean current) {
+    private String check(String previous, Boolean current) {
         String state;
         if (current) {
             if (previous.equals("released")) {
