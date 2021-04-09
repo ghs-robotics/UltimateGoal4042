@@ -35,7 +35,6 @@ public class Robot implements HSVConstants, FieldPositions {
     public double armAngle = 0.45; // Up position
     public double clawAngle = 0.15; // Closed position
     public double speed = 1;
-    public double config = 0;
 
     // Drive orientation (+1 means launcher side is front, -1 means intake side is front)
     private double orientation = 1;

@@ -16,16 +16,17 @@ import java.util.List;
 
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
 
+    // Some constants for the screen size
     public static final int SCREEN_HEIGHT = 240;
     public static final int SCREEN_WIDTH = 320;
 
-    // Detects rings by default
+    // Detects rings by default to start out
     public Scalar lowerHSV = LOWER_RING_HSV;
     public Scalar upperHSV = UPPER_RING_HSV;
 
     public String targetObject = "ring";
 
-    // Coordinates of detected object
+    // Coordinates of detected object (these values are constantly updated)
     public int objectX = 0;
     public int objectY = 0;
     public int objectWidth = 0;
@@ -34,15 +35,16 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // Amount of screen covered by a white rectangle during image processing
     public double cover = 0;
 
-    // Auxiliary Mat objects
+    // Auxiliary Mat objects for temporarily storing data
     private Mat dst = new Mat();
     private Mat hierarchy = new Mat();
 
-    // Returns array with coordinates of detected object
+    // Returns array with coordinates of detected object, allowing us to access the data elsewhere
     public int[] getObjectData() {
         return new int[]{objectX, objectY, objectWidth, objectHeight};
     }
 
+    // This method is called in the background (not by us)
     @Override
     public void init(Mat firstFrame) {
 //        inputToCb(firstFrame);
@@ -50,6 +52,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     }
 
     // Processes image before displaying on phone screen
+    // This method is called in the background (not by us) every time the camera receives a new
+    // input, which happens multiple times a second while we're streaming
     @Override
     public Mat processFrame(Mat input) {
         // Update object coordinates
@@ -64,11 +68,29 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         return input;
     }
 
+    // Checks if the data for the target object is reasonable
+    public boolean checkIfReasonable(String target, int x, int y, int w, int h) {
+        if (target.equals("ring")) {
+            return passesRingTest(w, h);
+        }
+        else if (target.equals("stack")) {
+            return passesStackTest(x, w, h);
+        }
+        else if (target.equals("tower")) {
+            return passesTowerTest(w);
+        }
+        else if (target.equals("wobble")) {
+            return passesWobbleTest(w, h);
+        }
+        return false; // Return false if none of the above targets apply
+    }
+
+    // Updates the lower and upper HSV values as well as the cover
     public void setTargetTo(String target) throws IllegalArgumentException {
         if (target.equals("ring")) {
             lowerHSV = LOWER_RING_HSV;
             upperHSV = UPPER_RING_HSV;
-            cover = 0.65;
+            cover = 0.65; // TODO : CALIBRATE
         }
         else if (target.equals("stack")) {
             lowerHSV = LOWER_STACK_HSV;
@@ -91,14 +113,16 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         targetObject = target;
     }
 
-    //https://stackoverflow.com/questions/17035005/using-get-and-put-to-access-pixel-values-in-opencv-for-java
-    //this is the method that displays hsv values of a point on screen
+    // Displays HSV values of a point on the screen
+    // More info: https://stackoverflow.com/questions/17035005/using-get-and-put-to-access-pixel-values-in-opencv-for-java
     private Mat showHSVCrosshair(Mat input) {
         int targetX = input.cols()/2;
         int targetY = input.rows()/2;
 
         dst = input.clone();
         dst.convertTo(dst, CvType.CV_64FC3);
+
+        // TODO : SHOULD THIS BE BGR?
         Imgproc.cvtColor(dst,dst,Imgproc.COLOR_RGB2HSV);
         int size = (int) (input.total() * input.channels());
 
@@ -112,64 +136,54 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
 
     // Detects the position of the target object on the screen and returns an array with those values
     public int[] findObjectCoordinates(Mat src) {
+
+        // Imgproc is a class that comes with the library and has a bunch of useful methods
+        // Resizes image to make processing more uniform
         Imgproc.resize(src, src, new Size(320, 240));
 
-        //Cover up background noise
-        //creates rectangle
+        // Covers up background noise
+        // Creates rectangle
         Imgproc.rectangle(src, new Point(0, 0), new Point(320, (int) (cover * 240)), GREEN_BGR, -1);
 
+        // Covers up most of screen if analyzing starter stack
         if (targetObject.equals("stack")) {
             Imgproc.rectangle(src, new Point(0, 0), new Point(140, 240), GREEN_BGR, -1);
             Imgproc.rectangle(src, new Point(270, 0), new Point(320, 240), GREEN_BGR, -1);
         }
 
-        // Convert color from RGB to HSV
+        // Converts color from BGR (default format for OpenCV) to HSV (easier format to process with)
         Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
 
-        // adding a mask to the dst mat
-        // filters colors within certain color range
+        // Filters colors within certain color range
         Core.inRange(dst, lowerHSV, upperHSV, dst);
 
-        // Get the contours of the ring
+        // Finds the contours of the object and stores them in an ArrayList
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
         Imgproc.drawContours(src, contours, -1, GREEN_BGR, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
 
-        Rect largest = new Rect();
+        // Creates a rectangle called rect with default value of 0 for x, y, width, and height
+        Rect largestRect = new Rect();
+
+        // Iterates through all of the contours and finds the largest bounding rectangle
         for (int i = 0; i < contours.size(); i++) {
             Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (largest.area() < rect.area()) {
+            if (largestRect.area() < rect.area()) {
 
-                // Check which object should be found and make sure it has a reasonable size
-                if (targetObject.equals("ring")) {
-                    if (passesRingTest(rect.width, rect.height)) {
-                        largest = rect;
-                    }
-                }
-                else if (targetObject.equals("stack")) {
-                    if (passesStackTest(rect.width, rect.height, rect.x)) {
-                        largest = rect;
-                    }
-                }
-                else if (targetObject.equals("tower")) {
-                    if (passesTowerTest(rect.width)) {
-                        largest = rect;
-                    }
-                }
-                else if (targetObject.equals("wobble")) {
-                    if (passesWobbleTest(rect.width, rect.height)) {
-                        largest = rect;
-                    }
+                // Makes sure object has a reasonable size before reassigning largestRect
+                if (checkIfReasonable(targetObject, rect.x, rect.y, rect.width, rect.height)) {
+                    largestRect = rect;
                 }
             }
         }
 
-        // Draw largest rect
-        Imgproc.rectangle(src, largest, GREEN_BGR, 1); // TODO : comment out?
+        // Draws largest rect on src image
+        Imgproc.rectangle(src, largestRect, GREEN_BGR, 1); // TODO : comment out?
 
-        return new int[]{largest.x, largest.y, largest.width, largest.height};
+        // Returns the data for the largest rectangle that is still reasonable
+        return new int[]{largestRect.x, largestRect.y, largestRect.width, largestRect.height};
     }
 
 
@@ -180,7 +194,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     }
 
     // Testing to make sure the detected object is a ring stack
-    private boolean passesStackTest(double w, double h, double x) {
+    private boolean passesStackTest(double x, double w, double h) {
         return (4 < w && 4 < h && h < 40 && x > 0);
     }
 

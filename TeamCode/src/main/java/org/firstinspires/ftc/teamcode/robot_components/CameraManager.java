@@ -50,7 +50,6 @@ public class CameraManager implements HSVConstants {
         // --------------- testing ----------------
 
 
-
         // Opens cameras
         phoneCam.openCameraDevice();
         webcam.openCameraDevice();
