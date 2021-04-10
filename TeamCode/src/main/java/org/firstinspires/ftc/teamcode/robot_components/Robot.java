@@ -331,7 +331,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 
     // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
-    public Config identifyRingConfig() {
+    public int identifyRingConfig() {
         setTargetToStack();
         updateObjectValues();
         if (5 <= objectHeight && objectHeight <= 18) { // typically about 10
