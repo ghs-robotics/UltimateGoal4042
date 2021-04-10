@@ -53,13 +53,13 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
 
 
         // Determine how many rings in the starting ring stacks
-        Config config = robot.identifyRingConfig();
+        int config = robot.identifyRingConfig();
 
         robot.resetGyroAngle();
         madeIt("config identified: " + config);
         robot.wait(1.0);
 
-        if (!config.equals(Config.ZERO)) {
+        if (config != (Config.ZERO)) {
             //Move forward 6-7 feet until at the edge of launch zone
             robot.setLauncherSideToBeForward();
             robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0.1);
@@ -80,14 +80,14 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         madeIt("shot 3 goals");
 
         // if starterStack != 0, pickup the starter stack rings
-        if (!config.equals(Config.ZERO)) {
+        if (config != (Config.ZERO)) {
             robot.setLauncherSideToBeForward();
             robot.runIntake(0.8);
             robot.move(0, -0.2, 3.3);
             madeIt("gathered rings");
 
             robot.setLauncherSideToBeForward();
-            if (config.equals(Config.ONE)) {
+            if (config == (Config.ONE)) {
                 robot.adjustAndShoot(1);
             } else {
                 robot.adjustAndShoot(3);
@@ -100,9 +100,9 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         robot.setLauncherSideToBeForward();
-        if (config.equals(Config.ZERO)) {
+        if (config == Config.ZERO) {
             robot.moveToPos(CONFIG_0_POS_I);
-        } else if (config.equals(Config.ONE)) {
+        } else if (config == Config.ONE) {
             robot.moveToPos(CONFIG_1_POS_I, 3.0, 0.5, 3.0);
             robot.move(0, 0.6, 1.0);
         } else {
@@ -145,9 +145,9 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         //Move left or right depending on target wobble goal
         robot.wait(0.01);
         robot.setLauncherSideToBeForward();
-        if (config.equals(Config.ZERO)) {
+        if (config == Config.ZERO) {
             robot.moveToPos(CONFIG_0_POS_II);
-        } else if (config.equals(Config.ONE)) {
+        } else if (config == Config.ONE) {
             robot.moveToPos(CONFIG_1_POS_II, 3.0, 0.5, 3.0);
             robot.move(0, 0.6, 1.0);
         } else {
@@ -168,7 +168,7 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
 
         madeIt("delivered the second wobble");
 
-        if (!config.equals(Config.ZERO)) {
+        if (config != Config.ZERO) {
             robot.move(0, -0.7, 0.7);
         }
 

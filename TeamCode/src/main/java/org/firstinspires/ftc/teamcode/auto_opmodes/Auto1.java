@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.auto_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.robot_components.Config;
 import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
@@ -22,7 +21,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.setTargetToStack();
         robot.resetGyroAngle();
         robot.updateObjectValues();
-        Config config = robot.identifyRingConfig(); // TODO : Comment out
+        int config = robot.identifyRingConfig(); // TODO : Comment out
         telemetry.addData("Status: ", "Initialized");
         telemetry.addData("Config: ", config);
         robot.stopDrive();
@@ -35,7 +34,6 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         // Determine how many rings in the starting ring stacks
         config = robot.identifyRingConfig();
-        int c = getNum(config);
 
         robot.resetGyroAngle();
         robot.powerLauncher.setPerfectLaunchAngle();
@@ -45,11 +43,11 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 //        robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
 
         robot.move(-0.8, 0.8, 1.0);
-        if (c > 0) {
+        if (config > 0) {
             robot.move(0, 0.8, 0.5);
         }
 
-        if (c == 0) {
+        if (config == 0) {
             robot.moveToPos(CONFIG_0_POS_I, 1.0, 3.0);
             placeWobble();
 
@@ -59,7 +57,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
             robot.launchRings(3);
             madeIt("shot 3 goals");
         } else {
-            if (c == 1) {
+            if (config == 1) {
                 robot.moveToPos(CONFIG_1_POS_I, 1.0, 3.0, 3.0);
                 robot.move(0, 0.3, 0.5);
                 placeWobble();
@@ -84,7 +82,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
             robot.setLauncherSideToBeForward();
             robot.runIntake(0.0);
             robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.0);
-            if (c == 1) {
+            if (config == 1) {
                 robot.launchRings(1);
             } else {
                 robot.launchRings(3);
@@ -113,16 +111,6 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.move(-0.6, 0, 0.6);
         robot.rotateToPos(0, 0.5);
         robot.launchRings(1);
-    }
-
-    private int getNum(Config config) {
-        if (config.equals(Config.ZERO)) {
-            return 0;
-        } else if (config.equals(Config.ONE)) {
-            return 1;
-        } else {
-            return 4;
-        }
     }
 
     private void madeIt(String s) {

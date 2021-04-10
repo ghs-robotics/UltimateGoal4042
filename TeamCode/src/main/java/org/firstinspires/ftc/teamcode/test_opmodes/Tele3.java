@@ -161,16 +161,17 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
 
          */
 
-        Config config = Config.ONE;
+        int config = Config.ONE;
         while (opModeIsActive()) {
             controller1.update();
             if (controller1.a.equals("pressing")) {
                 // Determine how many rings in the starting ring stacks
                 config = robot.identifyRingConfig();
 
+
                 madeIt("config identified: " + config);
 
-                if (!config.equals(Config.ZERO)) {
+                if (config != Config.ZERO) {
                     //Move forward 6-7 feet until at the edge of launch zone
                     robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0.1);
 
@@ -186,13 +187,13 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
                 madeIt("shot 3 goals");
 
                 // if starterStack != 0, pickup the starter stack rings
-                if (!config.equals(Config.ZERO)) {
+                if (config != Config.ZERO) {
                     robot.runIntake(0.8);
                     robot.move(0, -0.3, 3.0);
                     robot.runIntake(0.0);
                     madeIt("gathered rings");
 
-                    if (config.equals(Config.ONE)) {
+                    if (config != Config.ONE) {
                         robot.adjustAndShoot(1);
                     } else {
                         robot.adjustAndShoot(3);
@@ -203,9 +204,9 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
                 //move forward towards the desired target wobble goal zone
                 //Check distance to tower goal and correct if necessary
                 //Move left or right depending on target wobble goal
-                if (config.equals(Config.ZERO)) {
+                if (config != Config.ZERO) {
                     robot.moveToPos(CONFIG_0_POS_I);
-                } else if (config.equals(Config.ONE)) {
+                } else if (config != Config.ONE) {
                     robot.moveToPos(CONFIG_1_POS_I, 4.0);
                 } else {
                     robot.moveToPos(CONFIG_4_POS_I, 4.0);
@@ -246,9 +247,9 @@ public class Tele3 extends LinearOpMode implements FieldPositions {
                 //Check distance to tower goal and correct if necessary
                 //Move left or right depending on target wobble goal
                 robot.wait(0.01);
-                if (config.equals(Config.ZERO)) {
+                if (config == Config.ZERO) {
                     robot.moveToPos(CONFIG_0_POS_II);
-                } else if (config.equals(Config.ONE)) {
+                } else if (config == Config.ONE) {
                     robot.moveToPos(CONFIG_1_POS_II, 4.0);
                 } else {
                     robot.moveToPos(CONFIG_4_POS_II, 4.0);
