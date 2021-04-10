@@ -21,6 +21,10 @@ public interface HSVConstants {
     Scalar LOWER_WOBBLE_HSV = new Scalar(0, 0, 0);
     Scalar UPPER_WOBBLE_HSV = new Scalar(255, 255, 25);
 
+    // Wall HSV values THESE VALUES ARE PLACEHOLDERS
+    Scalar LOWER_WALL_HSV = new Scalar(0, 0, 0);
+    Scalar UPPER_WALL_HSV = new Scalar(255, 255, 25);
+
     // For image processing (e.g. drawing rectangles)
     Scalar GREEN_BGR = new Scalar(0, 255, 0); // THIS ONE IS BGR
 

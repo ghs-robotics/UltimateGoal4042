@@ -144,22 +144,42 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
 
                 // Check which object should be found and make sure it has a reasonable size
                 if (targetObject.equals("ring")) {
+                    lowerHSV = LOWER_RING_HSV;
+                    upperHSV = UPPER_RING_HSV;
+                    cover = 0.65;
                     if (passesRingTest(rect.width, rect.height)) {
                         largest = rect;
                     }
                 }
                 else if (targetObject.equals("stack")) {
+                    lowerHSV = LOWER_STACK_HSV;
+                    upperHSV = UPPER_STACK_HSV;
+                    cover = 0.65;
                     if (passesStackTest(rect.width, rect.height, rect.x)) {
                         largest = rect;
                     }
                 }
                 else if (targetObject.equals("tower")) {
+                    lowerHSV = LOWER_TOWER_HSV;
+                    upperHSV = UPPER_TOWER_HSV;
+                    cover = 0;
                     if (passesTowerTest(rect.width)) {
                         largest = rect;
                     }
                 }
                 else if (targetObject.equals("wobble")) {
+                    lowerHSV = LOWER_WOBBLE_HSV;
+                    upperHSV = UPPER_WOBBLE_HSV;
+                    cover = 0.65;
                     if (passesWobbleTest(rect.width, rect.height)) {
+                        largest = rect;
+                    }
+                }
+                else if (targetObject.equals("wall")) {
+                    lowerHSV = LOWER_WALL_HSV;
+                    upperHSV = UPPER_WALL_HSV;
+                    cover = 0;
+                    if (passesWallTest(rect.width, rect.height)) {
                         largest = rect;
                     }
                 }
@@ -172,6 +192,10 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         return new int[]{largest.x, largest.y, largest.width, largest.height};
     }
 
+    // Testing to make sure the detected object is the wall close up
+    private boolean passesWallTest(double h) {
+        return (h > 8 && h < 23); //h range is a placeholder value
+    }
 
     // Testing to make sure the detected object is a ring
     private boolean passesRingTest(double w, double h) {
