@@ -55,7 +55,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
         robot.init();
-        robot.setTargetToTower(); // TODO : Change
+        robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.setIntakeSideToBeForward(); // Default is when the front is the launcher side
@@ -163,12 +163,16 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Rotate to face east
             if (controller1.dpad_right.equals("pressing")) {
-                robot.rotateToPos(90,1);
+//                robot.rotateToPos(90,1);
+                robot.armAngle += 0.05;
+                robot.armServo.setPosition(robot.armAngle);
             }
 
             // Rotate to face west
             if (controller1.dpad_left.equals("pressing")) {
-                robot.rotateToPos(-90,1);
+//                robot.rotateToPos(-90,1);
+                robot.armAngle -= 0.05;
+                robot.armServo.setPosition(robot.armAngle);
             }
 
             // Reset gyro in case of emergency

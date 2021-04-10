@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class Robot implements HSVConstants, FieldPositions {
+public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     public CameraManager camera; // Manages the webcam and phone camera
 
@@ -232,7 +232,7 @@ public class Robot implements HSVConstants, FieldPositions {
     // Updates the powers being sent to the drive motors
     public void updateDrive() {
         //Displays motor powers on the phone
-//        telemetry.addData("config: ", identifyRingConfig());
+        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairValue);
         telemetry.addData("rightLaunchPower: ", "" + powerLauncher.rightPower);
         telemetry.addData("rightLaunchVelocity: ", "" + powerLauncher.getRightVelocity());
         telemetry.addData("launchAngle: ", "" + powerLauncher.launchAngle);
@@ -461,38 +461,6 @@ public class Robot implements HSVConstants, FieldPositions {
         }
         stopDrive();
     }
-
-    /*
-
-    // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double minSeconds, double maxSeconds, double otherMax, boolean backup) {
-        setForwardDirection("launcher");
-        setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
-        resetPIDs();
-        updateObjectValues();
-        double t = getElapsedTimeSeconds();
-        while((Math.abs(targetWidth - objectWidth) > 8
-                || Math.abs(targetX - objectX) > 8
-                || Math.abs(targetGyroAngle - gyro.getAngle()) > 8)
-                && elapsedTime.seconds() - t < otherMax) {
-            chaseTower();
-            if ((!objectIdentified) && backup) {
-                move(0, -0.5, 0.1);
-            }
-        }
-        t = getElapsedTimeSeconds();
-
-        // Start fresh by resetting these
-        resetPIDs();
-
-        while (elapsedTime.seconds() - t < minSeconds || elapsedTime.seconds() - t < maxSeconds &&
-                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
-            chaseTower();
-        }
-        stopDrive();
-    }
-
-     */
 
     // Makes robot move forward and pick up wobble goal
     public void pickUpWobbleGoal() {

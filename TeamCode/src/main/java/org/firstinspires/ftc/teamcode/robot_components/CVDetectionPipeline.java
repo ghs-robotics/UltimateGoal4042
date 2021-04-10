@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.robot_components;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -35,6 +34,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // Amount of screen covered by a white rectangle during image processing
     public double cover = 0;
 
+    public String crosshairValue = "";
+
     // Auxiliary Mat objects for temporarily storing data
     private Mat dst = new Mat();
     private Mat hierarchy = new Mat();
@@ -63,7 +64,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         objectWidth = vals[2];
         objectHeight = vals[3];
 
-//        input = showHSVCrosshair(input); //TODO : uncomment?
+        // TODO : UNCOMMENT
+        crosshairValue = findHSVCrosshair(input);
 
         return input;
     }
@@ -115,27 +117,23 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
 
     // Displays HSV values of a point on the screen
     // More info: https://stackoverflow.com/questions/17035005/using-get-and-put-to-access-pixel-values-in-opencv-for-java
-    private Mat showHSVCrosshair(Mat input) {
-        int targetX = input.cols()/2;
-        int targetY = input.rows()/2;
+    private String findHSVCrosshair(Mat input) {
+        int col = input.cols()/2;
+        int row = input.rows()/2;
 
         dst = input.clone();
-        dst.convertTo(dst, CvType.CV_64FC3);
+//        dst.convertTo(dst, CvType.CV_64FC3);
+        Imgproc.cvtColor(dst,dst,Imgproc.COLOR_BGR2HSV);
 
-        // TODO : SHOULD THIS BE BGR?
-        Imgproc.cvtColor(dst,dst,Imgproc.COLOR_RGB2HSV);
-        int size = (int) (input.total() * input.channels());
+        dst = dst.row(row);
+        dst = dst.col(col);
+        String value = dst.dump();
 
-        double[] data = new double[size];
-
-        dst.get(targetX,targetY,data);
-        input.get(targetX,targetY);
-
-        return input;
+        return value;
     }
 
     // Detects the position of the target object on the screen and returns an array with those values
-    public int[] findObjectCoordinates(Mat src) {
+    public int[] findObjectCoordinates(Mat src, String target) {
 
         // Imgproc is a class that comes with the library and has a bunch of useful methods
         // Resizes image to make processing more uniform
@@ -170,12 +168,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         // Iterates through all of the contours and finds the largest bounding rectangle
         for (int i = 0; i < contours.size(); i++) {
             Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (largestRect.area() < rect.area()) {
-
-                // Makes sure object has a reasonable size before reassigning largestRect
-                if (checkIfReasonable(targetObject, rect.x, rect.y, rect.width, rect.height)) {
-                    largestRect = rect;
-                }
+            if (largestRect.area() < rect.area() && checkIfReasonable(targetObject, rect.x, rect.y, rect.width, rect.height)) {
+                largestRect = rect;
             }
         }
 
@@ -189,7 +183,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
 
     // Testing to make sure the detected object is a ring
     private boolean passesRingTest(double w, double h) {
-        double r = 1.0 * w / h;
+        double r = 1.0 * w / h; // ratio
         return (h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5); // 8,23,22,90,1.5,7
     }
 
