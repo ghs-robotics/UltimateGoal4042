@@ -193,8 +193,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     }
 
     // Testing to make sure the detected object is the wall close up
-    private boolean passesWallTest(double h) {
-        return (h > 8 && h < 23); //h range is a placeholder value
+    private boolean passesWallTest(double w, double h) {
+        return (w > 1 && w < 12 && h > 8 && h < 23); //h range is a placeholder value
     }
 
     // Testing to make sure the detected object is a ring
