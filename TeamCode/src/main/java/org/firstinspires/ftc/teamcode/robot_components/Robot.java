@@ -4,11 +4,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class Robot extends DriveBase implements HSVConstants, FieldPositions {
+public class Robot extends DriveBase implements HSVConstants, FieldPosition {
 
     public CameraManager camera; // Manages the webcam and phone camera
 
@@ -27,22 +26,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     private static boolean objectIdentified = false; // The program will know when the object isn't in view
 
     // Robot variables and objects
-    private double leftFrontPower = 0;
-    private double rightFrontPower = 0;
-    private double leftRearPower = 0;
-    private double rightRearPower = 0;
     private double intakePower = 0;
     public double armAngle = 0.45; // Up position
     public double clawAngle = 0.15; // Closed position
-    public double speed = 1;
-
-    // Drive orientation (+1 means launcher side is front, -1 means intake side is front)
-    private double orientation = 1;
-
-    public DcMotor leftFrontDrive;
-    public DcMotor rightFrontDrive;
-    public DcMotor leftRearDrive;
-    public DcMotor rightRearDrive;
     public DcMotor intakeMotor;
     public Servo armServo;
     public Servo clawServo;
@@ -50,8 +36,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public PowerLauncher powerLauncher;
 
     public ElapsedTime elapsedTime;
-    public Gyro gyro;
-    public Telemetry telemetry;
 
     // PID controllers
     public PIDController towerXPID; // For the x-position of the tower goal
@@ -63,32 +47,24 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Constructs a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
 
+        // Calls the constructor in DriveBase, which handles all the drive base motors
+        super(hardwareMap, telemetry);
+
         // These are the names to use in the phone config (in quotes below)
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
-        leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
-        rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
 
-        // Defines the forward direction for each of our motors/servos; default is launcher
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
+        // Defines the forward direction for each of our motors/servos
         intakeMotor.setDirection(DcMotor.Direction.REVERSE);
         armServo.setDirection(Servo.Direction.FORWARD);
         clawServo.setDirection(Servo.Direction.FORWARD);
 
-        // Initializes some other useful tools for our robot (the gyroscope, the timer, etc.)
+        // Initializes some other useful tools/objects for our robot
         powerLauncher = new PowerLauncher(hardwareMap);
-        gyro = new Gyro(hardwareMap);
-        gyro.resetAngle();
         camera = new CameraManager(hardwareMap);
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
-        this.telemetry = telemetry;
 
         // Initializing PID objects
 
@@ -118,15 +94,21 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // ---------------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------
 
-    // Calculates powers for mecanum wheel drive
-    public void calculateDrivePowers(double x, double y, double rotation) {
-        rotation *= orientation;
-        double r = Math.hypot(x, y);
-        double robotAngle = Math.atan2(y, x) - Math.PI / 4;
-        leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
-        rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rotation, -1.0, 1.0) * speed;
-        leftRearPower = Range.clip(r * Math.sin(robotAngle) + rotation, -1.0, 1.0) * speed;
-        rightRearPower = Range.clip(r * Math.cos(robotAngle) - rotation, -1.0, 1.0) * speed;
+
+    // Displays a bunch of useful values on the DS phone
+    @Override
+    public void addTelemetryData() {
+        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairValue);
+        telemetry.addData("rightLaunchPower: ", "" + powerLauncher.rightPower);
+        telemetry.addData("rightLaunchVelocity: ", "" + powerLauncher.getRightVelocity());
+        telemetry.addData("launchAngle: ", "" + powerLauncher.launchAngle);
+        telemetry.addData("indexerAngle: ", "" + powerLauncher.indexerAngle);
+        telemetry.addData("gyro angle: ", "" + gyro.getAngle());
+        telemetry.addData("objectX = ", "" + objectX);
+        telemetry.addData("objectY = ", "" + objectY);
+        telemetry.addData("width = ", "" + objectWidth);
+        telemetry.addData("height = ", "" + objectHeight);
+        telemetry.update();
     }
 
     private void checkIfObjectIdentified() {
@@ -138,7 +120,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 
     // Returns how many seconds have passed since the timer was last reset
-    public double getElapsedTimeSeconds() {
+    public double getElapsedSeconds() {
         return elapsedTime.seconds();
     }
 
@@ -153,10 +135,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Resets the timer
     public void resetElapsedTime() {
         elapsedTime.reset();
-    }
-
-    public void resetGyroAngle() {
-        gyro.resetAngle();
     }
 
     // Resets all PID controllers
@@ -174,14 +152,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wait(0.4);
         armServo.setPosition(armAngle);
         powerLauncher.resetServos();
-    }
-
-    // Sends power to drive motors
-    public void sendDrivePowers() {
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftRearDrive.setPower(leftRearPower);
-        rightRearDrive.setPower(rightRearPower);
     }
 
     private void setTargetCoordinates(int x, int y, int w, String target) {
@@ -220,32 +190,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         setTargetCoordinates(x, 0, w, "wobble");
     }
 
-    // Makes the robot stop driving
-    public void stopDrive() {
-        leftFrontPower = 0;
-        rightFrontPower = 0;
-        leftRearPower = 0;
-        rightRearPower = 0;
-        sendDrivePowers();
-    }
-
-    // Updates the powers being sent to the drive motors
-    public void updateDrive() {
-        //Displays motor powers on the phone
-        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairValue);
-        telemetry.addData("rightLaunchPower: ", "" + powerLauncher.rightPower);
-        telemetry.addData("rightLaunchVelocity: ", "" + powerLauncher.getRightVelocity());
-        telemetry.addData("launchAngle: ", "" + powerLauncher.launchAngle);
-        telemetry.addData("indexerAngle: ", "" + powerLauncher.indexerAngle);
-        telemetry.addData("gyro angle: ", "" + gyro.getAngle());
-        telemetry.addData("objectX = ", "" + objectX);
-        telemetry.addData("objectY = ", "" + objectY);
-        telemetry.addData("width = ", "" + objectWidth);
-        telemetry.addData("height = ", "" + objectHeight);
-        telemetry.update();
-        sendDrivePowers();
-    }
-
     // Updates the coordinates of the object being detected on the screen
     // If target is "tower," this uses the webcam; otherwise, phoneCam
     public void updateObjectValues() {
@@ -258,8 +202,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds
     public void wait(double seconds) {
-        double start = getElapsedTimeSeconds();
-        while (getElapsedTimeSeconds() - start < seconds) {}
+        double start = getElapsedSeconds();
+        while (getElapsedSeconds() - start < seconds) {}
     }
 
 
@@ -285,30 +229,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public void runIntake(double power) {
         intakePower = power;
         intakeMotor.setPower(intakePower);
-    }
-
-    public void switchDriveDirection() {
-        if (orientation == -1) {
-            setLauncherSideToBeForward();
-        } else {
-            setIntakeSideToBeForward();
-        }
-    }
-
-    public void setIntakeSideToBeForward() {
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        orientation = -1;
-    }
-
-    public void setLauncherSideToBeForward() {
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        orientation = 1;
     }
 
     // Toggles the wobble gripper/claw
@@ -393,7 +313,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         x = -xPID.calcVal(targetX - objectX);
         y = wPID.calcVal(targetWidth - objectWidth);
         checkIfObjectIdentified();
-        chaseObject(x, y, -gyroPID.calcVal(targetGyroAngle - gyro.getAngle())); // TODO : change back
+        chaseObject(x, y, -gyroPID.calcVal(targetGyroAngle - gyro.getAngle()));
     }
 
     // Makes the robot line up with the tower goal (if called repeatedly)
@@ -438,19 +358,19 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
-        setLauncherSideToBeForward();
+        setLauncherSideAsFront();
         setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
         resetPIDs();
         rotateToPos(0.0, 0.0);
         updateObjectValues();
-        double t = getElapsedTimeSeconds();
+        double t = getElapsedSeconds();
         while((Math.abs(targetWidth - objectWidth) > 8
                 || Math.abs(targetX - objectX) > 8
                 || Math.abs(targetGyroAngle - gyro.getAngle()) > 8)
                 && elapsedTime.seconds() - t < maxBroadTuning) {
             chaseTower();
         }
-        t = getElapsedTimeSeconds();
+        t = getElapsedSeconds();
 
         // Start fresh by resetting these
         resetPIDs();
@@ -485,11 +405,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         }
         targetGyroAngle = angle;
         resetPIDs();
-        double t = getElapsedTimeSeconds();
+        double t = getElapsedSeconds();
         while(Math.abs(targetGyroAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 5) {
             adjustAngle();
         }
-        t = getElapsedTimeSeconds();
+        t = getElapsedSeconds();
         resetPIDs();
         while ((Math.abs(targetGyroAngle - gyro.getAngle()) > 1)
                 && elapsedTime.seconds() - t < maxFineTuning) {
@@ -499,4 +419,4 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 }
 
-//Documentation: https://ftctechnh.github.io/ftc_app/doc/javadoc/index.html
+// Documentation: https://ftctechnh.github.io/ftc_app/doc/javadoc/index.html

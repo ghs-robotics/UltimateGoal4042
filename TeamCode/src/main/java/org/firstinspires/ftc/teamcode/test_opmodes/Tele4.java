@@ -26,11 +26,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Config;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp
-public class Tele4 extends LinearOpMode implements FieldPositions {
+public class Tele4 extends LinearOpMode implements FieldPosition {
 
     Robot robot;
     Controller controller1;
@@ -61,11 +61,11 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
 
         if (config != (Config.ZERO)) {
             //Move forward 6-7 feet until at the edge of launch zone
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0.1);
 
             madeIt("next to starter stack");
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.moveToPos(new int[]{142, 65});
         }
 
@@ -73,20 +73,20 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         //Move sideways until in line with tower goal
         //aim the robot at the goal and make sure that the robot is within the launch zone
         //Shoot 3 rings
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.moveToPos(PERFECT_LAUNCH_POS, 3.0);
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.adjustAndShoot(3);
         madeIt("shot 3 goals");
 
         // if starterStack != 0, pickup the starter stack rings
         if (config != (Config.ZERO)) {
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.runIntake(0.8);
             robot.move(0, -0.2, 3.3);
             madeIt("gathered rings");
 
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             if (config == (Config.ONE)) {
                 robot.adjustAndShoot(1);
             } else {
@@ -99,7 +99,7 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         //move forward towards the desired target wobble goal zone
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         if (config == Config.ZERO) {
             robot.moveToPos(CONFIG_0_POS_I);
         } else if (config == Config.ONE) {
@@ -125,13 +125,13 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
 
         //Head back to location where we shot the rings
         //Move left or right and then backward towards second wobble goal
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.moveToPos(SECOND_WOBBLE_POS, 3.0);
 
         madeIt("going for the second wobble goal");
 
         //pick up second wobble goal
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.pickUpWobbleGoal();
 
 
@@ -144,7 +144,7 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         //Check distance to tower goal and correct if necessary
         //Move left or right depending on target wobble goal
         robot.wait(0.01);
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         if (config == Config.ZERO) {
             robot.moveToPos(CONFIG_0_POS_II);
         } else if (config == Config.ONE) {
@@ -173,7 +173,7 @@ public class Tele4 extends LinearOpMode implements FieldPositions {
         }
 
         //Move forward to park over launch line
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.moveToPos(PARK_POS);
         robot.stopDrive();
 

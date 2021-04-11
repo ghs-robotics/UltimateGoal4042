@@ -17,6 +17,10 @@ public interface HSVConstants {
     Scalar LOWER_TOWER_HSV = new Scalar(0, 80, 100);
     Scalar UPPER_TOWER_HSV = new Scalar(80, 255, 220); // 80, 255, 220
 
+    // Wall HSV values TODO : THESE VALUES ARE PLACEHOLDERS
+    Scalar LOWER_WALL_HSV = new Scalar(0, 0, 0);
+    Scalar UPPER_WALL_HSV = new Scalar(255, 255, 25);
+
     // Wobble goal HSV values
     Scalar LOWER_WOBBLE_HSV = new Scalar(0, 0, 0);
     Scalar UPPER_WOBBLE_HSV = new Scalar(255, 255, 25);

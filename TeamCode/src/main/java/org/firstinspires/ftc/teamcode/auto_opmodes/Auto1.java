@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode.auto_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 
 @Autonomous
-public class Auto1 extends LinearOpMode implements FieldPositions {
+public class Auto1 extends LinearOpMode implements FieldPosition {
 
     // Declare OpMode members
     Robot robot;
@@ -39,7 +39,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.powerLauncher.setPerfectLaunchAngle();
 
         //Move forward 6-7 feet until at the edge of launch zone
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
 //        robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
 
         robot.move(-0.8, 0.8, 1.0);
@@ -51,9 +51,9 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
             robot.moveToPos(CONFIG_0_POS_I, 1.0, 3.0);
             placeWobble();
 
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.launchRings(3);
             madeIt("shot 3 goals");
         } else {
@@ -64,22 +64,22 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
                 robot.move(0, -1.0, 0.5);
             }
 
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.launchRings(3);
             madeIt("shot 3 goals");
 
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.powerLauncher.setLaunchAngleHorizontal();
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.runIntake(1.0);
             robot.move(0, -0.17, 1.8);
             madeIt("gathered rings");
 
             robot.wait(2.7);
             robot.powerLauncher.setPerfectLaunchAngle();
-            robot.setLauncherSideToBeForward();
+            robot.setLauncherSideAsFront();
             robot.runIntake(0.0);
             robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.0);
             if (config == 1) {
@@ -94,7 +94,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         //Move left or right depending on target wobble goal
 
         // Move back to park over launch line
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.moveToPos(PARK_POS);
         robot.stopDrive();
     }
@@ -103,7 +103,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         // Shoot power shots
         robot.powerLauncher.setLaunchAnglePowershot();
         robot.moveToPos(RIGHT_POWERSHOT_POS, 1.5, 3.0);
-        robot.setLauncherSideToBeForward();
+        robot.setLauncherSideAsFront();
         robot.launchRings(1);
         robot.move(-0.6, 0, 0.6);
         robot.rotateToPos(0, 0.5);

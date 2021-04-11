@@ -26,11 +26,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Config;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp
-public class Tele3 extends LinearOpMode implements FieldPositions {
+public class Tele3 extends LinearOpMode implements FieldPosition {
 
     Robot robot;
     Controller controller1;

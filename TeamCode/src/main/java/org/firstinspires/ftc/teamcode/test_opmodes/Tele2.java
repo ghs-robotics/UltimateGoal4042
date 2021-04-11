@@ -51,7 +51,7 @@ public class Tele2 extends OpMode {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.init();
-        robot.setIntakeSideToBeForward();
+        robot.setIntakeSideAsFront();
 
         robot.setTargetToRing();
         telemetry.addData("Status", "Initialized");

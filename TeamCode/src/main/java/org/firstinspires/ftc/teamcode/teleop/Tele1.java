@@ -33,12 +33,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.DriveMode;
-import org.firstinspires.ftc.teamcode.robot_components.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.SmoothnessRegulator;
+import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp(name="Tele1", group="Linear Opmode")
-public class Tele1 extends LinearOpMode implements FieldPositions {
+public class Tele1 extends LinearOpMode implements FieldPosition {
 
     // Declare OpMode members
     Robot robot;
@@ -54,12 +54,15 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         controller2 = new Controller(gamepad2); // Whoever presses start + b
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
-        robot.init();
+        // TODO : UNCOMMENT
+//        robot.init();
+        robot.resetServos();
+        robot.resetGyroAngle();
         robot.setTargetToTower();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        robot.setIntakeSideToBeForward(); // Default is when the front is the launcher side
-        DriveMode.setController(controller1);
+        robot.setIntakeSideAsFront(); // Default is when the front is the launcher side
+        SmoothnessRegulator.setController(controller1);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -99,12 +102,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             //
             if (controller1.a.equals("pressing")) {
-                robot.setLauncherSideToBeForward();
+                robot.setLauncherSideAsFront();
             }
 
             //
             if (controller1.b.equals("pressing")) {
-                robot.setIntakeSideToBeForward();
+                robot.setIntakeSideAsFront();
             }
 
             // Toggle speed between 100% and 50%
@@ -118,25 +121,25 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
-                robot.setLauncherSideToBeForward();
+                robot.setLauncherSideAsFront();
                 robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
                 robot.powerLauncher.setPerfectLaunchAngle();
-                robot.setIntakeSideToBeForward();
+                robot.setIntakeSideAsFront();
             }
 
             // Adjust and shoot
             if (controller1.right_bumper.equals("pressing")) {
-                robot.setLauncherSideToBeForward();
+                robot.setLauncherSideAsFront();
                 robot.adjustAndShoot(3);
-                robot.setIntakeSideToBeForward();
+                robot.setIntakeSideAsFront();
             }
 
             // Mecanum wheel drive
-            DriveMode.update();
+            SmoothnessRegulator.update();
             robot.calculateDrivePowers(
-                    controller1.left_stick_x * DriveMode.getFactor(),
-                    controller1.left_stick_y * DriveMode.getFactor(),
-                    controller1.right_stick_x * DriveMode.getFactor()
+                    controller1.left_stick_x * SmoothnessRegulator.getFactor(),
+                    controller1.left_stick_y * SmoothnessRegulator.getFactor(),
+                    controller1.right_stick_x * SmoothnessRegulator.getFactor()
             );
 
             robot.updateDrive(); // Also updates telemetry
@@ -148,7 +151,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Toggles between strong/smooth mode
             if (controller1.left_stick_button.equals("pressing")) {
-                DriveMode.switchMode();
+                SmoothnessRegulator.switchMode();
             }
 
             // Rotate to face tower goal (north)

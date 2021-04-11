@@ -64,7 +64,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         objectWidth = vals[2];
         objectHeight = vals[3];
 
-        // TODO : UNCOMMENT
+        // TODO : COMMENT OUT
         crosshairValue = findHSVCrosshair(input);
 
         return input;
@@ -109,6 +109,11 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
             upperHSV = UPPER_WOBBLE_HSV;
             cover = 0.65;
         }
+        else if (target.equals("wall")) {
+            lowerHSV = LOWER_WALL_HSV;
+            upperHSV = UPPER_WALL_HSV;
+            cover = 0;
+        }
         else {
             throw new IllegalArgumentException("Target must be ring, tower, or wobble!");
         }
@@ -128,12 +133,13 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         dst = dst.row(row);
         dst = dst.col(col);
         String value = dst.dump();
+        dst.release(); // Avoid leaking memory
 
         return value;
     }
 
     // Detects the position of the target object on the screen and returns an array with those values
-    public int[] findObjectCoordinates(Mat src, String target) {
+    public int[] findObjectCoordinates(Mat src) {
 
         // Imgproc is a class that comes with the library and has a bunch of useful methods
         // Resizes image to make processing more uniform
@@ -196,6 +202,11 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     private boolean passesTowerTest(double w) {
         // width 34 is back of the field, closest is 150
         return (25 < w && w < 150);
+    }
+
+    // Testing to make sure the detected object is the wall close up
+    private boolean passesWallTest(double w, double h) {
+        return (w > 1 && w < 12 && h > 8 && h < 23); // TODO : PLACEHOLDERS
     }
 
     // Testing to make sure the detected object is a wobble goal
