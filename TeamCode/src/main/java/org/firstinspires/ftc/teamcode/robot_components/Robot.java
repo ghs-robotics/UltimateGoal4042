@@ -113,10 +113,16 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     public void addTelemetryData() {
 //        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairHSV);
 
-        if (!tower.isIdentified()) {
+        if (!tower.isActive()) {
+            telemetry.addData("NOTE: ", "TOWER NOT ACTIVE");
+        }
+        else if (!tower.isIdentified()) {
             telemetry.addData("NOTE: ", "TOWER NOT IDENTIFIED");
         }
-        if (!floor.isIdentified()) {
+        if (!floor.isActive()) {
+            telemetry.addData("NOTE: ", "FLOOR NOT ACTIVE");
+        }
+        else if (!floor.isIdentified()) {
             telemetry.addData("NOTE: ", "FLOOR NOT IDENTIFIED");
         }
 
@@ -124,10 +130,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         telemetry.addData("launchAngle: ", "" + powerLauncher.launchAngle);
         telemetry.addData("indexerAngle: ", "" + powerLauncher.indexerAngle);
         telemetry.addData("gyro angle: ", "" + gyro.getAngle());
-        telemetry.addData("objectX = ", "" + target.x);
-        telemetry.addData("objectY = ", "" + target.y);
-        telemetry.addData("width = ", "" + target.w);
-        telemetry.addData("height = ", "" + target.h);
+        telemetry.addData("tower: ", "" + tower.toString());
+        telemetry.addData("floor: ", "" + floor.toString());
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
         telemetry.addData("Kp (w): ", wPID.k_P);
         telemetry.addData("Ki (w): ", wPID.k_I);
@@ -217,7 +221,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     }
 
     // Makes the robot line up with the tower goal (if called repeatedly)
-    // Make sure the gyro angle and target values are correct before calling this!!!
+    // Make sure the gyro angle and target values are correct before calling this (and reset PIDs and activate)!!!
     public void adjustPosition() {
         if (!tower.isIdentified()) {
             chaseObject(floor);
@@ -227,9 +231,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     }
 
     // Makes the robot chase the target object (if called repeatedly)
-    // Make sure the gyro angle and target values are correct before calling this (and reset PIDs)!!!
+    // Make sure the gyro angle and target values are correct before calling this (and reset PIDs and activate)!!!
     private void chaseObject(CVObject target) {
-        target.updateData();
+//        target.updateData();
         x = tower.getXPIDValue();
         y = tower.getWPIDValue();
         calculateDrivePowers(0, 0, getGyroPIDValue()); // TODO : replace with x, y
@@ -260,16 +264,19 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         setLauncherSideAsFront();
+        tower.activate();
+        floor.activate();
         tower.setTargetXW(pos);
         floor.setTargetY(280); // TODO : UPDATE
         rotateToPos(0.0, 0.0);
-        tower.updateData();
-        floor.updateData();
+//        tower.updateData();
+//        floor.updateData();
         double t = getElapsedSeconds();
         while(  (!tower.isIdentified()
                 || tower.getErrorW() > 8
                 || tower.getErrorX() > 8
-                || getGyroError() > 8)
+                || tower.getErrorX() > 8
+                || getAbsoluteGyroError() > 8)
                 && elapsedTime.seconds() - t < maxBroadTuning) {
             adjustPosition();
         }

@@ -7,7 +7,7 @@ public interface HSVConstants {
 
     // Floor HSV values TODO : THESE VALUES ARE PLACEHOLDERS
     Scalar LOWER_FLOOR_HSV = new Scalar(0, 0, 0);
-    Scalar UPPER_FLOOR_HSV = new Scalar(255, 80, 80);
+    Scalar UPPER_FLOOR_HSV = new Scalar(255, 50, 105);
 
     // Ring HSV values
     Scalar LOWER_RING_HSV = new Scalar(74, 123, 94); // original values: 74, 153, 144

@@ -58,7 +58,7 @@ public class DriveBase {
         resetGyroAngle();
 
         // gyroPID works best when Ki = 0
-        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2);
+        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); // TODO : SET TOLERANCE TO 1.1
 
         // Initializes telemetry
         this.telemetry = telemetry;
@@ -108,13 +108,17 @@ public class DriveBase {
         return desiredAngle;
     }
 
+    public double getAbsoluteGyroError() {
+        return Math.abs(getGyroError());
+    }
+
     // Returns how many seconds have passed since the timer was last reset
     public double getElapsedSeconds() {
         return elapsedTime.seconds();
     }
 
     public double getGyroError() {
-        return Math.abs(targetGyroAngle - gyro.getAngle());
+        return targetGyroAngle - gyro.getAngle();
     }
 
     public double getGyroPIDValue() {
@@ -136,12 +140,12 @@ public class DriveBase {
         targetGyroAngle = getReasonableGyroAngle(angle);
         gyroPID.resetValues();
         double t = getElapsedSeconds();
-        while(getGyroError() > 5 && elapsedTime.seconds() - t < 5) {
+        while(getAbsoluteGyroError() > 5 && elapsedTime.seconds() - t < 5) {
             adjustAngle();
         }
         t = getElapsedSeconds();
         gyroPID.resetValues();
-        while ((getGyroError() > 1)
+        while ((getAbsoluteGyroError() > 1)
                 && elapsedTime.seconds() - t < maxFineTuning) {
             adjustAngle();
         }

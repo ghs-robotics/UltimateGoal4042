@@ -8,11 +8,9 @@ import com.qualcomm.robotcore.util.Range;
 
 public class PowerLauncher {
 
-    // VELOCITY         PERFECT LAUNCH ANGLE (FROM PERFECT_LAUNCH_POSITION)
-    public static double PERFECT_LAUNCH_ANGLE = 0.135; // Default launch angle
-    public static double POWERSHOT_ANGLE = PERFECT_LAUNCH_ANGLE - 0.008; // Angle for hitting powershots
-    public static double MAX_LAUNCH_ANGLE = 0.140;
-    public static double HORIZONTAL_LAUNCH_ANGLE = 0.100; // TODO : CALIBRATE
+    public static double PERFECT_LAUNCH_ANGLE = 0.090; // Default launch angle
+    public static double MAX_LAUNCH_ANGLE = 0.160;
+    public static double OPTIMAL_INTAKING_ANGLE = 0.000; // Minimum launch angle
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -24,8 +22,7 @@ public class PowerLauncher {
     public double leftPower = 0;
     public double rightPower = 0;
 
-    // launchAngle should range between 0.600 (horizontal) and 0.300 (very steep); launcher vertical at 0.010
-    public double launchAngle = HORIZONTAL_LAUNCH_ANGLE;
+    public double launchAngle = OPTIMAL_INTAKING_ANGLE;
     public double indexerAngle = INDEXER_BACK_POS;
 
     public boolean running = false; // If the launcher is running
@@ -197,12 +194,12 @@ public class PowerLauncher {
 
     // Sets launcher to horizontal
     public void setLaunchAngleHorizontal() {
-        setLaunchAngle(HORIZONTAL_LAUNCH_ANGLE);
+        setLaunchAngle(OPTIMAL_INTAKING_ANGLE);
     }
 
     // Sets launcher to hit powershots
     public void setLaunchAnglePowershot() {
-        setLaunchAngle(POWERSHOT_ANGLE);
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE - 0.008);
     }
 
     // Sets launcher to vertical
@@ -211,7 +208,7 @@ public class PowerLauncher {
     }
 
     // Sets a launch angle
-    public void setPerfectLaunchAngle() {
+    public void setLaunchAnglePerfect() {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE);
     }
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.auto_opmodes;
+package org.firstinspires.ftc.teamcode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,6 +18,7 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
     {
         robot = new Robot(hardwareMap, telemetry);
         robot.initWithCV();
+        robot.stack.activate();
         robot.stack.updateData();
         int config = robot.identifyRingConfig(); // TODO : Comment out
         telemetry.addData("Status: ", "Initialized");
@@ -32,9 +33,10 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
 
         // Determine how many rings in the starting ring stacks
         config = robot.identifyRingConfig();
+        robot.stack.deactivate();
 
         robot.resetGyroAngle();
-        robot.powerLauncher.setPerfectLaunchAngle();
+        robot.powerLauncher.setLaunchAnglePerfect();
 
         // Move forward but avoid starter stack
         robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
@@ -71,7 +73,7 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
             madeIt("gathered rings");
 
             robot.wait(2.7);
-            robot.powerLauncher.setPerfectLaunchAngle();
+            robot.powerLauncher.setLaunchAnglePerfect();
             robot.setLauncherSideAsFront();
             robot.runIntake(0.0);
             robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.0);

@@ -54,12 +54,14 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
         controller2 = new Controller(gamepad2); // Whoever presses start + b
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
-        // TODO : UNCOMMENT
         robot.initWithCV();
+//        robot.tower.activate();
+        robot.floor.activate();
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        robot.setIntakeSideAsFront(); // Default is when the front is the launcher side
-        SmoothnessRegulator.setController(controller1);
+        robot.setIntakeSideAsFront();
+        SmoothnessRegulator.setController(controller1); // For toggling between smooth and choppy mode
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -77,7 +79,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             // Registers controller input
             controller1.update();
             controller2.update();
-            robot.tower.updateData();
+            SmoothnessRegulator.update();
 
             // Constantly adjusts launch velocity
 //            if (robot.powerLauncher.running) {
@@ -120,7 +122,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             if (controller1.left_bumper.equals("pressing")) {
                 robot.setLauncherSideAsFront();
                 robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
-                robot.powerLauncher.setPerfectLaunchAngle();
+                robot.powerLauncher.setLaunchAnglePerfect();
                 robot.setIntakeSideAsFront();
             }
 
@@ -132,7 +134,6 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             }
 
             // Mecanum wheel drive
-            SmoothnessRegulator.update();
             robot.calculateDrivePowers(
                     controller1.left_stick_x * SmoothnessRegulator.getFactor(),
                     controller1.left_stick_y * SmoothnessRegulator.getFactor(),
@@ -163,16 +164,16 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             // Rotate to face east
             if (controller1.dpad_right.equals("pressing")) {
-//                robot.rotateToPos(90,1);
-                robot.armAngle += 0.05;
-                robot.armServo.setPosition(robot.armAngle);
+                robot.rotateToPos(90,1);
+//                robot.armAngle += 0.05;
+//                robot.armServo.setPosition(robot.armAngle);
             }
 
             // Rotate to face west
             if (controller1.dpad_left.equals("pressing")) {
-//                robot.rotateToPos(-90,1);
-                robot.armAngle -= 0.05;
-                robot.armServo.setPosition(robot.armAngle);
+                robot.rotateToPos(-90,1);
+//                robot.armAngle -= 0.05;
+//                robot.armServo.setPosition(robot.armAngle);
             }
 
             // Reset gyro in case of emergency
@@ -251,7 +252,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             // Go to default launch angle
             if (controller2.left_stick_button.equals("pressed")) {
-                robot.powerLauncher.setPerfectLaunchAngle();
+                robot.powerLauncher.setLaunchAnglePerfect();
             }
 
             sleep(50); // TODO : OPTIMIZE

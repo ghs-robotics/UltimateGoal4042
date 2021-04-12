@@ -7,6 +7,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
+import java.util.ArrayList;
+
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
 
     // Stores the most recent frame
@@ -15,7 +17,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // Auxiliary Mat objects for temporarily storing data
     private Mat dst = new Mat();
 
-    public CVObject target;
+    public ArrayList<CVObject> objects;
 
     // For sampling HSV values of individual pixels
     public String crosshairHSV = "";
@@ -34,6 +36,9 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         Imgproc.resize(input, input, new Size(320, 240));
 
         currentMat = input;
+        for (CVObject obj : objects) {
+            obj.updateData();
+        }
 
         // Updates crosshairValue
 //        crosshairValue = findHSVCrosshair(dst); // TODO : FIX SO IT ANALYZES THE CORRECT THING

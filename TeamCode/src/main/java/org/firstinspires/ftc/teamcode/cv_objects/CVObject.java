@@ -18,6 +18,7 @@ public abstract class CVObject implements HSVConstants {
 
     public String name = "unspecified";
     public boolean identified = false;
+    public boolean active = false; // true if pipeline is actively updating this object's data
 
     public CVDetectionPipeline pipeline;
 
@@ -59,6 +60,13 @@ public abstract class CVObject implements HSVConstants {
         this.wPID = wPID;
     }
 
+    public void activate() {
+        if (!pipeline.objects.contains(this)) {
+            pipeline.objects.add(this);
+            active = true;
+        }
+    }
+
     // Creates solid rectangles to cover up background noise
     protected void coverBackground() {
         Imgproc.rectangle(
@@ -67,6 +75,13 @@ public abstract class CVObject implements HSVConstants {
                 new Point(SCREEN_WIDTH, (int) (cover * SCREEN_HEIGHT)),
                 GREEN_BGR, -1
         );
+    }
+
+    public void deactivate() {
+        if (pipeline.objects.contains(this)) {
+            pipeline.objects.remove(this);
+            active = false;
+        }
     }
 
     public int getErrorX() {
@@ -95,6 +110,10 @@ public abstract class CVObject implements HSVConstants {
         } else {
             return 0;
         }
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public boolean isIdentified() {
@@ -148,7 +167,7 @@ public abstract class CVObject implements HSVConstants {
         List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(currentHSVMat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
-        // Draw contours on the src image TODO : DOES THIS EVEN IMPACT ANYTHING?
+        // Draw contours on the src image
         Imgproc.drawContours(input, contours, -1, GREEN_BGR, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
 
         // Creates a rectangle called rect with default value of 0 for x, y, width, and height
@@ -157,12 +176,12 @@ public abstract class CVObject implements HSVConstants {
         // Iterates through all of the contours and finds the largest bounding rectangle
         for (int i = 0; i < contours.size(); i++) {
             Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (rect.area() < rect.area() && isReasonable(rect.x, rect.y, rect.width, rect.height)) {
+            if (largestRect.area() < rect.area() && isReasonable(rect.x, rect.y, rect.width, rect.height)) {
                 largestRect = rect;
             }
         }
 
-        // Draws largest rect on src image TODO : DOES THIS EVEN IMPACT ANYTHING?
+        // Draws largest rect on src image
         Imgproc.rectangle(input, largestRect, GREEN_BGR, 1);
 
         // Updates coordinates

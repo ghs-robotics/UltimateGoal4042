@@ -9,6 +9,8 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
+import java.util.ArrayList;
+
 public class CameraManager implements HSVConstants {
 
     // Cameras
@@ -40,7 +42,9 @@ public class CameraManager implements HSVConstants {
                 OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
-        */
+
+         */
+
 
 
         // --------------- testing ----------------
@@ -58,6 +62,9 @@ public class CameraManager implements HSVConstants {
         // Creates and assigns each camera a pipeline
         phoneCamPipeline = new CVDetectionPipeline();
         webcamPipeline = new CVDetectionPipeline();
+
+        phoneCamPipeline.objects = new ArrayList<>(); // Initializes the ArrayLists in each pipeline
+        webcamPipeline.objects = new ArrayList<>();
 
         phoneCam.setPipeline(phoneCamPipeline);
         webcam.setPipeline(webcamPipeline);
