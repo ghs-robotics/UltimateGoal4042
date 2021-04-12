@@ -1,9 +1,13 @@
-package org.firstinspires.ftc.teamcode.robot_components;
+package org.firstinspires.ftc.teamcode.data;
 
 import org.opencv.core.Scalar;
 
 // Interface containing HSV constants for the robot class
 public interface HSVConstants {
+
+    // Floor HSV values TODO : THESE VALUES ARE PLACEHOLDERS
+    Scalar LOWER_FLOOR_HSV = new Scalar(0, 0, 0);
+    Scalar UPPER_FLOOR_HSV = new Scalar(255, 80, 80);
 
     // Ring HSV values
     Scalar LOWER_RING_HSV = new Scalar(74, 123, 94); // original values: 74, 153, 144
@@ -28,5 +32,8 @@ public interface HSVConstants {
     // For image processing (e.g. drawing rectangles)
     Scalar GREEN_BGR = new Scalar(0, 255, 0); // THIS ONE IS BGR
 
+    // Some constants for the screen size
+    int SCREEN_HEIGHT = 240;
+    int SCREEN_WIDTH = 320;
 }
 

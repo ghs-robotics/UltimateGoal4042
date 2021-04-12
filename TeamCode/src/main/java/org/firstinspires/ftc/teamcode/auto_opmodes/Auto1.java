@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.auto_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
+import org.firstinspires.ftc.teamcode.data.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 
@@ -17,20 +17,18 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
     public void runOpMode()
     {
         robot = new Robot(hardwareMap, telemetry);
-        robot.init();
-        robot.setTargetToStack();
-        robot.resetGyroAngle();
-        robot.updateObjectValues();
+        robot.initWithCV();
+        robot.stack.updateData();
         int config = robot.identifyRingConfig(); // TODO : Comment out
         telemetry.addData("Status: ", "Initialized");
         telemetry.addData("Config: ", config);
-        robot.stopDrive();
-        robot.updateDrive();
+        robot.updateDrive(); // Display telemetry
 
         waitForStart();
 
-        robot.updateObjectValues();
         robot.resetElapsedTime();
+        robot.powerLauncher.setLaunchAngleHorizontal();
+        robot.wait(0.4); // wait for launcher to go down
 
         // Determine how many rings in the starting ring stacks
         config = robot.identifyRingConfig();
@@ -38,14 +36,9 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         robot.resetGyroAngle();
         robot.powerLauncher.setPerfectLaunchAngle();
 
-        //Move forward 6-7 feet until at the edge of launch zone
-        robot.setLauncherSideAsFront();
-//        robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
+        // Move forward but avoid starter stack
+        robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
 
-        robot.move(-0.8, 0.8, 1.0);
-        if (config > 0) {
-            robot.move(0, 0.8, 0.5);
-        }
 
         if (config == 0) {
             robot.moveToPos(CONFIG_0_POS_I, 1.0, 3.0);

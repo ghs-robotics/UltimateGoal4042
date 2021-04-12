@@ -32,13 +32,14 @@ package org.firstinspires.ftc.teamcode.test_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.data.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 // THIS CLASS IS FOR TESTING PURPOSES!!
 
 @TeleOp(name="Tele2", group="Iterative Opmode")
-public class Tele2 extends OpMode {
+public class Tele2 extends OpMode implements FieldPosition {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
@@ -50,10 +51,9 @@ public class Tele2 extends OpMode {
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.init();
+        robot.initWithCV();
         robot.setIntakeSideAsFront();
 
-        robot.setTargetToRing();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -71,7 +71,6 @@ public class Tele2 extends OpMode {
     public void loop() {
         //Registers controller input
         controller1.update();
-        robot.updateObjectValues();
 
         //Mecanum wheel drive
         robot.calculateDrivePowers(
@@ -85,18 +84,18 @@ public class Tele2 extends OpMode {
         }
 
         if (controller1.a.equals("pressing")) {
-            target = "ring";
-            robot.setTargetToRing(33, 80);
-        }
-
-        if (controller1.y.equals("pressing")) {
-            target = "ring";
-            robot.setTargetToRing(33, 80);
+            target = "object";
+            robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
         }
 
         if (controller1.b.equals("pressing")) {
-            target = "ring";
-            robot.setTargetToRing(63, 60);
+            target = "object";
+            robot.tower.setTargetXW(NEXT_TO_STARTER_STACK_POS);
+        }
+
+        if (controller1.y.equals("pressing")) {
+            target = "object";
+            robot.tower.setTargetXW(CONFIG_1_POS_I);
         }
 
         if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.005; }
@@ -109,10 +108,11 @@ public class Tele2 extends OpMode {
         if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0005; }
 
 
-        if (target.equals("none")){ robot.updateDrive(); }
-        if (target.equals("wobble")){ robot.chaseWobble(); }
-        if (target.equals("ring")){ robot.chaseRing(); }
-        if (target.equals("tower")){ robot.chaseTower(); }
+        if (target.equals("none")){
+            robot.updateDrive();
+        } else {
+            robot.adjustPosition();
+        }
     }
 
     //Code to run ONCE after the driver hits STOP

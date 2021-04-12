@@ -34,7 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.SmoothnessRegulator;
-import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
+import org.firstinspires.ftc.teamcode.data.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp(name="Tele1", group="Linear Opmode")
@@ -55,10 +55,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
         // TODO : UNCOMMENT
-//        robot.init();
-        robot.resetServos();
-        robot.resetGyroAngle();
-        robot.setTargetToTower();
+        robot.initWithCV();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         robot.setIntakeSideAsFront(); // Default is when the front is the launcher side
@@ -80,7 +77,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             // Registers controller input
             controller1.update();
             controller2.update();
-            robot.updateObjectValues();
+            robot.tower.updateData();
 
             // Constantly adjusts launch velocity
 //            if (robot.powerLauncher.running) {
@@ -256,6 +253,8 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             if (controller2.left_stick_button.equals("pressed")) {
                 robot.powerLauncher.setPerfectLaunchAngle();
             }
+
+            sleep(50); // TODO : OPTIMIZE
         }
     }
 }

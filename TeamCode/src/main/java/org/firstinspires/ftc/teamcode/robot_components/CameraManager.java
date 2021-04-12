@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.data.HSVConstants;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -44,9 +45,9 @@ public class CameraManager implements HSVConstants {
 
         // --------------- testing ----------------
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK);
+                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
+                hardwareMap.get(WebcamName.class,"Webcam 1"));
         // --------------- testing ----------------
 
 
@@ -62,14 +63,6 @@ public class CameraManager implements HSVConstants {
         webcam.setPipeline(webcamPipeline);
     }
 
-    // Returns the coordinates of the target object using CV
-    public int[] getObjectData(String target) {
-        if (target.equals("tower") || target.equals("stack")) {
-            return webcamPipeline.getObjectData();
-        }
-        return phoneCamPipeline.getObjectData();
-    }
-
     // Initializes the camera
     public void initCamera() {
         startStreaming();
@@ -79,7 +72,7 @@ public class CameraManager implements HSVConstants {
     public void startStreaming() {
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
-        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+//        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
     // Stops streaming frames on the phone camera

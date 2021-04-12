@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot_components;
+package org.firstinspires.ftc.teamcode.data;
 
 public enum FieldPositions {
 

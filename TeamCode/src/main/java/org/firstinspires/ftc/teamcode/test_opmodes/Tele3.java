@@ -24,9 +24,8 @@ package org.firstinspires.ftc.teamcode.test_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.robot_components.Config;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.FieldPosition;
+import org.firstinspires.ftc.teamcode.data.FieldPosition;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp
@@ -40,14 +39,12 @@ public class Tele3 extends LinearOpMode implements FieldPosition {
     {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.init();
-        robot.setTargetToStack();
+        robot.initWithCV();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
 
-        robot.updateObjectValues();
         robot.resetElapsedTime();
 
 
@@ -161,122 +158,9 @@ public class Tele3 extends LinearOpMode implements FieldPosition {
 
          */
 
-        int config = Config.ONE;
+        int config = 1;
         while (opModeIsActive()) {
             controller1.update();
-            if (controller1.a.equals("pressing")) {
-                // Determine how many rings in the starting ring stacks
-                config = robot.identifyRingConfig();
-
-
-                madeIt("config identified: " + config);
-
-                if (config != Config.ZERO) {
-                    //Move forward 6-7 feet until at the edge of launch zone
-                    robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0.1);
-
-                    madeIt("next to starter stack");
-                    robot.moveToPos(new int[]{142, 65});
-                }
-            }
-            if (controller1.b.equals("pressing")) {
-                //Move sideways until in line with tower goal
-                //aim the robot at the goal and make sure that the robot is within the launch zone
-                //Shoot 3 rings
-                robot.adjustAndShoot(3);
-                madeIt("shot 3 goals");
-
-                // if starterStack != 0, pickup the starter stack rings
-                if (config != Config.ZERO) {
-                    robot.runIntake(0.8);
-                    robot.move(0, -0.3, 3.0);
-                    robot.runIntake(0.0);
-                    madeIt("gathered rings");
-
-                    if (config != Config.ONE) {
-                        robot.adjustAndShoot(1);
-                    } else {
-                        robot.adjustAndShoot(3);
-                    }
-                }
-            }
-            if (controller1.x.equals("pressing")) {
-                //move forward towards the desired target wobble goal zone
-                //Check distance to tower goal and correct if necessary
-                //Move left or right depending on target wobble goal
-                if (config != Config.ZERO) {
-                    robot.moveToPos(CONFIG_0_POS_I);
-                } else if (config != Config.ONE) {
-                    robot.moveToPos(CONFIG_1_POS_I, 4.0);
-                } else {
-                    robot.moveToPos(CONFIG_4_POS_I, 4.0);
-                }
-
-                madeIt("next to wobble goal drop zone");
-
-                //once there, place down the wobble goal
-                robot.turnArm();
-                robot.wait(0.4);
-                robot.toggleClaw();
-                robot.wait(0.4);
-                robot.turnArm();
-                robot.wait(0.1);
-                robot.toggleClaw();
-
-                madeIt("set down first wobble goal");
-            }
-            if (controller1.y.equals("pressing")) {
-                //Head back to location where we shot the rings
-                //Move left or right and then backward towards second wobble goal
-                robot.moveToPos(PERFECT_LAUNCH_POS, 0.0);
-
-                madeIt("going for the second wobble goal");
-
-                //pick up second wobble goal
-                robot.pickUpWobbleGoal();
-
-
-                madeIt("picked up the second wobble goal");
-            }
-
-            if (controller1.dpad_left.equals("pressing")) {
-                //Check that we're in shooting position
-                //Shoot the 3 rings
-
-                //move forward towards the desired target wobble goal zone
-                //Check distance to tower goal and correct if necessary
-                //Move left or right depending on target wobble goal
-                robot.wait(0.01);
-                if (config == Config.ZERO) {
-                    robot.moveToPos(CONFIG_0_POS_II);
-                } else if (config == Config.ONE) {
-                    robot.moveToPos(CONFIG_1_POS_II, 4.0);
-                } else {
-                    robot.moveToPos(CONFIG_4_POS_II, 4.0);
-                }
-
-                madeIt("brought second wobble goal to drop zone");
-            }
-            if (controller1.dpad_up.equals("pressing")) {
-                madeIt("brought second wobble goal to drop zone");
-
-                //once there, place down the wobble goal
-                robot.turnArm();
-                robot.wait(0.4);
-                robot.toggleClaw();
-                robot.wait(0.4);
-                robot.turnArm();
-                robot.wait(0.1);
-                robot.toggleClaw();
-            }
-            if (controller1.dpad_right.equals("pressing")) {
-                //Move forward to park over launch line
-                robot.moveToPos(PARK_POS);
-                robot.stopDrive();
-
-
-                madeIt("parked");
-            }
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);
