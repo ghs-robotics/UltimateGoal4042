@@ -17,8 +17,8 @@ import java.util.List;
 public abstract class CVObject implements HSVConstants {
 
     public String name = "unspecified";
-    public boolean identified = false;
-    public boolean active = false; // true if pipeline is actively updating this object's data
+    protected boolean identified = false;
+    protected boolean active = false; // true if pipeline is actively updating this object's data
 
     public CVDetectionPipeline pipeline;
 
@@ -27,8 +27,8 @@ public abstract class CVObject implements HSVConstants {
     protected Mat currentHSVMat;
     protected Mat hierarchy;
 
-    public Scalar lowerHSV;
-    public Scalar upperHSV;
+    protected Scalar lowerHSV;
+    protected Scalar upperHSV;
 
     // All measured in pixels (on the screen)
     public int x = 0;
@@ -37,15 +37,17 @@ public abstract class CVObject implements HSVConstants {
     public int h = 0; // height
 
     // Values to be targeted
-    int targetX = 0;
-    int targetY = 0;
-    int targetW = 0;
+    public int targetX = 0;
+    public int targetY = 0;
+    public int targetW = 0;
+    public int targetH = 0;
 
     // Amount of screen covered by a white rectangle during image processing
     public double cover = 0;
 
-    public PIDController xPID;
-    public PIDController wPID;
+    // PIDs for x and y position of robot
+    public PIDController breadthPID; // Controls side to side motion of robot
+    public PIDController depthPID; // Controls forward and backward motion of the robot
 
     public CVObject(String name, CVDetectionPipeline pipeline) {
         this.name = name;
@@ -54,10 +56,10 @@ public abstract class CVObject implements HSVConstants {
         this.hierarchy = new Mat();
     }
 
-    public CVObject(String name, CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
+    public CVObject(String name, CVDetectionPipeline pipeline, PIDController breadthPID, PIDController depthPID) {
         this(name, pipeline);
-        this.xPID = xPID;
-        this.wPID = wPID;
+        this.breadthPID = breadthPID;
+        this.depthPID = depthPID;
     }
 
     public void activate() {
@@ -96,17 +98,23 @@ public abstract class CVObject implements HSVConstants {
         return targetW - w;
     }
 
-    public double getXPIDValue() {
+    public int getErrorH() {
+        return targetH - h;
+    }
+
+    // Uses x value by default
+    public double getBreadthPIDValue() {
         if (identified) {
-            return -xPID.calcVal(getErrorX());
+            return -breadthPID.calcVal(getErrorX());
         } else {
             return 0;
         }
     }
 
-    public double getWPIDValue() {
+    // Uses width by default
+    public double getDepthPIDValue() {
         if (identified) {
-            return wPID.calcVal(getErrorW());
+            return depthPID.calcVal(getErrorW());
         } else {
             return 0;
         }
@@ -122,13 +130,15 @@ public abstract class CVObject implements HSVConstants {
 
     abstract boolean isReasonable(int x, int y, int w, int h);
 
+    // Should be overridden in subclasses having fewer than two PIDs
     public void resetPIDs() {
-        xPID.resetValues();
-        wPID.resetValues();
+        breadthPID.resetValues();
+        depthPID.resetValues();
     }
 
     public void setTargetX(int targetX) {
         this.targetX = targetX;
+        resetPIDs();
     }
 
     public void setTargetXW(int[] vals) {
@@ -139,10 +149,17 @@ public abstract class CVObject implements HSVConstants {
 
     public void setTargetY(int targetY) {
         this.targetY = targetY;
+        resetPIDs();
     }
 
     public void setTargetW(int targetW) {
         this.targetW = targetW;
+        resetPIDs();
+    }
+
+    public void setTargetH(int targetH) {
+        this.targetH = targetH;
+        resetPIDs();
     }
 
     @Override
@@ -151,6 +168,7 @@ public abstract class CVObject implements HSVConstants {
     }
 
     // Updates coordinates and identified boolean
+    // ONLY CALL THIS FROM WITHIN THE PIPELINE
     public void updateData() {
         Mat input = pipeline.currentMat; // Edits to this Mat will display on the phone screen
 
@@ -168,7 +186,7 @@ public abstract class CVObject implements HSVConstants {
         Imgproc.findContours(currentHSVMat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
-        Imgproc.drawContours(input, contours, -1, GREEN_BGR, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
+        Imgproc.drawContours(input, contours, -1, GREEN_BGR, 1, Imgproc.LINE_8, hierarchy, 2, new Point());
 
         // Creates a rectangle called rect with default value of 0 for x, y, width, and height
         Rect largestRect = new Rect();
@@ -182,7 +200,7 @@ public abstract class CVObject implements HSVConstants {
         }
 
         // Draws largest rect on src image
-        Imgproc.rectangle(input, largestRect, GREEN_BGR, 1);
+        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2);
 
         // Updates coordinates
         this.x = largestRect.x;

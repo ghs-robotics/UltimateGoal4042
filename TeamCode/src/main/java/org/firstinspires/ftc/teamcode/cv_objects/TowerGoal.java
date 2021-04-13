@@ -12,11 +12,6 @@ public class TowerGoal extends CVObject {
         cover = 0;
     }
 
-    @Override
-    protected void coverBackground() {
-        super.coverBackground();
-    }
-
     // Testing to make sure the detected object is the tower goal
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {

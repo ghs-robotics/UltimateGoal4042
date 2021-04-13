@@ -12,11 +12,6 @@ public class Ring extends CVObject {
         cover = 0.65; // TODO : CALIBRATE
     }
 
-    @Override
-    protected void coverBackground() {
-        super.coverBackground();
-    }
-
     // Testing to make sure the detected object is a ring
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {

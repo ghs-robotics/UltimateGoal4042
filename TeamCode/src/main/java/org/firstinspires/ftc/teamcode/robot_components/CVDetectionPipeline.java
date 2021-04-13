@@ -41,19 +41,22 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Updates crosshairValue
-//        crosshairValue = findHSVCrosshair(dst); // TODO : FIX SO IT ANALYZES THE CORRECT THING
+//        crosshairHSV = findHSVCrosshair(input);
+//        dst.release();
 
         return currentMat;
     }
 
     // Finds HSV values of the point at the center of the screen
     private String findHSVCrosshair(Mat input) {
-        int col = input.cols()/2;
-        int row = input.rows()/2;
-        dst = dst.row(row);
-        dst = dst.col(col);
-        String value = dst.dump();
-        return value;
+        // Converts to HSV
+        Imgproc.cvtColor(input, dst, Imgproc.COLOR_BGR2HSV);
+
+        int middleColumn = input.cols()/2;
+        int middleRow = input.rows()/2;
+
+        // Extracting HSV value from center point of the input image
+        return (dst.row(middleRow)).col(middleColumn).dump();
     }
 
     /*

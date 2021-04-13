@@ -47,7 +47,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     public PIDController towerXPID; // For the x-position of the tower goal
     public PIDController towerWPID; // For the width of the tower goal
     public PIDController xPID;
-    public PIDController yPID;
     public PIDController wPID; // For the y-position of the robot
 
     // Constructs a robot object with methods that we can use in both Auto and TeleOp
@@ -81,19 +80,18 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 2);
 
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 2); // Could be better
-        yPID = new PIDController(0.0200, 0.0000, 0.0000, 2); // TODO : UPDATE
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 2); // Could be better
 
         CVDetectionPipeline web = camera.webcamPipeline;
         CVDetectionPipeline phone = camera.phoneCamPipeline;
 
-        floor = new FieldFloor(phone, yPID);
-        wall = new FieldWall(web);
+        floor = new FieldFloor(phone, new PIDController(0.0450, 0.0030, 0.0010, 2)); // yPID TODO : UPDATE
+        wall = new FieldWall(phone, new PIDController(0.0450, 0.0030, 0.0010, 2)); // hPID
         ring = new Ring(phone, xPID, wPID);
         stack = new StarterStack(web);
-        tower = new TowerGoal(web, xPID, wPID);
+        tower = new TowerGoal(web, towerXPID, towerWPID);
         wobble = new WobbleGoal(phone, xPID, wPID);
-        target = tower;
+        target = tower; // TODO : CHANGE
     }
 
 
@@ -111,31 +109,32 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-//        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairHSV);
+        telemetry.addData("crosshair: ", camera.phoneCamPipeline.crosshairHSV);
 
-        if (!tower.isActive()) {
-            telemetry.addData("NOTE: ", "TOWER NOT ACTIVE");
+        if (!target.isActive()) {
+            telemetry.addData("NOTE", target.name + " NOT ACTIVE");
         }
-        else if (!tower.isIdentified()) {
-            telemetry.addData("NOTE: ", "TOWER NOT IDENTIFIED");
-        }
-        if (!floor.isActive()) {
-            telemetry.addData("NOTE: ", "FLOOR NOT ACTIVE");
-        }
-        else if (!floor.isIdentified()) {
-            telemetry.addData("NOTE: ", "FLOOR NOT IDENTIFIED");
+        else if (!target.isIdentified()) {
+            telemetry.addData("NOTE", target.name + " NOT IDENTIFIED");
         }
 
-        telemetry.addData("angle = ", gyro.getAngle());
-        telemetry.addData("launchAngle: ", "" + powerLauncher.launchAngle);
-        telemetry.addData("indexerAngle: ", "" + powerLauncher.indexerAngle);
-        telemetry.addData("gyro angle: ", "" + gyro.getAngle());
-        telemetry.addData("tower: ", "" + tower.toString());
-        telemetry.addData("floor: ", "" + floor.toString());
+        if (!wall.isActive()) {
+            telemetry.addData("NOTE", "WALL NOT ACTIVE");
+        }
+        else if (!wall.isIdentified()) {
+            telemetry.addData("NOTE", "WALL NOT IDENTIFIED");
+        }
+
+        telemetry.addData("angle", gyro.getAngle());
+        telemetry.addData("launchAngle", "" + powerLauncher.launchAngle);
+        telemetry.addData("indexerAngle", "" + powerLauncher.indexerAngle);
+        telemetry.addData("gyro angle", "" + gyro.getAngle());
+        telemetry.addData("target", "" + target.toString());
+        telemetry.addData("wall", "" + wall.toString());
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-        telemetry.addData("Kp (w): ", wPID.k_P);
-        telemetry.addData("Ki (w): ", wPID.k_I);
-        telemetry.addData("Kd (w): ", wPID.k_D);
+        telemetry.addData("Kp", target.depthPID.k_P);
+        telemetry.addData("Ki", target.depthPID.k_I);
+        telemetry.addData("Kd", target.depthPID.k_D);
         telemetry.update();
     }
 
@@ -165,16 +164,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
             wait(0.7);
         }
         powerLauncher.toggleOff();
-    }
-
-    // Resets all PID controllers
-    public void resetPIDs() {
-        towerXPID.resetValues();
-        towerWPID.resetValues();
-        xPID.resetValues();
-        yPID.resetValues();
-        wPID.resetValues();
-        gyroPID.resetValues();
     }
 
     // Sets servos to starting positions
@@ -221,22 +210,23 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     }
 
     // Makes the robot line up with the tower goal (if called repeatedly)
-    // Make sure the gyro angle and target values are correct before calling this (and reset PIDs and activate)!!!
+    // Make sure the following things are accounted for before calling this:
+    // gyro angle, target values, reset PIDs, activate object, set launcher side as front
     public void adjustPosition() {
         if (!tower.isIdentified()) {
-            chaseObject(floor);
+            chaseObject(wall);
         } else {
             chaseObject(tower);
         }
     }
 
     // Makes the robot chase the target object (if called repeatedly)
-    // Make sure the gyro angle and target values are correct before calling this (and reset PIDs and activate)!!!
-    private void chaseObject(CVObject target) {
-//        target.updateData();
-        x = tower.getXPIDValue();
-        y = tower.getWPIDValue();
-        calculateDrivePowers(0, 0, getGyroPIDValue()); // TODO : replace with x, y
+    // Make sure the following things are accounted for before calling this:
+    // gyro angle, target values, reset PIDs, activate object, set launcher side as front
+    public void chaseObject(CVObject target) {
+        x = target.getBreadthPIDValue();
+        y = target.getDepthPIDValue();
+        calculateDrivePowers(x, y, getGyroPIDValue());
         sendDrivePowers();
         addTelemetryData();
     }
@@ -265,12 +255,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         setLauncherSideAsFront();
         tower.activate();
-        floor.activate();
+        wall.activate();
         tower.setTargetXW(pos);
-        floor.setTargetY(280); // TODO : UPDATE
+        wall.setTargetH(80);
         rotateToPos(0.0, 0.0);
-//        tower.updateData();
-//        floor.updateData();
         double t = getElapsedSeconds();
         while(  (!tower.isIdentified()
                 || tower.getErrorW() > 8
@@ -283,13 +271,16 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         t = getElapsedSeconds();
 
         // Start fresh by resetting these
-        resetPIDs();
+        tower.resetPIDs();
+        wall.resetPIDs();
 
         while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
                 (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
             adjustPosition();
         }
         stopDrive();
+        tower.deactivate();
+        wall.deactivate();
     }
 
     // Makes robot move forward and pick up wobble goal

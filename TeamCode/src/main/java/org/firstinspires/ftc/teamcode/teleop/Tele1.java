@@ -55,8 +55,8 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
 
         robot.initWithCV();
-//        robot.tower.activate();
-        robot.floor.activate();
+        robot.tower.activate();
+        robot.wall.activate();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

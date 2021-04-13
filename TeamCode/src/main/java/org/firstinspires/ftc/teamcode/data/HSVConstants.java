@@ -5,9 +5,9 @@ import org.opencv.core.Scalar;
 // Interface containing HSV constants for the robot class
 public interface HSVConstants {
 
-    // Floor HSV values TODO : THESE VALUES ARE PLACEHOLDERS
+    // Floor HSV values
     Scalar LOWER_FLOOR_HSV = new Scalar(0, 0, 0);
-    Scalar UPPER_FLOOR_HSV = new Scalar(255, 50, 105);
+    Scalar UPPER_FLOOR_HSV = new Scalar(255, 85, 175);
 
     // Ring HSV values
     Scalar LOWER_RING_HSV = new Scalar(74, 123, 94); // original values: 74, 153, 144
@@ -22,12 +22,14 @@ public interface HSVConstants {
     Scalar UPPER_TOWER_HSV = new Scalar(80, 255, 220); // 80, 255, 220
 
     // Wall HSV values TODO : THESE VALUES ARE PLACEHOLDERS
-    Scalar LOWER_WALL_HSV = new Scalar(0, 0, 0);
-    Scalar UPPER_WALL_HSV = new Scalar(255, 255, 25);
+    Scalar LOWER_WALL_HSV = new Scalar(70, 75, 95);
+    Scalar UPPER_WALL_HSV = new Scalar(130, 255, 255);
 
     // Wobble goal HSV values
-    Scalar LOWER_WOBBLE_HSV = new Scalar(0, 0, 0);
-    Scalar UPPER_WOBBLE_HSV = new Scalar(255, 255, 25);
+//    Scalar LOWER_WOBBLE_HSV = new Scalar(0, 0, 0);
+//    Scalar UPPER_WOBBLE_HSV = new Scalar(255, 255, 25);
+    Scalar LOWER_WOBBLE_HSV = new Scalar(0, 80, 100); // TODO : TEST THESE VALUES
+    Scalar UPPER_WOBBLE_HSV = new Scalar(80, 255, 220);
 
     // For image processing (e.g. drawing rectangles)
     Scalar GREEN_BGR = new Scalar(0, 255, 0); // THIS ONE IS BGR

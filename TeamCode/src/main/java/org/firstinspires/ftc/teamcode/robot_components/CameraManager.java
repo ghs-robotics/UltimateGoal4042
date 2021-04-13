@@ -31,7 +31,7 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.appContext.getPackageName());
 
 
-        /*
+
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
                         2, // The number of sub-containers to create
@@ -43,16 +43,18 @@ public class CameraManager implements HSVConstants {
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
 
-         */
 
 
 
+        /*
         // --------------- testing ----------------
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"));
         // --------------- testing ----------------
+
+         */
 
 
         // Opens cameras
@@ -79,7 +81,7 @@ public class CameraManager implements HSVConstants {
     public void startStreaming() {
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
-//        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
     // Stops streaming frames on the phone camera

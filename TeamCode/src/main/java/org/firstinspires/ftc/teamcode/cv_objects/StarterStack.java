@@ -32,9 +32,24 @@ public class StarterStack extends CVObject {
         }
     }
 
+    // No PIDs
+    @Override
+    public double getBreadthPIDValue() {
+        return 0;
+    }
+
+    // No PIDs
+    @Override
+    public double getDepthPIDValue() {
+        return 0;
+    }
+
     // Testing to make sure the detected object is the starter stack
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
         return (4 < w && 4 < h && h < 40 && x > 0);
     }
+
+    @Override
+    public void resetPIDs() {}
 }

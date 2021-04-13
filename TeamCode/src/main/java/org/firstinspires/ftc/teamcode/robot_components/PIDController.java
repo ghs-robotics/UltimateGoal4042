@@ -17,6 +17,15 @@ public class PIDController {
     private double prevTime; // measured in seconds!
     private ElapsedTime time;
 
+    public PIDController() {
+        this(0, 0, 0, 1.0);
+    }
+
+    // Default values for min and max are -1.0 and 1.0, respectively
+    public PIDController(double Kp, double Ki, double Kd, double tolerance) {
+        this(Kp, Ki, Kd, tolerance, -1.0, 1.0);
+    }
+
     public PIDController(double Kp, double Ki, double Kd, double tolerance, double min, double max) {
         k_P = Kp;
         k_I = Ki;
@@ -26,11 +35,6 @@ public class PIDController {
         this.max = max;
         time = new ElapsedTime();
         resetValues();
-    }
-
-    // Default values for min and max are -1.0 and 1.0, respectively
-    public PIDController(double Kp, double Ki, double Kd, double tolerance) {
-        this(Kp, Ki, Kd, tolerance, -1.0, 1.0);
     }
 
     // Restarts the PID controller

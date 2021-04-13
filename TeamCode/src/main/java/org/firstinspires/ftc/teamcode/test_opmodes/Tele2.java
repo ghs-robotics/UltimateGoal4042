@@ -43,8 +43,7 @@ public class Tele2 extends OpMode implements FieldPosition {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-    //Controller controller2;
-    String target = "none";
+    boolean chasing = false;
 
     //Code to run ONCE when the driver hits INIT
     @Override
@@ -52,6 +51,9 @@ public class Tele2 extends OpMode implements FieldPosition {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.initWithCV();
+//        robot.tower.activate();
+        robot.wall.activate();
+        robot.wall.setTargetH(50);
         robot.setIntakeSideAsFront();
 
         telemetry.addData("Status", "Initialized");
@@ -80,38 +82,38 @@ public class Tele2 extends OpMode implements FieldPosition {
         );
 
         if (controller1.x.equals("pressing")) {
-            target = "none";
+            chasing = false;
         }
 
         if (controller1.a.equals("pressing")) {
-            target = "object";
-            robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+            chasing = true;
+            robot.wall.setTargetH(30);
         }
 
         if (controller1.b.equals("pressing")) {
-            target = "object";
-            robot.tower.setTargetXW(NEXT_TO_STARTER_STACK_POS);
+            chasing = true;
+            robot.wall.setTargetH(80);
         }
 
         if (controller1.y.equals("pressing")) {
-            target = "object";
-            robot.tower.setTargetXW(CONFIG_1_POS_I);
+            chasing = true;
+            robot.wall.setTargetH(50);
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.005; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.005; }
+        if (controller1.left_bumper.equals("pressing")) { robot.wall.depthPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.wall.depthPID.k_P += 0.005; }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0005; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0005; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wall.depthPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wall.depthPID.k_I += 0.0005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0005; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0005; }
+        if (controller1.dpad_left.equals("pressing")) { robot.wall.depthPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.wall.depthPID.k_D += 0.0005; }
 
 
-        if (target.equals("none")){
-            robot.updateDrive();
+        if (chasing) {
+            robot.chaseObject(robot.wall);
         } else {
-            robot.adjustPosition();
+            robot.updateDrive();
         }
     }
 
