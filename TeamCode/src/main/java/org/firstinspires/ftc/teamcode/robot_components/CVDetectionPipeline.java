@@ -17,7 +17,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // Auxiliary Mat objects for temporarily storing data
     private Mat dst = new Mat();
 
-    public ArrayList<CVObject> objects;
+    public ArrayList<CVObject> activeObjects;
 
     // For sampling HSV values of individual pixels
     public String crosshairHSV = "";
@@ -36,7 +36,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         Imgproc.resize(input, input, new Size(320, 240));
 
         currentMat = input;
-        for (CVObject obj : objects) {
+        for (CVObject obj : activeObjects) {
             obj.updateData();
         }
 

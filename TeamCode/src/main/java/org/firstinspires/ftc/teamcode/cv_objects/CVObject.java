@@ -63,8 +63,8 @@ public abstract class CVObject implements HSVConstants {
     }
 
     public void activate() {
-        if (!pipeline.objects.contains(this)) {
-            pipeline.objects.add(this);
+        if (!pipeline.activeObjects.contains(this)) {
+            pipeline.activeObjects.add(this);
             active = true;
         }
     }
@@ -80,8 +80,8 @@ public abstract class CVObject implements HSVConstants {
     }
 
     public void deactivate() {
-        if (pipeline.objects.contains(this)) {
-            pipeline.objects.remove(this);
+        if (pipeline.activeObjects.contains(this)) {
+            pipeline.activeObjects.remove(this);
             active = false;
         }
     }

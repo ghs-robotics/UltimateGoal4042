@@ -33,7 +33,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     private double y = 0;
 
     // Stores data for automated functions in TeleOp
-    private boolean autonomous = false;
     private double phaseTimeStamp = 0;
 
     // Robot variables and objects
@@ -207,18 +206,24 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // ---------------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------
 
+    // Automated move to position function that uses phases and must be called repeatedly
+    // This allows us to terminate the function early (because we can just set phase to be 0)
     public int moveInPhases(int phase) {
-        if (!autonomous) {
-            autonomous = true;
-            phaseTimeStamp = elapsedTime.seconds();
+        if (phase == 4) {
             setLauncherSideAsFront();
             tower.activate();
             wall.activate();
             wall.setTargetH(80);
+            targetGyroAngle = getReasonableGyroAngle(0);
+            phaseTimeStamp = elapsedTime.seconds();
+            phase--;
         }
-        else if (getAbsoluteGyroError() > 8 || targetGyroAngle != getReasonableGyroAngle(0.0)) {
-            targetGyroAngle = getReasonableGyroAngle(0); // TODO : MAKE MORE EFFICIENT
-            adjustAngle();
+        else if (phase == 3) {
+            if (getAbsoluteGyroError() > 4) {
+                adjustAngle();
+            } else {
+                phase--;
+            }
         }
         else if (phase == 2) {
             if ((!tower.isIdentified()
@@ -229,10 +234,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
                     && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
                 adjustPosition();
             } else {
-                phase--;
                 phaseTimeStamp = elapsedTime.seconds();
                 tower.resetPIDs();
                 wall.resetPIDs();
+                phase--;
             }
         }
         else if (phase == 1) {
@@ -241,9 +246,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
                 adjustPosition();
             } else {
                 stopDrive();
-                tower.deactivate();
-                wall.deactivate();
-                autonomous = false;
+//                tower.deactivate();
+//                wall.deactivate();
                 phase--;
             }
         }
@@ -274,8 +278,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         x = target.getBreadthPIDValue();
         y = target.getDepthPIDValue();
         calculateDrivePowers(x, y, getGyroPIDValue());
-        sendDrivePowers();
-        addTelemetryData();
+        updateDrive();
     }
 
     // Calling move(0, 0.4, 3.0) makes the robot move forward 3.5 feet (a little over 1 ft/sec)

@@ -92,8 +92,22 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 queue = robot.powerLauncher.handleQueue(queue);
             }
 
-            if (phase == 1) {
+            // Checks if the robot should be performing an automated move function
+            if (phase == 10) {
                 robot.adjustPosition();
+            }
+            else if (phase > 0) {
+                phase = robot.moveInPhases(phase);
+            }
+            else {
+                // Mecanum wheel drive
+                robot.calculateDrivePowers(
+                        controller1.left_stick_x * SmoothnessRegulator.getFactor(),
+                        controller1.left_stick_y * SmoothnessRegulator.getFactor(),
+                        controller1.right_stick_x * SmoothnessRegulator.getFactor()
+                );
+
+                robot.updateDrive(); // Also updates telemetry
             }
 
             // -----------------------------------------------------------------------------------------
@@ -106,12 +120,13 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             //
             if (controller1.a.equals("pressing")) {
-                robot.setLauncherSideAsFront();
+                robot.usingMeta = true;
             }
 
             //
             if (controller1.b.equals("pressing")) {
-                robot.setIntakeSideAsFront();
+                robot.usingMeta = false;
+                robot.metaOffset += 90;
             }
 
             // Toggle speed between 100% and 50%
@@ -128,25 +143,17 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             if (controller1.left_bumper.equals("pressing")) {
                 robot.setLauncherSideAsFront();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-                robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
                 robot.powerLauncher.setLaunchAnglePerfect();
+                phase = 10;
             }
 
             // Adjust and shoot
             if (controller1.right_bumper.equals("pressing")) {
-                // TODO : ADD ALL OF THE OTHER SETUP
+                robot.setLauncherSideAsFront();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-                phase = 1;
+                robot.powerLauncher.setLaunchAnglePerfect();
+                phase = 4;
             }
-
-            // Mecanum wheel drive
-            robot.calculateDrivePowers(
-                    controller1.left_stick_x * SmoothnessRegulator.getFactor(),
-                    controller1.left_stick_y * SmoothnessRegulator.getFactor(),
-                    controller1.right_stick_x * SmoothnessRegulator.getFactor()
-            );
-
-            robot.updateDrive(); // Also updates telemetry
 
             // Flip the drive direction
             if (controller1.right_stick_button.equals("pressing")) {

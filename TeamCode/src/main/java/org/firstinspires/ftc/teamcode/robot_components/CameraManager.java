@@ -65,8 +65,8 @@ public class CameraManager implements HSVConstants {
         phoneCamPipeline = new CVDetectionPipeline();
         webcamPipeline = new CVDetectionPipeline();
 
-        phoneCamPipeline.objects = new ArrayList<>(); // Initializes the ArrayLists in each pipeline
-        webcamPipeline.objects = new ArrayList<>();
+        phoneCamPipeline.activeObjects = new ArrayList<>(); // Initializes the ArrayLists in each pipeline
+        webcamPipeline.activeObjects = new ArrayList<>();
 
         phoneCam.setPipeline(phoneCamPipeline);
         webcam.setPipeline(webcamPipeline);
