@@ -32,6 +32,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     private double x = 0;
     private double y = 0;
 
+    // Stores data for automated functions in TeleOp
+    private boolean autonomous = false;
+    private double phaseTimeStamp = 0;
+
     // Robot variables and objects
     private double intakePower = 0;
     public double armAngle = 0.45; // Up position
@@ -202,6 +206,49 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // ---------------------------------   AUTOMATED FUNCTIONS   -----------------------------------
     // ---------------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------
+
+    public int moveInPhases(int phase) {
+        if (!autonomous) {
+            autonomous = true;
+            phaseTimeStamp = elapsedTime.seconds();
+            setLauncherSideAsFront();
+            tower.activate();
+            wall.activate();
+            wall.setTargetH(80);
+        }
+        else if (getAbsoluteGyroError() > 8 || targetGyroAngle != getReasonableGyroAngle(0.0)) {
+            targetGyroAngle = getReasonableGyroAngle(0); // TODO : MAKE MORE EFFICIENT
+            adjustAngle();
+        }
+        else if (phase == 2) {
+            if ((!tower.isIdentified()
+                    || tower.getErrorW() > 8
+                    || tower.getErrorX() > 8
+                    || tower.getErrorX() > 8
+                    || getAbsoluteGyroError() > 8)
+                    && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
+                adjustPosition();
+            } else {
+                phase--;
+                phaseTimeStamp = elapsedTime.seconds();
+                tower.resetPIDs();
+                wall.resetPIDs();
+            }
+        }
+        else if (phase == 1) {
+            if (elapsedTime.seconds() - phaseTimeStamp < 2.0 &&
+                    (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
+                adjustPosition();
+            } else {
+                stopDrive();
+                tower.deactivate();
+                wall.deactivate();
+                autonomous = false;
+                phase--;
+            }
+        }
+        return phase;
+    }
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {

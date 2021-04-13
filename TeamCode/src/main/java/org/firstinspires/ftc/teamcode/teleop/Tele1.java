@@ -53,6 +53,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
         controller1 = new Controller(gamepad1); // Whoever presses start + a
         controller2 = new Controller(gamepad2); // Whoever presses start + b
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
+        int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
 
         robot.initWithCV();
         robot.tower.activate();
@@ -114,16 +115,17 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 robot.toggleSpeed();
             }
 
-            //
+            // Terminate any automated functions
             if (controller1.y.equals("pressing")) {
+                phase = 0;
             }
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
                 robot.setLauncherSideAsFront();
+                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.moveToPos(PERFECT_LAUNCH_POS, 2.0);
                 robot.powerLauncher.setLaunchAnglePerfect();
-                robot.setIntakeSideAsFront();
             }
 
             // Adjust and shoot
