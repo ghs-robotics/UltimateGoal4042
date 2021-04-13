@@ -92,6 +92,10 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 queue = robot.powerLauncher.handleQueue(queue);
             }
 
+            if (phase == 1) {
+                robot.adjustPosition();
+            }
+
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
             // ------------------------------   CONTROLLER 1 FUNCTIONS   -------------------------------
@@ -130,9 +134,9 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             // Adjust and shoot
             if (controller1.right_bumper.equals("pressing")) {
-                robot.setLauncherSideAsFront();
-                robot.adjustAndShoot(3);
-                robot.setIntakeSideAsFront();
+                // TODO : ADD ALL OF THE OTHER SETUP
+                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+                phase = 1;
             }
 
             // Mecanum wheel drive
