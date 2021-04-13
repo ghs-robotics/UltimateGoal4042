@@ -104,7 +104,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                         controller1.left_stick_x * SmoothnessRegulator.getFactor(),
                         controller1.left_stick_y * SmoothnessRegulator.getFactor(),
                         controller1.right_stick_x * SmoothnessRegulator.getFactor(),
-                        true
+                        controller1.right_stick_y * SmoothnessRegulator.getFactor()
                 );
 
                 robot.updateDrive(); // Also updates telemetry
