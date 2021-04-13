@@ -210,7 +210,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // This allows us to terminate the function early (because we can just set phase to be 0)
     public int moveInPhases(int phase) {
         if (phase == 4) {
-            setLauncherSideAsFront();
             tower.activate();
             wall.activate();
             wall.setTargetH(80);
@@ -303,7 +302,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
 
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
-        setLauncherSideAsFront();
         tower.activate();
         wall.activate();
         tower.setTargetXW(pos);

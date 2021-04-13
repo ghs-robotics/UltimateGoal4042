@@ -61,7 +61,6 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        robot.setIntakeSideAsFront();
         SmoothnessRegulator.setController(controller1); // For toggling between smooth and choppy mode
 
         // Wait for the game to start (driver presses PLAY)
@@ -104,7 +103,8 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 robot.calculateDrivePowers(
                         controller1.left_stick_x * SmoothnessRegulator.getFactor(),
                         controller1.left_stick_y * SmoothnessRegulator.getFactor(),
-                        controller1.right_stick_x * SmoothnessRegulator.getFactor()
+                        controller1.right_stick_x * SmoothnessRegulator.getFactor(),
+                        true
                 );
 
                 robot.updateDrive(); // Also updates telemetry
@@ -120,12 +120,10 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             //
             if (controller1.a.equals("pressing")) {
-                robot.usingMeta = true;
             }
 
             //
             if (controller1.b.equals("pressing")) {
-                robot.usingMeta = false;
             }
 
             // Toggle speed between 100% and 50%
@@ -140,7 +138,6 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
-                robot.setLauncherSideAsFront();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
                 phase = 10;
@@ -148,15 +145,13 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             // Adjust and shoot
             if (controller1.right_bumper.equals("pressing")) {
-                robot.setLauncherSideAsFront();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
                 phase = 4;
             }
 
-            // Flip the drive direction
+            //
             if (controller1.right_stick_button.equals("pressing")) {
-                robot.switchDriveDirection();
             }
 
             // Toggles between strong/smooth mode

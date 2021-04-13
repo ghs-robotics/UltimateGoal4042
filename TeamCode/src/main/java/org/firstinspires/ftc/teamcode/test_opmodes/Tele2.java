@@ -54,7 +54,6 @@ public class Tele2 extends OpMode implements FieldPosition {
 //        robot.tower.activate();
         robot.wall.activate();
         robot.wall.setTargetH(50);
-        robot.setIntakeSideAsFront();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

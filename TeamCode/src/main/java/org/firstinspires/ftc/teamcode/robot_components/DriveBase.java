@@ -19,12 +19,8 @@ public class DriveBase {
     // Drive speed ranges from 0 to 1
     protected double speed = 1;
 
-    // Drive orientation (+1 means launcher side is front, -1 means intake side is front)
-    protected double orientation = 1;
-
     // For meta-drive
-    public boolean usingMeta = false; // Doesn't use meta drive by default
-    public int metaOffset = 90; // Specifies the direction of meta mode; default will be facing the tower goal
+    public int metaOffset = 90; // Specifies the direction of meta mode; 90 is optimal for driver
 
     // Mecanum wheel drive motors
     public DcMotor leftFrontDrive;
@@ -53,7 +49,10 @@ public class DriveBase {
         // TODO : WHAT ABOUT ZERO POWER BEHAVIOR? FOR AUTO?
 
         // Default is to have the launcher be the front
-        setLauncherSideAsFront();
+        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
+        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
+        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
 
         // Initializes gyro and sets starting angle to zero
         gyro = new Gyro(hardwareMap);
@@ -86,10 +85,14 @@ public class DriveBase {
 
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rot) { // rot is rotation
-        rot *= orientation;
+        calculateDrivePowers(x, y, rot, false);
+    }
+
+    // Calculates powers for mecanum wheel drive
+    public void calculateDrivePowers(double x, double y, double rot, boolean meta) { // rot is rotation
         double r = Math.hypot(x, y); // TODO : MULTIPLY BY SQRT(2) ?
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
-        if (usingMeta) { // Assuming launcher is front
+        if (meta) { // Assuming launcher is front
             robotAngle -= Math.toRadians(gyro.getAngle() + metaOffset);
         }
         leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rot, -1.0, 1.0) * speed;
@@ -173,36 +176,9 @@ public class DriveBase {
         this.speed = speed;
     }
 
-    // When driving, intake side will be forward
-    public void setIntakeSideAsFront() {
-        leftFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        orientation = -1;
-    }
-
-    // When driving, launcher side will be forward
-    public void setLauncherSideAsFront() {
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        orientation = 1;
-    }
-
     // Makes the robot stop driving
     public void stopDrive() {
         sendDrivePowers(0, 0, 0);
-    }
-
-    // Toggles between launcher and intake side being the front (when driving)
-    public void switchDriveDirection() {
-        if (orientation == -1) {
-            setLauncherSideAsFront();
-        } else {
-            setIntakeSideAsFront();
-        }
     }
 
     // Toggles the drive speed between 50% and normal

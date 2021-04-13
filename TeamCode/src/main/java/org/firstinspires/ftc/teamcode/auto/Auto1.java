@@ -46,9 +46,7 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
             robot.moveToPos(CONFIG_0_POS_I, 1.0, 3.0);
             placeWobble();
 
-            robot.setLauncherSideAsFront();
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
-            robot.setLauncherSideAsFront();
             robot.launchRings(3);
             madeIt("shot 3 goals");
         } else {
@@ -59,22 +57,17 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
                 robot.move(0, -1.0, 0.5);
             }
 
-            robot.setLauncherSideAsFront();
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
-            robot.setLauncherSideAsFront();
             robot.launchRings(3);
             madeIt("shot 3 goals");
 
-            robot.setLauncherSideAsFront();
             robot.powerLauncher.setLaunchAngleHorizontal();
-            robot.setLauncherSideAsFront();
             robot.runIntake(1.0);
             robot.move(0, -0.17, 1.8);
             madeIt("gathered rings");
 
             robot.wait(2.7);
             robot.powerLauncher.setLaunchAnglePerfect();
-            robot.setLauncherSideAsFront();
             robot.runIntake(0.0);
             robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.0);
             if (config == 1) {
@@ -89,7 +82,6 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         //Move left or right depending on target wobble goal
 
         // Move back to park over launch line
-        robot.setLauncherSideAsFront();
         robot.moveToPos(PARK_POS);
         robot.stopDrive();
     }
@@ -98,7 +90,6 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         // Shoot power shots
         robot.powerLauncher.setLaunchAnglePowershot();
         robot.moveToPos(RIGHT_POWERSHOT_POS, 1.5, 3.0);
-        robot.setLauncherSideAsFront();
         robot.launchRings(1);
         robot.move(-0.6, 0, 0.6);
         robot.rotateToPos(0, 0.5);
