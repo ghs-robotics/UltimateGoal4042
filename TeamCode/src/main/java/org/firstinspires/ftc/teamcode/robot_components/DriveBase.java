@@ -24,7 +24,7 @@ public class DriveBase {
 
     // For meta-drive
     public boolean usingMeta = false; // Doesn't use meta drive by default
-    public int metaOffset = 0; // Specifies the direction of meta mode; default will be facing the tower goal
+    public int metaOffset = 90; // Specifies the direction of meta mode; default will be facing the tower goal
 
     // Mecanum wheel drive motors
     public DcMotor leftFrontDrive;
@@ -49,6 +49,8 @@ public class DriveBase {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
+
+        // TODO : WHAT ABOUT ZERO POWER BEHAVIOR? FOR AUTO?
 
         // Default is to have the launcher be the front
         setLauncherSideAsFront();
@@ -85,10 +87,10 @@ public class DriveBase {
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rot) { // rot is rotation
         rot *= orientation;
-        double r = Math.hypot(x, y);
+        double r = Math.hypot(x, y); // TODO : MULTIPLY BY SQRT(2) ?
         double robotAngle = Math.atan2(y, x) - Math.PI / 4;
-        if (usingMeta) {
-            robotAngle += Math.toRadians(gyro.getAngle() + metaOffset);
+        if (usingMeta) { // Assuming launcher is front
+            robotAngle -= Math.toRadians(gyro.getAngle() + metaOffset);
         }
         leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rot, -1.0, 1.0) * speed;
         rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rot, -1.0, 1.0) * speed;
@@ -96,6 +98,7 @@ public class DriveBase {
         rightRearPower = Range.clip(r * Math.cos(robotAngle) - rot, -1.0, 1.0) * speed;
     }
 
+    // Finds an equivalent gyro angle (mod 360) within range of the actual current robot angle
     public double getReasonableGyroAngle(double desiredAngle) {
         double actualAngle = gyro.getAngle();
         while (Math.abs(actualAngle - desiredAngle)  > 190) {

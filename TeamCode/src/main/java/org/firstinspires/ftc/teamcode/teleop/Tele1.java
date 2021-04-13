@@ -126,7 +126,6 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             //
             if (controller1.b.equals("pressing")) {
                 robot.usingMeta = false;
-                robot.metaOffset += 90;
             }
 
             // Toggle speed between 100% and 50%
@@ -194,6 +193,8 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 robot.resetGyroAngle();
             }
 
+            // TODO : MAKE ONE TRIGGER ADJUST THE PERFECT LAUNCH POS?
+
 
             // -----------------------------------------------------------------------------------------
             // -----------------------------------------------------------------------------------------
@@ -234,17 +235,17 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             }
 
             // Run intake with right joystick
-            robot.runIntake(controller2.right_stick_y);
+            robot.runIntake(-controller2.right_stick_y);
 
             // Angle the launcher up a tiny bit and set to default angle
             if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(0.003);
-                robot.powerLauncher.setCurrentAngleToDefault();
+                robot.powerLauncher.changeLaunchAngle(-0.003);
+                robot.powerLauncher.setCurrentAngleToDefault(); // TODO : TEST NEGATIVES
             }
 
             // Angle the launcher down a tiny bit and set to default angle
             if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.003);
+                robot.powerLauncher.changeLaunchAngle(0.003);
                 robot.powerLauncher.setCurrentAngleToDefault();
             }
 
