@@ -206,52 +206,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // ---------------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------
 
-    // Automated move to position function that uses phases and must be called repeatedly
-    // This allows us to terminate the function early (because we can just set phase to be 0)
-    public int moveInPhases(int phase) {
-        if (phase == 4) {
-            tower.activate();
-            wall.activate();
-            wall.setTargetH(80);
-            targetGyroAngle = getReasonableGyroAngle(0);
-            phaseTimeStamp = elapsedTime.seconds();
-            phase--;
-        }
-        else if (phase == 3) {
-            if (getAbsoluteGyroError() > 4) {
-                adjustAngle();
-            } else {
-                phase--;
-            }
-        }
-        else if (phase == 2) {
-            if ((!tower.isIdentified()
-                    || tower.getErrorW() > 8
-                    || tower.getErrorX() > 8
-                    || tower.getErrorX() > 8
-                    || getAbsoluteGyroError() > 8)
-                    && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
-                adjustPosition();
-            } else {
-                phaseTimeStamp = elapsedTime.seconds();
-                tower.resetPIDs();
-                wall.resetPIDs();
-                phase--;
-            }
-        }
-        else if (phase == 1) {
-            if (elapsedTime.seconds() - phaseTimeStamp < 2.0 &&
-                    (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
-                adjustPosition();
-            } else {
-                stopDrive();
-//                tower.deactivate();
-//                wall.deactivate();
-                phase--;
-            }
-        }
-        return phase;
-    }
 
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
@@ -261,11 +215,15 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
 
     // Makes the robot line up with the tower goal (if called repeatedly)
     // Make sure the following things are accounted for before calling this:
-    // gyro angle, target values, reset PIDs, activate object, set launcher side as front
+    // targetGyroAngle, target values, reset PIDs, activate object, set launcher side as front
     public void adjustPosition() {
-        if (!tower.isIdentified()) {
+        if (getAbsoluteGyroError() > 4) {
+            adjustAngle();
+        }
+        else if (!tower.isIdentified() || wall.h < 30) { // TODO : IS 30 TOO HIGH?
             chaseObject(wall);
-        } else {
+        }
+        else {
             chaseObject(tower);
         }
     }
@@ -286,6 +244,46 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         sendDrivePowers();
         wait(seconds);
         stopDrive();
+    }
+
+    // Automated move to position function that uses phases and must be called repeatedly
+    // This allows us to terminate the function early (because we can just set phase to be 0)
+    public int moveInPhases(int phase) {
+        if (phase == 3) {
+            tower.activate();
+            wall.activate();
+            wall.setTargetH(80);
+            targetGyroAngle = getReasonableGyroAngle(0);
+            phaseTimeStamp = elapsedTime.seconds();
+            phase--;
+        }
+        else if (phase == 2) {
+            if ((!tower.isIdentified()
+                    || tower.getErrorW() > 8
+                    || tower.getErrorX() > 8
+                    || tower.getErrorX() > 8
+                    || getAbsoluteGyroError() > 4)
+                    && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
+                adjustPosition();
+            } else {
+                phaseTimeStamp = elapsedTime.seconds();
+                tower.resetPIDs();
+                wall.resetPIDs();
+                phase--;
+            }
+        }
+        else if (phase == 1) {
+            if (elapsedTime.seconds() - phaseTimeStamp < 2.0 &&
+                    (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
+                adjustPosition();
+            } else {
+                stopDrive();
+//                tower.deactivate(); // TODO
+//                wall.deactivate();
+                phase--;
+            }
+        }
+        return phase;
     }
 
     public void moveToPos(int[] pos) {
@@ -327,8 +325,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
             adjustPosition();
         }
         stopDrive();
-        tower.deactivate();
-        wall.deactivate();
+//        tower.deactivate();
+//        wall.deactivate();
     }
 
     // Makes robot move forward and pick up wobble goal

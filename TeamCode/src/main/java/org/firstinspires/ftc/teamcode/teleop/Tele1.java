@@ -147,7 +147,7 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             if (controller1.right_bumper.equals("pressing")) {
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
-                phase = 4;
+                phase = 3;
             }
 
             //
