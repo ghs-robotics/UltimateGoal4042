@@ -1,42 +1,26 @@
 package org.firstinspires.ftc.teamcode.data;
 
-public enum FieldPositions {
+// Contains the coordinates (x position, tower width) for useful locations on the field
+public interface FieldPositions {
 
     // Generally useful positions
-    PERFECT_LAUNCH_POS (140, 58),
-    NEXT_TO_STARTER_STACK_POS (190, 60),
-    PARK_POS (134, 73),
-    RIGHT_POWERSHOT_POS (180, 58),
+    int[] PERFECT_LAUNCH_POS = new int[]{140, 58}; // Perfect launch position
+    int[] NEXT_TO_STARTER_STACK_POS = new int[]{190, 60}; // Where to go to avoid first starter stack
+    int[] PARK_POS = new int[]{134, 73}; // Where to park during autonomous
+    int[] LEFT_POWERSHOT_POS = new int[]{180, 58}; // TODO : CALIBRATE
 
     // Position pertaining to the wobble goals
-    CONFIG_0_POS_I (100, 80),
-    CONFIG_0_POS_II (110, 80),
+    int[] CONFIG_0_POS_I = new int[]{100, 80}; // Where to drop first wobble goal
+    int[] CONFIG_0_POS_II = new int[]{110, 80}; // Where to drop second wobble goal
 
-    CONFIG_1_POS_I (186, 110),
-    CONFIG_1_POS_II (196, 110),
+    int[] PRE_CONFIG_1_POS_I = new int[]{186, 110};
+    int[] PRE_CONFIG_1_POS_II = new int[]{196, 110};
+    int CONFIG_1_WALL_HEIGHT = 28;
 
-    CONFIG_4_POS_I (100, 110),
-    CONFIG_4_POS_II (90, 110),
+    int[] PRE_CONFIG_4_POS_I = new int[]{100, 110};
+    int[] PRE_CONFIG_4_POS_II = new int[]{90, 110};
+    int CONFIG_4_WALL_HEIGHT = 26;
 
-    SECOND_WOBBLE_POS (154, 45);
-
-    private int towerX;
-    private int towerW;
-    private int backWallH;
-
-    FieldPositions(int towerX, int towerW) {
-        this.towerX = towerX;
-        this.towerW = towerW;
-
-        // TODO : UPDATE
-        this.backWallH = 0;
-    }
-
-    public int[] getXWPos() {
-        return new int[]{towerX, towerW};
-    }
-
-    public int getBackWallH() {
-        return backWallH;
-    }
+    int[] SECOND_WOBBLE_POS = new int[]{154, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int SECOND_WOBBLE_WALL_HEIGHT = 75;
 }

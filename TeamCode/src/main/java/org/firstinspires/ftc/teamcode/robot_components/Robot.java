@@ -12,10 +12,10 @@ import org.firstinspires.ftc.teamcode.cv_objects.Ring;
 import org.firstinspires.ftc.teamcode.cv_objects.StarterStack;
 import org.firstinspires.ftc.teamcode.cv_objects.TowerGoal;
 import org.firstinspires.ftc.teamcode.cv_objects.WobbleGoal;
-import org.firstinspires.ftc.teamcode.data.FieldPosition;
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
 
-public class Robot extends DriveBase implements HSVConstants, FieldPosition {
+public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     public CameraManager camera; // Manages the webcam and phone camera
 
@@ -89,7 +89,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         CVDetectionPipeline phone = camera.phoneCamPipeline;
 
         floor = new FieldFloor(phone, new PIDController(0.0450, 0.0030, 0.0010, 2)); // yPID TODO : UPDATE
-        wall = new FieldWall(phone, new PIDController(0.0450, 0.0030, 0.0010, 2)); // hPID
+        wall = new FieldWall(phone, new PIDController(0.0450, 0.0030, 0.0010, 0.1)); // hPID
         ring = new Ring(phone, xPID, wPID);
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
@@ -112,7 +112,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addData("crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+//        telemetry.addData("crosshair: ", camera.phoneCamPipeline.crosshairHSV);
 
         if (!target.isActive()) {
             telemetry.addData("NOTE", target.name + " NOT ACTIVE");
@@ -261,9 +261,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         }
         else if (phase == 2) {
             if ((!tower.isIdentified()
-                    || tower.getErrorW() > 8
-                    || tower.getErrorX() > 8
-                    || tower.getErrorX() > 8
+                    || tower.getAbsErrorW() > 8
+                    || tower.getAbsErrorX() > 8
+                    || tower.getAbsErrorX() > 8
                     || getAbsoluteGyroError() > 4)
                     && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
                 adjustPosition();
@@ -309,10 +309,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         rotateToPos(0.0, 0.0);
         double t = getElapsedSeconds();
         while(  (!tower.isIdentified()
-                || tower.getErrorW() > 8
-                || tower.getErrorX() > 8
-                || tower.getErrorX() > 8
-                || getAbsoluteGyroError() > 8)
+                || tower.getAbsErrorW() > 8
+                || tower.getAbsErrorX() > 8
+                || tower.getAbsErrorX() > 8
+                || getAbsoluteGyroError() > 4)
                 && elapsedTime.seconds() - t < maxBroadTuning) {
             adjustPosition();
         }
@@ -327,7 +327,31 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
             adjustPosition();
         }
         stopDrive();
-//        tower.deactivate();
+//        tower.deactivate(); // TODO
+//        wall.deactivate();
+    }
+
+    // Move to a certain distance from the back wall
+    // Only call this if the robot is already at least 2 feet from the back wall!
+    public void moveUsingWall(int wallH, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        wall.activate();
+        wall.setTargetH(wallH);
+        rotateToPos(0.0, 0.0);
+        double t = getElapsedSeconds();
+        while(  (wall.getAbsErrorH() > 3 || getAbsoluteGyroError() > 4)
+                && elapsedTime.seconds() - t < maxBroadTuning) {
+            chaseObject(wall);
+        }
+        t = getElapsedSeconds();
+
+        // Start fresh by resetting this
+        wall.resetPIDs();
+
+        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+            chaseObject(wall);
+        }
+        stopDrive();
 //        wall.deactivate();
     }
 

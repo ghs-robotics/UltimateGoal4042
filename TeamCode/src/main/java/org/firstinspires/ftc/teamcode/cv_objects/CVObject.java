@@ -86,6 +86,22 @@ public abstract class CVObject implements HSVConstants {
         }
     }
 
+    public int getAbsErrorX() {
+        return Math.abs(targetX - x);
+    }
+
+    public int getAbsErrorY() {
+        return Math.abs(targetY - y);
+    }
+
+    public int getAbsErrorW() {
+        return Math.abs(targetW - w);
+    }
+
+    public int getAbsErrorH() {
+        return Math.abs(targetH - h);
+    }
+
     public int getErrorX() {
         return targetX - x;
     }

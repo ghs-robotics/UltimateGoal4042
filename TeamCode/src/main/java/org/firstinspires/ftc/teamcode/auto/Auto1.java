@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode.auto;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.data.FieldPosition;
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 
 @Autonomous
-public class Auto1 extends LinearOpMode implements FieldPosition {
+public class Auto1 extends LinearOpMode implements FieldPositions {
 
     // Declare OpMode members
     Robot robot;
@@ -19,11 +19,9 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         robot = new Robot(hardwareMap, telemetry);
         robot.initWithCV();
         robot.stack.activate();
-        robot.stack.updateData();
-        int config = robot.identifyRingConfig(); // TODO : Comment out
         telemetry.addData("Status: ", "Initialized");
-        telemetry.addData("Config: ", config);
-        robot.updateDrive(); // Display telemetry
+        telemetry.addData("Config: ", robot.identifyRingConfig()); // TODO : COMMENT OUT
+        robot.updateDrive(); // Display telemetry SHOULD THIS BE robot.telemetry.update();
 
         waitForStart();
 
@@ -32,43 +30,55 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         robot.wait(0.4); // wait for launcher to go down
 
         // Determine how many rings in the starting ring stacks
-        config = robot.identifyRingConfig();
+        int config = robot.identifyRingConfig();
         robot.stack.deactivate();
 
         robot.resetGyroAngle();
         robot.powerLauncher.setLaunchAnglePerfect();
 
         // Move forward but avoid starter stack
-        robot.moveToPos(RIGHT_POWERSHOT_POS, 0.5, 0.6, 3.0);
-
+        robot.moveToPos(LEFT_POWERSHOT_POS, 0.5, 0.6, 3.0);
 
         if (config == 0) {
+            // Deliver first wobble goal
             robot.moveToPos(CONFIG_0_POS_I, 1.0, 3.0);
             placeWobble();
 
+            // Shoot 3 preloaded rings
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
             robot.launchRings(3);
             madeIt("shot 3 goals");
-        } else {
+        }
+        else {
             if (config == 1) {
-                robot.moveToPos(CONFIG_1_POS_I, 1.0, 3.0, 3.0);
-                robot.move(0, 0.3, 0.5);
+                // Deliver first wobble goal
+                robot.moveToPos(PRE_CONFIG_1_POS_I, 1.0, 3.0, 3.0);
+                robot.moveUsingWall(CONFIG_1_WALL_HEIGHT, 0.3, 2.0, 3.0);
                 placeWobble();
-                robot.move(0, -1.0, 0.5);
             }
 
+            // Shoot 3 preloaded rings
             robot.moveToPos(PERFECT_LAUNCH_POS, 2.0, 3.0);
             robot.launchRings(3);
             madeIt("shot 3 goals");
 
+            // Load rings from starter stack
             robot.powerLauncher.setLaunchAngleLoading();
             robot.runIntake(1.0);
-            robot.move(0, -0.17, 1.8);
+            if (config == 1) {
+                robot.move(0, -0.3, 1.4);
+            }
+            else {
+                robot.move(0, -0.17, 1.8);
+            }
             madeIt("gathered rings");
 
+            // Wait for rings to load fully
             robot.wait(2.7);
+
             robot.powerLauncher.setLaunchAnglePerfect();
             robot.runIntake(0.0);
+
             robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.0);
             if (config == 1) {
                 robot.launchRings(1);
@@ -89,7 +99,7 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
     private void getPowerShots() {
         // Shoot power shots
         robot.powerLauncher.setLaunchAnglePowershot();
-        robot.moveToPos(RIGHT_POWERSHOT_POS, 1.5, 3.0);
+        robot.moveToPos(LEFT_POWERSHOT_POS, 1.5, 3.0);
         robot.launchRings(1);
         robot.move(-0.6, 0, 0.6);
         robot.rotateToPos(0, 0.5);
@@ -114,6 +124,6 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         robot.turnArm();
         robot.wait(0.5);
         robot.toggleClaw();
-        robot.move(-0.7, 0, 0.5);
+        robot.move(-1.0, 0, 0.4);
     }
 }

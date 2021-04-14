@@ -161,7 +161,7 @@ public class PowerLauncher {
     // Rotate servos to default positions
     public void resetServos() {
         indexerAngle = INDEXER_BACK_POS;
-        launchAngle = LOADING_LAUNCH_ANGLE;
+        launchAngle = VERTICAL_LAUNCH_ANGLE;
         indexerServo.setPosition(indexerAngle);
         launchAngleServo.setPosition(launchAngle);
     }

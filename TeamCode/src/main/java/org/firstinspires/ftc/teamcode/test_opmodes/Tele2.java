@@ -32,14 +32,14 @@ package org.firstinspires.ftc.teamcode.test_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.data.FieldPosition;
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 // THIS CLASS IS FOR TESTING PURPOSES!!
 
 @TeleOp(name="Tele2", group="Iterative Opmode")
-public class Tele2 extends OpMode implements FieldPosition {
+public class Tele2 extends OpMode implements FieldPositions {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
