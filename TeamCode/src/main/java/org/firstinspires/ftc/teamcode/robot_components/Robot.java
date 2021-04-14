@@ -134,6 +134,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("target", "" + target.toString());
         telemetry.addData("wall", "" + wall.toString());
+        telemetry.addData("floor", "" + floor.toString());
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
         telemetry.addData("Kp", target.depthPID.k_P);
         telemetry.addData("Ki", target.depthPID.k_I);
@@ -152,6 +153,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         initWithoutCV();
         tower.activate();
         wall.activate();
+        floor.activate(); // TODO : deactivate somewhere?
     }
 
     public void initWithoutCV() {
@@ -222,8 +224,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
-        else if (!tower.isIdentified() || wall.h < 28) {
-            chaseObject(wall);
+        else if (!tower.isIdentified() || floor.h > 97) { // When robot is too close to front of field
+            chaseObject(floor);
         }
         else {
             chaseObject(tower);

@@ -42,7 +42,7 @@ public class FieldWall extends CVObject {
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
         // h ranges from 23 (across field) to 110 (very close to wall)
-        return 16 < h && h < 130 && y > 80; // TODO : UPDATE
+        return w == 79 && 16 < h && h < 130 && y > 80;
     }
 
     @Override

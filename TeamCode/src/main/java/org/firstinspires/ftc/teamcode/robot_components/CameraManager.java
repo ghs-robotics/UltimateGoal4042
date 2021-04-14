@@ -31,31 +31,11 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.appContext.getPackageName());
 
 
-
-        int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
-                .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
-                        2, // The number of sub-containers to create
-                        OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
-
-
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
-
-
-
-
-        /*
-        // --------------- testing ----------------
-        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
-                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"Webcam 1"));
-        // --------------- testing ----------------
-
-         */
-
+        // Uncomment one of the below statements ONLY
+//        setUpDualPort(hardwareMap, cameraMonitorViewId);
+//        setUpSinglePhonePort(hardwareMap, cameraMonitorViewId);
+        setUpSingleWebcamPort(hardwareMap, cameraMonitorViewId);
+//        setUpNoStreamPort(hardwareMap);
 
         // Opens cameras
         phoneCam.openCameraDevice();
@@ -75,6 +55,40 @@ public class CameraManager implements HSVConstants {
     // Initializes the camera
     public void initCamera() {
         startStreaming();
+    }
+
+    private void setUpDualPort(HardwareMap hardwareMap, int cameraMonitorViewId) {
+        int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
+                .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
+                        2, // The number of sub-containers to create
+                        OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY);
+
+
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[0]);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
+    }
+
+    private void setUpNoStreamPort(HardwareMap hardwareMap) {
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"Webcam 1"));
+    }
+
+    private void setUpSinglePhonePort(HardwareMap hardwareMap, int cameraMonitorViewId) {
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"Webcam 1"));
+    }
+
+    private void setUpSingleWebcamPort(HardwareMap hardwareMap, int cameraMonitorViewId) {
+        phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
+                OpenCvInternalCamera.CameraDirection.BACK);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
     }
 
     // Starts streaming frames on the phone camera

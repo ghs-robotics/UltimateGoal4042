@@ -124,6 +124,6 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.turnArm();
         robot.wait(0.5);
         robot.toggleClaw();
-        robot.move(-1.0, 0, 0.4);
+        robot.move(1.0, 0, 0.4);
     }
 }

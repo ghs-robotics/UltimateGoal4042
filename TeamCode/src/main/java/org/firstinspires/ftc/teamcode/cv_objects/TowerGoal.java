@@ -15,7 +15,16 @@ public class TowerGoal extends CVObject {
     // Testing to make sure the detected object is the tower goal
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
+        double r = 1.0 * w / h; // ratio is usually about 1.5
         // width 34 is back of the field, closest is 150
-        return (25 < w && w < 150);
+        return (30 < w && w < 115 && 18 < h && h < 55 && r > 1.3);
     }
+    /*
+        Some values for reference:
+        w       h
+        34      22
+        52      34
+        77      49
+        110     45 (top of goal out of view)
+     */
 }
