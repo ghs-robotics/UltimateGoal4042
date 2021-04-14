@@ -224,8 +224,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
-        else if (!tower.isIdentified() || floor.h > 97) { // When robot is too close to front of field
-            chaseObject(floor);
+        else if (!tower.isIdentified() || floor.h > 97 || wall.h < 30) { // When robot is too close to front of field
+            chaseObject(floor); // TODO : TEST wall.h < 30, do we want a front floor/wall identification?
         }
         else {
             chaseObject(tower);
