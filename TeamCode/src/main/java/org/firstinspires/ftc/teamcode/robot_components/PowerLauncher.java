@@ -8,9 +8,10 @@ import com.qualcomm.robotcore.util.Range;
 
 public class PowerLauncher {
 
-    public static double PERFECT_LAUNCH_ANGLE = 0.140; // Default launch angle
-    public static double MAX_LAUNCH_ANGLE = 0.160;
-    public static double OPTIMAL_INTAKING_ANGLE = 0.070; // Minimum launch angle
+    // Launcher angles
+    public static double PERFECT_LAUNCH_ANGLE = 0.760; // Default launch angle
+    public static double VERTICAL_LAUNCH_ANGLE = 0.830;
+    public static double LOADING_LAUNCH_ANGLE = 0.700; // Minimum launch angle
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -22,7 +23,7 @@ public class PowerLauncher {
     public double leftPower = 0;
     public double rightPower = 0;
 
-    public double launchAngle = OPTIMAL_INTAKING_ANGLE;
+    public double launchAngle = LOADING_LAUNCH_ANGLE;
     public double indexerAngle = INDEXER_BACK_POS;
 
     public boolean running = false; // If the launcher is running
@@ -39,7 +40,7 @@ public class PowerLauncher {
     private double prevLeftSeconds = 0;
     private double prevRightSeconds = 0;
     private double timeStamp = 0; // For regulating the speed of changing the incline
-    private double queueTimeStamp = 0; // For the queue
+    private double queueTimeStamp = 0; // For the queue of rings to be launched
 
     private ElapsedTime elapsedTime;
 
@@ -116,13 +117,14 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
+    // Handle the queue of rings
     public int handleQueue(int queue) {
         this.queue = queue;
         if (!running) {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        if (elapsedTime.seconds() - queueTimeStamp > 1.4) { // TODO : ADJUST
+        if (elapsedTime.seconds() - queueTimeStamp > 1.6) { // TODO : ADJUST
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             this.queue--;
@@ -131,7 +133,7 @@ public class PowerLauncher {
             }
             return this.queue;
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 0.7) { // TODO : ADJUST
+        else if (elapsedTime.seconds() - queueTimeStamp > 1.0) { // TODO : ADJUST
             setIndexerAngle(INDEXER_FORWARD_POS);
         }
         return queue;
@@ -142,6 +144,10 @@ public class PowerLauncher {
         setIndexerAngle(INDEXER_FORWARD_POS);
         wait(0.4); // TODO : CHANGE
         setIndexerAngle(INDEXER_BACK_POS);
+    }
+
+    public boolean hasLoadingLaunchAngle() {
+        return launchAngle == LOADING_LAUNCH_ANGLE;
     }
 
     // Resets the encoder encoder position's of the motors to zero
@@ -155,7 +161,7 @@ public class PowerLauncher {
     // Rotate servos to default positions
     public void resetServos() {
         indexerAngle = INDEXER_BACK_POS;
-        launchAngle = PERFECT_LAUNCH_ANGLE;
+        launchAngle = LOADING_LAUNCH_ANGLE;
         indexerServo.setPosition(indexerAngle);
         launchAngleServo.setPosition(launchAngle);
     }
@@ -193,23 +199,23 @@ public class PowerLauncher {
     }
 
     // Sets launcher to horizontal
-    public void setLaunchAngleHorizontal() {
-        setLaunchAngle(OPTIMAL_INTAKING_ANGLE);
-    }
-
-    // Sets launcher to hit powershots
-    public void setLaunchAnglePowershot() {
-        setLaunchAngle(PERFECT_LAUNCH_ANGLE - 0.008);
+    public void setLaunchAngleLoading() {
+        setLaunchAngle(LOADING_LAUNCH_ANGLE);
     }
 
     // Sets launcher to vertical
-    public void setLaunchAngleMax() {
-        setLaunchAngle(MAX_LAUNCH_ANGLE);
+    public void setLaunchAngleVertical() {
+        setLaunchAngle(VERTICAL_LAUNCH_ANGLE);
     }
 
     // Sets a launch angle
     public void setLaunchAnglePerfect() {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE);
+    }
+
+    // Sets launcher to hit powershots
+    public void setLaunchAnglePowershot() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE - 0.008);
     }
 
     // Toggles the two launcher motors between off and full power

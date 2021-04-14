@@ -12,7 +12,7 @@ public class FieldWall extends CVObject {
         this.depthPID = hPID;
         lowerHSV = LOWER_WALL_HSV;
         upperHSV = UPPER_WALL_HSV;
-        cover = 0.35; // TODO : CHECK
+        cover = 0.35;
         targetH = 80; // Good position to pick up 2nd wobble goal in auto
     }
 
@@ -42,7 +42,7 @@ public class FieldWall extends CVObject {
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
         // h ranges from 23 (across field) to 110 (very close to wall)
-        return 16 < h && h < 130; // TODO : UPDATE
+        return 16 < h && h < 130 && y > 80; // TODO : UPDATE
     }
 
     @Override

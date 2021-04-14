@@ -20,29 +20,23 @@ public enum FieldPositions {
 
     SECOND_WOBBLE_POS (154, 45);
 
-    private int blueTowerX;
-    private int blueTowerW;
-    private int frontGrayTileY;
-    private int rearGrayTileY;
+    private int towerX;
+    private int towerW;
+    private int backWallH;
 
-    FieldPositions(int blueTowerX, int blueTowerW) {
-        this.blueTowerX = blueTowerX;
-        this.blueTowerW = blueTowerW;
+    FieldPositions(int towerX, int towerW) {
+        this.towerX = towerX;
+        this.towerW = towerW;
 
         // TODO : UPDATE
-        this.frontGrayTileY = 0;
-        this.rearGrayTileY = 0;
+        this.backWallH = 0;
     }
 
-    public int[] getBlueXWPos() {
-        return new int[]{blueTowerX, blueTowerW};
+    public int[] getXWPos() {
+        return new int[]{towerX, towerW};
     }
 
-    public int getFrontGrayTileY() {
-        return frontGrayTileY;
-    }
-
-    public int getRearGrayTileY() {
-        return rearGrayTileY;
+    public int getBackWallH() {
+        return backWallH;
     }
 }

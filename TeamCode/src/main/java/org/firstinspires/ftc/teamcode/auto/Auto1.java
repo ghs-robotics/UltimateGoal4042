@@ -28,7 +28,7 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
         waitForStart();
 
         robot.resetElapsedTime();
-        robot.powerLauncher.setLaunchAngleHorizontal();
+        robot.powerLauncher.setLaunchAngleLoading();
         robot.wait(0.4); // wait for launcher to go down
 
         // Determine how many rings in the starting ring stacks
@@ -61,7 +61,7 @@ public class Auto1 extends LinearOpMode implements FieldPosition {
             robot.launchRings(3);
             madeIt("shot 3 goals");
 
-            robot.powerLauncher.setLaunchAngleHorizontal();
+            robot.powerLauncher.setLaunchAngleLoading();
             robot.runIntake(1.0);
             robot.move(0, -0.17, 1.8);
             madeIt("gathered rings");

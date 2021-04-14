@@ -56,8 +56,6 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
         int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
 
         robot.initWithCV();
-        robot.tower.activate();
-        robot.wall.activate();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -81,11 +79,6 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
             controller2.update();
             SmoothnessRegulator.update();
 
-            // Constantly adjusts launch velocity
-//            if (robot.powerLauncher.running) {
-//                robot.powerLauncher.adjustShooterVelocity();
-//            }
-
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
                 queue = robot.powerLauncher.handleQueue(queue);
@@ -107,6 +100,21 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                         controller1.right_stick_y * SmoothnessRegulator.getFactor()
                 );
 
+                // TODO : TEST THIS
+                double speed = 0.4;
+                if (controller1.dpad_up.equals("pressed")) {
+                    robot.calculateDrivePowers(speed, 0, 0);
+                }
+                else if (controller1.dpad_down.equals("pressed")) {
+                    robot.calculateDrivePowers(-speed, 0, 0);
+                }
+                else if (controller1.dpad_left.equals("pressed")) {
+                    robot.calculateDrivePowers(0, speed, 0);
+                }
+                else if (controller1.dpad_right.equals("pressed")) {
+                    robot.calculateDrivePowers(0, -speed, 0);
+                }
+
                 robot.updateDrive(); // Also updates telemetry
             }
 
@@ -120,10 +128,12 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
 
             //
             if (controller1.a.equals("pressing")) {
+                // Automated position
             }
 
             //
             if (controller1.b.equals("pressing")) {
+                // Automated position
             }
 
             // Toggle speed between 100% and 50%
@@ -143,52 +153,27 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 phase = 10;
             }
 
-            // Adjust and shoot
+            // Go to perfect launch position and set launch angle
             if (controller1.right_bumper.equals("pressing")) {
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
                 phase = 3;
             }
 
-            //
+            // Choppy mode
             if (controller1.right_stick_button.equals("pressing")) {
+                SmoothnessRegulator.deactivateSmoothMode();
             }
 
-            // Toggles between strong/smooth mode
+            // Smooth mode
             if (controller1.left_stick_button.equals("pressing")) {
-                SmoothnessRegulator.switchMode();
-            }
-
-            // Rotate to face tower goal (north)
-            if (controller1.dpad_up.equals("pressing")) {
-                robot.rotateToPos(180,1);
-            }
-
-            // Rotate to face away from tower goal (south)
-            if (controller1.dpad_down.equals("pressing")) {
-                robot.rotateToPos(0,1);
-            }
-
-            // Rotate to face east
-            if (controller1.dpad_right.equals("pressing")) {
-                robot.rotateToPos(90,1);
-//                robot.armAngle += 0.05;
-//                robot.armServo.setPosition(robot.armAngle);
-            }
-
-            // Rotate to face west
-            if (controller1.dpad_left.equals("pressing")) {
-                robot.rotateToPos(-90,1);
-//                robot.armAngle -= 0.05;
-//                robot.armServo.setPosition(robot.armAngle);
+                SmoothnessRegulator.activateSmoothMode();
             }
 
             // Reset gyro in case of emergency
             if (controller1.left_trigger + controller1.right_trigger > 1.8) {
                 robot.resetGyroAngle();
             }
-
-            // TODO : MAKE ONE TRIGGER ADJUST THE PERFECT LAUNCH POS?
 
 
             // -----------------------------------------------------------------------------------------
@@ -209,42 +194,48 @@ public class Tele1 extends LinearOpMode implements FieldPosition {
                 robot.turnArm();
             }
 
-            // Launch one ring
+            // Launch one ring at perfect launch angle
             if (controller2.a.equals("pressing")) {
+                robot.powerLauncher.setLaunchAnglePerfect();
                 queue++;
             }
 
-            // Toggle launcher
+            // Launch one ring at current angle
             if (controller2.b.equals("pressing")) {
-                robot.powerLauncher.toggle();
+                queue++;
             }
 
-            // Index TODO : NOT NEEDED
+            // Manually index one ring
             if (controller2.x.equals("pressing")) {
                 robot.powerLauncher.index();
             }
 
-            //
+            // Toggle launcher
             if (controller2.y.equals("pressing")) {
-                robot.powerLauncher.setLaunchAngleHorizontal();
+                robot.powerLauncher.toggle();
             }
 
             // Run intake with right joystick
             robot.runIntake(-controller2.right_stick_y);
 
+            // Set loading launch angle if the intake is running
+            if (!robot.powerLauncher.hasLoadingLaunchAngle() && controller2.right_stick_y != 0) {
+                robot.powerLauncher.setLaunchAngleLoading();
+            }
+
             // Angle the launcher up a tiny bit and set to default angle
             if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.003);
-                robot.powerLauncher.setCurrentAngleToDefault(); // TODO : TEST NEGATIVES
+                robot.powerLauncher.changeLaunchAngle(-0.005);
+                robot.powerLauncher.setCurrentAngleToDefault();
             }
 
             // Angle the launcher down a tiny bit and set to default angle
             if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(0.003);
+                robot.powerLauncher.changeLaunchAngle(0.005);
                 robot.powerLauncher.setCurrentAngleToDefault();
             }
 
-            // Set current launch angle to the default TODO : REPEATED
+            // Set current launch angle to the default
             if (controller2.dpad_right.equals("pressing")) {
                 robot.powerLauncher.setCurrentAngleToDefault();
             }

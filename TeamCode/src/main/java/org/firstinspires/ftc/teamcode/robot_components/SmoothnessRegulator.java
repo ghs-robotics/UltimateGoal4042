@@ -13,6 +13,16 @@ public class SmoothnessRegulator {
     private static ElapsedTime elapsedTime = new ElapsedTime(); // To keep track of time
     private static Controller c; // Controller for joystick input
 
+    // Smooth mode
+    public static void activateSmoothMode() {
+        smooth = true;
+    }
+
+    // Choppy mode
+    public static void deactivateSmoothMode() {
+        smooth = false;
+    }
+
     // Specifies the controller to take input from
     public static void setController(Controller controller) {
         c = controller;

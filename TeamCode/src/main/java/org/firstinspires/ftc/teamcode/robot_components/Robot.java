@@ -37,7 +37,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
 
     // Robot variables and objects
     private double intakePower = 0;
-    public double armAngle = 0.45; // Up position
+    public double armAngle = 0.37; // Up position
     public double clawAngle = 0.15; // Closed position
 
     public DcMotor intakeMotor;
@@ -150,6 +150,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     public void initWithCV() {
         camera.initCamera();
         initWithoutCV();
+        tower.activate();
+        wall.activate();
     }
 
     public void initWithoutCV() {
@@ -161,7 +163,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
     // Launches a ring by moving the shooterServo
     public void launchRings(int rings) { // TODO : CUT DOWN ON TIME
         powerLauncher.toggleOn();
-        wait(0.7);
+        wait(0.9);
         for (int i = 0; i < rings; i++) {
             powerLauncher.index();
             wait(0.7);
@@ -192,8 +194,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
 
     // Turns the arm
     public void turnArm() {
-        // Default angle is 0.5 (which is the up position)
-        armAngle = (armAngle == 0.88 ? 0.45 : 0.88);
+        // Default angle is 0.37 (which is the up position)
+        armAngle = (armAngle == 0.88 ? 0.37 : 0.88);
         armServo.setPosition(armAngle);
     }
 
@@ -220,7 +222,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPosition {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
-        else if (!tower.isIdentified() || wall.h < 30) { // TODO : IS 30 TOO HIGH?
+        else if (!tower.isIdentified() || wall.h < 28) {
             chaseObject(wall);
         }
         else {
