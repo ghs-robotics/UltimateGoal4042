@@ -110,7 +110,6 @@ public class DriveBase {
         rightFrontPower = Range.clip(r * Math.sin(angleOfMotion) - rot, -1.0, 1.0) * speed;
         leftRearPower = Range.clip(r * Math.sin(angleOfMotion) + rot, -1.0, 1.0) * speed;
         rightRearPower = Range.clip(r * Math.cos(angleOfMotion) - rot, -1.0, 1.0) * speed;
-
     }
 
     // Finds an equivalent gyro angle (mod 360) within range of the actual current robot angle

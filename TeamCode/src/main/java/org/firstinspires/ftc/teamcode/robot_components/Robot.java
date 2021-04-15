@@ -306,8 +306,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         tower.activate();
         wall.activate();
+        floor.activate();
         tower.setTargetXW(pos);
         wall.setTargetH(80);
+        floor.setTargetH(60);
         rotateToPos(0.0, 0.0);
         double t = getElapsedSeconds();
         while(  (!tower.isIdentified()

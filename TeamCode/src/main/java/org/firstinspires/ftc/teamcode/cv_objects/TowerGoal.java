@@ -7,8 +7,8 @@ public class TowerGoal extends CVObject {
 
     public TowerGoal(CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
         super("tower", pipeline, xPID, wPID);
-        lowerHSV = LOWER_TOWER_HSV;
-        upperHSV = UPPER_TOWER_HSV;
+        lowerHSV = LOWER_BLUE_TOWER_HSV;
+        upperHSV = UPPER_BLUE_TOWER_HSV;
         cover = 0;
     }
 
@@ -25,6 +25,6 @@ public class TowerGoal extends CVObject {
         34      22
         52      34
         77      49
-        110     45 (top of goal out of view)
+        110     45 (top of goal is out of view)
      */
 }
