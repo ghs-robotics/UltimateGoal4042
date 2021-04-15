@@ -30,6 +30,7 @@ public class DriveBase {
 
     public Gyro gyro; // Keeps track of robot's angle
     public PIDController gyroPID; // Controls the angle
+    public PIDController metaGyroPID; // Controls the angle in meta mode
     public double targetGyroAngle = 0; // gyroscope will target this angle
 
     // For displaying things on the DS phone
@@ -60,6 +61,7 @@ public class DriveBase {
 
         // gyroPID works best when Ki = 0
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.9); // TODO : TEST THIS TOLERANCE
+        metaGyroPID = new PIDController(0.0230, 0.0000, 0.0020, 0.9); // TODO : TEST
 
         // Initializes telemetry
         this.telemetry = telemetry;
@@ -89,11 +91,11 @@ public class DriveBase {
     }
 
     // Calculates powers for mecanum wheel drive in meta mode
-    public void calculateDrivePowers(double x1, double y1, double x2, double y2) { // rot is rotation
-        double r2 = Math.hypot(x2, y2); // TODO : MULTIPLY BY SQRT(2) ?
+    public void calculateDrivePowers(double x1, double y1, double x2, double y2) {
+        double r2 = Math.hypot(x2, y2);
         double angleOfRotation = Math.atan2(y2, x2); // Angle to rotate to (with launcher side)
         targetGyroAngle = getReasonableGyroAngle(Math.toDegrees(angleOfRotation));
-        double rot = r2 * getGyroPIDValue(); // TODO : MULTIPLY BY SQRT(2) ?
+        double rot = r2 * getMetaGyroPIDValue();
         calculateDrivePowers(x1, y1, rot, true);
     }
 
@@ -139,6 +141,10 @@ public class DriveBase {
 
     public double getGyroPIDValue() {
         return -gyroPID.calcVal(getGyroError());
+    }
+
+    public double getMetaGyroPIDValue() {
+        return -metaGyroPID.calcVal(getGyroError());
     }
 
     // Resets the timer
