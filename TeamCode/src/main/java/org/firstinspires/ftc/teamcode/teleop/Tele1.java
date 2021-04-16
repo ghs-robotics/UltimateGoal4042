@@ -101,7 +101,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 );
 
                 // TODO : TEST THIS
-                double speed = 0.25;
+                double speed = 0.32;
                 if (controller1.dpad_up.equals("pressed")) {
                     robot.calculateDrivePowers(speed, 0, 0);
                 }

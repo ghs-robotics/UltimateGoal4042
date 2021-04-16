@@ -44,14 +44,14 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
             obj.updateData();
         }
 
-        // Updates crosshairValue
-        crosshairHSV = findCenterHSVCrosshair(input);
+        // Updates crosshairValue of center point
+        crosshairHSV = findHSVCrosshairString(input, input.rows()/2, input.cols()/2);
 
         return currentMat;
     }
 
     // Finds HSV values of the point at the center of the screen
-    public static String findHSVCrosshairString(Mat input, int column, int row) {
+    public static String findHSVCrosshairString(Mat input, int row, int column) {
         // Converts to HSV
         Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
 
@@ -70,13 +70,6 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         return new MyScalar(input.get(row, column)); // get returns a double[] array
     }
 
-    // Finds HSV values of the point at the center of the screen
-    public static String findCenterHSVCrosshair(Mat input) {
-        int middleColumn = input.cols()/2;
-        int middleRow = input.rows()/2;
-        return findHSVCrosshair(input, middleColumn, middleRow).toString();
-    }
-
     public static MyScalar cvtString2Scalar(String s) {
         Scanner text = new Scanner(s);
         int count = 0;
@@ -92,8 +85,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         return new MyScalar(val[0], val[1], val[2]);
     }
 
-    public static MyScalar getScalar(Mat input, int column, int row) {
-        return cvtString2Scalar(findHSVCrosshairString(input, column, row));
+    public static MyScalar getScalar(Mat input, int row, int column) {
+        return cvtString2Scalar(findHSVCrosshairString(input, row, column));
     }
 
     /*

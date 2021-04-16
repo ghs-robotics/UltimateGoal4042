@@ -7,18 +7,43 @@ import org.opencv.core.Mat;
 
 public class TowerGoal extends CVObject {
 
-    private Mat mat1;
-    private Mat mat2;
-    private Mat mat3;
+    Mat dst1;
+    Mat dst2;
 
     public TowerGoal(CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
         super("tower", pipeline, xPID, wPID);
         lowerHSV = LOWER_BLUE_TOWER_HSV;
         upperHSV = UPPER_BLUE_TOWER_HSV;
         cover = 0;
-        mat1 = new Mat();
-        mat2 = new Mat();
-        mat3 = new Mat();
+        dst1 = new Mat();
+        dst2 = new Mat();
+    }
+
+    // Finds HSV values of a point
+    public MyScalar findHSV(int row, int column) {
+        // Extracting HSV value from center point of the input image
+        dst1 = currentHSVMat.row(row);
+        dst2 = dst1.col(column);
+        String s = dst2.dump();
+
+        int comma1 = 0;
+        int comma2 = 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == ',') {
+                if (comma1 == 0) {
+                    comma1 = i;
+                } else {
+                    comma2 = i;
+                }
+            }
+        }
+
+        int val1 = Integer.parseInt(s.substring(1, comma1).trim());
+        int val2 = Integer.parseInt(s.substring(comma1 + 1, comma2).trim());
+        int val3 = Integer.parseInt(s.substring(comma2 + 1, s.length() - 1).trim());
+
+        return new MyScalar(val1, val2, val3);
     }
 
     // Tests to make sure there is the goal slot
@@ -27,24 +52,25 @@ public class TowerGoal extends CVObject {
         MyScalar scalar;
 
         // Left flap has to be blue
-        scalar = CVDetectionPipeline.findHSVCrosshair(currentHSVMat, row, x + (int) (0.1 * w));
-        if (!scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
-            return false;
-        }
-
-        // Right flap has to be blue
-        scalar = CVDetectionPipeline.findHSVCrosshair(currentHSVMat, row, x + (int) (0.9 * w));
-        if (!scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
-            return false;
-        }
-
-        // Middle part shouldn't be blue (since that's the slot for the rings to enter the high goal)
-        scalar = CVDetectionPipeline.findHSVCrosshair(currentHSVMat, row, x + (int) (0.5 * w));
-        if (scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
-            return false;
-        }
+        scalar = findHSV(row, x + (int) (0.1 * w));
+//        if (!scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
+//            return false;
+//        }
+//
+//        // Right flap has to be blue
+//        scalar = CVDetectionPipeline.findHSVCrosshair(currentHSVMat, row, x + (int) (0.9 * w));
+//        if (!scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
+//            return false;
+//        }
+//
+//        // Middle part shouldn't be blue (since that's the slot for the rings to enter the high goal)
+//        scalar = CVDetectionPipeline.findHSVCrosshair(currentHSVMat, row, x + (int) (0.5 * w));
+//        if (scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
+//            return false;
+//        }
         return true;
     }
+
 
     // Testing to make sure the detected object is the tower goal
     @Override
