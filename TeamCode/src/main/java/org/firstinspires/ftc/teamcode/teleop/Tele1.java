@@ -138,7 +138,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Toggle speed between 100% and 50%
             if (controller1.x.equals("pressing")) {
-                robot.toggleSpeed();
+                // Automated position?
             }
 
             // Terminate any automated functions
@@ -160,14 +160,14 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 phase = 3;
             }
 
-            // Choppy mode
+            // Toggle between choppy/smooth mode
             if (controller1.right_stick_button.equals("pressing")) {
-                SmoothnessRegulator.deactivateSmoothMode();
+                SmoothnessRegulator.switchMode();
             }
 
-            // Smooth mode
+            // Toggle between full speed and 50%
             if (controller1.left_stick_button.equals("pressing")) {
-                SmoothnessRegulator.activateSmoothMode();
+                robot.toggleSpeed();
             }
 
             // Reset gyro in case of emergency

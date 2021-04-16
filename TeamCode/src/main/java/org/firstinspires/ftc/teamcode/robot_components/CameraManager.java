@@ -31,10 +31,10 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.appContext.getPackageName());
 
 
-        // Uncomment one of the below statements ONLY
+        // Uncomment ONE of the below statements ONLY
 //        setUpDualPort(hardwareMap, cameraMonitorViewId);
-//        setUpSinglePhonePort(hardwareMap, cameraMonitorViewId);
-        setUpSingleWebcamPort(hardwareMap, cameraMonitorViewId);
+        setUpSinglePhonePort(hardwareMap, cameraMonitorViewId);
+//        setUpSingleWebcamPort(hardwareMap, cameraMonitorViewId);
 //        setUpNoStreamPort(hardwareMap);
 
         // Opens cameras
@@ -94,7 +94,7 @@ public class CameraManager implements HSVConstants {
     // Starts streaming frames on the phone camera
     public void startStreaming() {
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT);
+        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
         webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 

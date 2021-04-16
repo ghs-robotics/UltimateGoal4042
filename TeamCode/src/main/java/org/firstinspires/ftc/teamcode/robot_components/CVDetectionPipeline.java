@@ -9,7 +9,6 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
 
@@ -18,8 +17,6 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
 
     // Auxiliary Mat objects for temporarily storing data
     private static Mat dst1 = new Mat();
-    private static Mat dst2 = new Mat();
-    private static Mat dst3 = new Mat();
 
     public ArrayList<CVObject> activeObjects;
 
@@ -45,48 +42,16 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Updates crosshairValue of center point
-        crosshairHSV = findHSVCrosshairString(input, input.rows()/2, input.cols()/2);
+//        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
+//        crosshairHSV = findHSV(dst1, input.rows()/2, input.cols()/2).toString();
 
         return currentMat;
     }
 
-    // Finds HSV values of the point at the center of the screen
-    public static String findHSVCrosshairString(Mat input, int row, int column) {
-        // Converts to HSV
-        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
-
-        // Extracting HSV value from center point of the input image
-        dst2 = dst1.row(row);
-        dst3 = dst2.col(column);
-        String value = dst3.dump();
-
-        return value;
-    }
-
-    // Finds HSV values of the point at the center of the screen
-    public static MyScalar findHSVCrosshair(Mat input, int row, int column) {
-        // Converts to HSV
-        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
-        return new MyScalar(input.get(row, column)); // get returns a double[] array
-    }
-
-    public static MyScalar cvtString2Scalar(String s) {
-        Scanner text = new Scanner(s);
-        int count = 0;
-        int[] val = new int[3];
-        while (text.hasNext()) {
-            if (text.hasNextInt()) {
-                val[count] = text.nextInt();
-                count++;
-            } else {
-                text.next();
-            }
-        }
-        return new MyScalar(val[0], val[1], val[2]);
-    }
-
-    public static MyScalar getScalar(Mat input, int row, int column) {
-        return cvtString2Scalar(findHSVCrosshairString(input, row, column));
+    // Finds HSV values of a point
+    public static MyScalar findHSV(Mat input, int row, int col) {
+        double[] val = input.get(row, col); // double[] array with HSV values
+        return new MyScalar((int) val[0], (int) val[1], (int) val[2]);
     }
 
     /*

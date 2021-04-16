@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.cv_objects;
 
-import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
+import org.firstinspires.ftc.teamcode.data.MyScalar;
+import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
 import org.firstinspires.ftc.teamcode.robot_components.PIDController;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -25,7 +26,8 @@ public abstract class CVObject implements HSVConstants {
     // Contains frame that will be used for object detection
     // constantly updated (in updateData)
     protected Mat currentHSVMat;
-    protected Mat hierarchy;
+    protected Mat currentHSVMask; // Stores the mask
+    protected Mat hierarchy; // Auxiliary
 
     protected Scalar lowerHSV;
     protected Scalar upperHSV;
@@ -42,7 +44,7 @@ public abstract class CVObject implements HSVConstants {
     public int targetW = 0;
     public int targetH = 0;
 
-    // Amount of screen covered by a white rectangle during image processing
+    // Amount of screen covered by a white rectangle during image processing; ranges from 0 to 1
     public double cover = 0;
 
     // PIDs for x and y position of robot
@@ -53,6 +55,7 @@ public abstract class CVObject implements HSVConstants {
         this.name = name;
         this.pipeline = pipeline;
         this.currentHSVMat = new Mat();
+        this.currentHSVMask = new Mat();
         this.hierarchy = new Mat();
     }
 
@@ -84,6 +87,12 @@ public abstract class CVObject implements HSVConstants {
             pipeline.activeObjects.remove(this);
             active = false;
         }
+    }
+
+    // Finds HSV values of a point
+    protected MyScalar findHSV(int row, int col) {
+        double[] val = currentHSVMat.get(row, col); // double[] array with HSV values
+        return new MyScalar((int) val[0], (int) val[1], (int) val[2]);
     }
 
     public int getAbsErrorX() {
@@ -203,11 +212,11 @@ public abstract class CVObject implements HSVConstants {
         coverBackground();
 
         // Filters colors within certain color range
-        Core.inRange(currentHSVMat, this.lowerHSV, this.upperHSV, currentHSVMat);
+        Core.inRange(currentHSVMat, this.lowerHSV, this.upperHSV, currentHSVMask);
 
         // Finds the contours of the object and stores them in an ArrayList
         List<MatOfPoint> contours = new ArrayList<>();
-        Imgproc.findContours(currentHSVMat, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(currentHSVMask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
         Imgproc.drawContours(input, contours, -1, GREEN_BGR, 1, Imgproc.LINE_8, hierarchy, 2, new Point());

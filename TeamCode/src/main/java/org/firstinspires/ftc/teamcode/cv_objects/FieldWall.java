@@ -12,7 +12,7 @@ public class FieldWall extends CVObject {
         this.depthPID = hPID;
         lowerHSV = LOWER_WALL_HSV;
         upperHSV = UPPER_WALL_HSV;
-        cover = 0.35;
+        cover = 0.10;
         targetH = 80; // Good position to pick up 2nd wobble goal in auto
     }
 
@@ -41,8 +41,8 @@ public class FieldWall extends CVObject {
     // Testing to make sure the detected object is the wall close up
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
-        // h ranges from 23 (across field) to 110 (very close to wall)
-        return w == 79 && 16 < h && h < 130 && y > 80;
+        // h ranges from 28 (across field) to 110 (very close to wall); 92 is 2 ft from wall
+        return w == 79 && 20 < h && h < 130;
     }
 
     @Override

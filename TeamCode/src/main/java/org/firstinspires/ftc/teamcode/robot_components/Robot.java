@@ -38,7 +38,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Robot variables and objects
     private double intakePower = 0;
     public double armAngle = 0.37; // Up position
-    public double clawAngle = 0.15; // Closed position
+    public double clawAngle = 0.92; // Closed position
 
     public DcMotor intakeMotor;
     public Servo armServo;
@@ -64,7 +64,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         clawServo = hardwareMap.get(Servo.class, "clawServo");
 
         // Defines the forward direction for each of our motors/servos
-        intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         armServo.setDirection(Servo.Direction.FORWARD);
         clawServo.setDirection(Servo.Direction.FORWARD);
 
@@ -112,7 +112,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairHSV);
+//        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairHSV);
 
         if (!target.isActive()) {
             telemetry.addData("NOTE", target.name + " NOT ACTIVE");
@@ -128,9 +128,14 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             telemetry.addData("NOTE", "WALL NOT IDENTIFIED");
         }
 
-        telemetry.addData("angle", gyro.getAngle());
+        if (!floor.isActive()) {
+            telemetry.addData("NOTE", "FLOOR NOT ACTIVE");
+        }
+        else if (!floor.isIdentified()) {
+            telemetry.addData("NOTE", "FLOOR NOT IDENTIFIED");
+        }
+
         telemetry.addData("launchAngle", "" + powerLauncher.launchAngle);
-        telemetry.addData("indexerAngle", "" + powerLauncher.indexerAngle);
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("target", "" + target.toString());
         telemetry.addData("wall", "" + wall.toString());
@@ -190,7 +195,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Toggles the wobble gripper/claw
     public void toggleClaw() {
         // Default angle is 0.15 (which means the gripper is closed)
-        clawAngle = (clawAngle == 0.48 ? 0.15 : 0.48);
+        clawAngle = (clawAngle == 0.55 ? 0.92 : 0.55);
         clawServo.setPosition(clawAngle);
     }
 
@@ -200,6 +205,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         armAngle = (armAngle == 0.88 ? 0.37 : 0.88);
         armServo.setPosition(armAngle);
     }
+
+
 
 
 
@@ -224,7 +231,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
-        else if (!tower.isIdentified() || floor.h > 97 || wall.h < 30) { // When robot is too close to front of field
+        else if (!tower.isIdentified() || floor.y < 90 || wall.h < 35) { // When robot is too close to front of field
             chaseObject(floor); // TODO : TEST wall.h < 30, do we want a front floor/wall identification?
         }
         else {
@@ -255,6 +262,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public int moveInPhases(int phase) {
         if (phase == 3) {
             tower.activate();
+            floor.activate();
             wall.activate();
             wall.setTargetH(80);
             targetGyroAngle = getReasonableGyroAngle(0);
