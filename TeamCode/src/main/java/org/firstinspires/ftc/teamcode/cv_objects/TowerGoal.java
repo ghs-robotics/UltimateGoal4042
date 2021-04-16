@@ -15,7 +15,7 @@ public class TowerGoal extends CVObject {
 
     // Tests to make sure there is the slot for the high goal
     // Makes the object detection pretty bulletproof
-    private boolean hasHatShape() {
+    private boolean hasHatShape(int x, int y, int w, int h) {
         int row = y + (int) (0.8 * h); // 80% of the way down from top of blue tower goal
 
         // Left flap has to be blue
@@ -43,7 +43,7 @@ public class TowerGoal extends CVObject {
     protected boolean isReasonable(int x, int y, int w, int h) {
         double r = 1.0 * w / h; // ratio is usually about 1.5
         // width 34 is back of the field, closest is 150
-        return (30 < w && w < 130 && 18 < h && h < 65 && r > 1.3);
+        return (30 < w && w < 130 && 18 < h && h < 65 && r > 1.3) && hasHatShape(x, y, w, h);
     }
     /*
         Some values for reference:
@@ -57,8 +57,5 @@ public class TowerGoal extends CVObject {
     @Override
     public void updateData() {
         super.updateData();
-        if (!hasHatShape()) {
-            setToNotIdentified();
-        }
     }
 }

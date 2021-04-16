@@ -136,9 +136,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 // Automated position
             }
 
-            // Toggle speed between 100% and 50%
+            // Reset the controls
             if (controller1.x.equals("pressing")) {
-                // Automated position?
+                robot.speed = 1;
+                SmoothnessRegulator.deactivateSmoothMode();
             }
 
             // Terminate any automated functions

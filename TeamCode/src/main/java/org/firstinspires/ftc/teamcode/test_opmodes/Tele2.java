@@ -86,17 +86,17 @@ public class Tele2 extends OpMode implements FieldPositions {
 
         if (controller1.a.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(30);
+            robot.wall.setTargetH(35);
         }
 
         if (controller1.b.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(80);
+            robot.wall.setTargetH(50);
         }
 
         if (controller1.y.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(50);
+            robot.wall.setTargetH(91);
         }
 
         if (controller1.left_bumper.equals("pressing")) { robot.wall.depthPID.k_P -= 0.005; }

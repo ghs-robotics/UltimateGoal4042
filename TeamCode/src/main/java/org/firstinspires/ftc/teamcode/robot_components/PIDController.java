@@ -50,7 +50,7 @@ public class PIDController {
     // Calculates the power value to be sent to the motor(s)
     public double calcVal(double error) {
         // If the error is small enough, the robot won't adjust
-        if (Math.abs(error) < toleranceRadius) { return 0; }
+        if (Math.abs(error) <= toleranceRadius) { return 0; }
 
         // Calculates the different errors
         double deltaTime = time.seconds() - prevTime;

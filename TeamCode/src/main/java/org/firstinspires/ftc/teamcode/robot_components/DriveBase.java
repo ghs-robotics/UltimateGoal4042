@@ -17,7 +17,7 @@ public class DriveBase {
     protected double rightRearPower = 0;
 
     // Drive speed ranges from 0 to 1
-    protected double speed = 1;
+    public double speed = 1;
 
     // For meta-drive
     public int metaOffset = 90; // Specifies the direction of meta mode; 90 is optimal for driver
@@ -61,7 +61,7 @@ public class DriveBase {
 
         // gyroPID works best when Ki = 0
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.7); // TODO : TEST THIS TOLERANCE
-        metaGyroPID = new PIDController(0.0110, 0.0000, 0.0020, 0.4); // TODO : TEST
+        metaGyroPID = new PIDController(0.0100, 0.0000, 0.0000, 0.3); // TODO : TEST
 
         // Initializes telemetry
         this.telemetry = telemetry;

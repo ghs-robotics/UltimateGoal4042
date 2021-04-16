@@ -33,8 +33,8 @@ public class CameraManager implements HSVConstants {
 
         // Uncomment ONE of the below statements ONLY
 //        setUpDualPort(hardwareMap, cameraMonitorViewId);
-        setUpSinglePhonePort(hardwareMap, cameraMonitorViewId);
-//        setUpSingleWebcamPort(hardwareMap, cameraMonitorViewId);
+//        setUpSinglePhonePort(hardwareMap, cameraMonitorViewId);
+        setUpSingleWebcamPort(hardwareMap, cameraMonitorViewId);
 //        setUpNoStreamPort(hardwareMap);
 
         // Opens cameras

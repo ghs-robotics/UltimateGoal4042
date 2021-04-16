@@ -44,6 +44,15 @@ public class FieldWall extends CVObject {
         // h ranges from 28 (across field) to 110 (very close to wall); 92 is 2 ft from wall
         return w == 79 && 20 < h && h < 130;
     }
+    /*
+        Some useful values
+        h       field pos
+        23      at tower goal (furthest)
+        35      pre perfect
+        46      perfect launch pos
+        91      2 ft from back wall
+        125     1.3 ft from back wall (don't get any closer!!!)
+     */
 
     @Override
     public void resetPIDs() {

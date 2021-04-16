@@ -12,15 +12,15 @@ public class FieldFloor extends CVObject {
         this.depthPID = yPID;
         lowerHSV = LOWER_FLOOR_HSV;
         upperHSV = UPPER_FLOOR_HSV;
-        cover = 0.2; // TODO : UPDATE FOR NEW PHONE ANGLE
-        targetY = 140; // h ranges from 20 (super close to back wall) to 100 (front of field)
+        cover = 0.25;
+        targetY = 115;
     }
 
     @Override
     public void coverBackground() {
         super.coverBackground();
-        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(100, 240), GREEN_BGR, -1);
-        Imgproc.rectangle(currentHSVMat, new Point(220, 0), new Point(320, 240), GREEN_BGR, -1);
+        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(75, 240), GREEN_BGR, -1);
+        Imgproc.rectangle(currentHSVMat, new Point(245, 0), new Point(320, 240), GREEN_BGR, -1);
         Imgproc.rectangle(currentHSVMat, new Point(0, (int) (0.7 * SCREEN_HEIGHT)), new Point(320, 240), GREEN_BGR, -1);
     }
 
@@ -42,9 +42,17 @@ public class FieldFloor extends CVObject {
     // Testing to make sure the detected object is the wall close up
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
-        // y ranges from 76 (robot at tower goal) to 125 (robot 2 ft from the wall)
-        return w == 119 && 73 < y && y + h == 168;
+        return w == 169 && 60 < y && y + h == 168;
     }
+    /*
+        Some useful values
+        y       field pos
+        66      at tower goal (furthest)
+        80      pre perfect
+        92      perfect launch pos
+        124     2 ft from back wall
+        160     1 ft from back wall (robot can barely see floor from here)
+     */
 
     @Override
     public void resetPIDs() {

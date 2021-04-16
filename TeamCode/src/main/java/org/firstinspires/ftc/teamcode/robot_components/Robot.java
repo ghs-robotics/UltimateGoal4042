@@ -76,20 +76,20 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 2);
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1);
 
         // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 2);
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1);
 
-        xPID = new PIDController(0.0200, 0.0000, 0.0000, 2); // Could be better
-        wPID = new PIDController(0.0250, 0.0000, 0.0000, 2); // Could be better
+        xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
+        wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
 
         CVDetectionPipeline web = camera.webcamPipeline;
         CVDetectionPipeline phone = camera.phoneCamPipeline;
 
-        floor = new FieldFloor(phone, new PIDController(0.0450, 0.0030, 0.0010, 2)); // yPID TODO : UPDATE
-        wall = new FieldWall(phone, new PIDController(0.0450, 0.0030, 0.0010, 0.1)); // hPID
+        floor = new FieldFloor(phone, new PIDController(0.0600, 0.0035, 0.0020, 1)); // yPID
+        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 1)); // hPID
         ring = new Ring(phone, xPID, wPID);
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
@@ -112,7 +112,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-//        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairHSV);
+        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+//        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
 
         if (!target.isActive()) {
             telemetry.addData("NOTE", target.name + " NOT ACTIVE");
