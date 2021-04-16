@@ -18,10 +18,11 @@ public class Twins extends CVObject {
     private Mat auxiliaryMat;
 
     public Twins(CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
-        super("tower", pipeline, xPID, wPID);
+        super("twins", pipeline, xPID, wPID);
         lowerHSV = LOWER_TWIN_HSV;
         upperHSV = UPPER_TWIN_HSV;
-        cover = 0.4; // TODO : TEST
+        cover = 0; // TODO : TEST
+        auxiliaryMat = new Mat();
     }
 
     // Covers everything on the screen except the given region and a slim border
@@ -44,7 +45,7 @@ public class Twins extends CVObject {
         Imgproc.rectangle(
                 currentHSVMat,
                 new Point(0, 0),
-                new Point(SCREEN_WIDTH, Math.max(0, y - 20)),
+                new Point(SCREEN_WIDTH, y + 2),
                 GREEN_BGR, -1
         );
         // Below black part of tower goal
@@ -60,7 +61,7 @@ public class Twins extends CVObject {
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
         double r = 1.0 * h / w;
-        return (3 < w && w < 20 && 18 < h && h < 75 && r > 2.5); // TODO : TEST
+        return (2 < w && w < 20 && 10 < h && h < 75 && r > 2.5); // TODO : TEST
     }
 
     // Finds the black part of the tower goal and covers everything outside of it with rectangles
@@ -120,7 +121,7 @@ public class Twins extends CVObject {
         coverBackground();
 
         // Optional
-//        restrictSearchToBlackRegion();
+        restrictSearchToBlackRegion();
 
         // Filters colors within certain color range
         Core.inRange(currentHSVMat, this.lowerHSV, this.upperHSV, currentHSVMat);
@@ -144,12 +145,10 @@ public class Twins extends CVObject {
             }
         }
 
-        contours.remove(rect1);
-
         // Iterates through all of the contours apart from rect1 and finds the largest bounding rectangle
         for (int i = 0; i < contours.size(); i++) {
             Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (rect2.area() < rect.area() && isReasonable(rect.x, rect.y, rect.width, rect.height)) {
+            if (rect2.area() < rect.area() && (!rect.equals(rect1)) && isReasonable(rect.x, rect.y, rect.width, rect.height)) {
                 rect2 = rect;
             }
         }

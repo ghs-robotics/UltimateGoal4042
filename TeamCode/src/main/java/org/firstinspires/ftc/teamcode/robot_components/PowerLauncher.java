@@ -9,9 +9,9 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.710; // Default launch angle
-    public static double VERTICAL_LAUNCH_ANGLE = 0.760;
-    public static double LOADING_LAUNCH_ANGLE = 0.670; // Minimum launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.770; // Default launch angle
+    public static double VERTICAL_OFFSET = 0.020; // Added to PERFECT LAUNCH ANGLE
+    public static double LOADING_OFFSET = -0.040; // Added to PERFECT LAUNCH ANGLE
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -23,7 +23,7 @@ public class PowerLauncher {
     public double leftPower = 0;
     public double rightPower = 0;
 
-    public double launchAngle = LOADING_LAUNCH_ANGLE;
+    public double launchAngle = PERFECT_LAUNCH_ANGLE + LOADING_OFFSET;
     public double indexerAngle = INDEXER_BACK_POS;
 
     public boolean running = false; // If the launcher is running
@@ -147,7 +147,7 @@ public class PowerLauncher {
     }
 
     public boolean hasLoadingLaunchAngle() {
-        return launchAngle == LOADING_LAUNCH_ANGLE;
+        return launchAngle == PERFECT_LAUNCH_ANGLE + LOADING_OFFSET;
     }
 
     // Resets the encoder encoder position's of the motors to zero
@@ -161,7 +161,7 @@ public class PowerLauncher {
     // Rotate servos to default positions
     public void resetServos() {
         indexerAngle = INDEXER_BACK_POS;
-        launchAngle = VERTICAL_LAUNCH_ANGLE;
+        launchAngle = PERFECT_LAUNCH_ANGLE + VERTICAL_OFFSET;
         indexerServo.setPosition(indexerAngle);
         launchAngleServo.setPosition(launchAngle);
     }
@@ -198,14 +198,14 @@ public class PowerLauncher {
         launchAngleServo.setPosition(launchAngle);
     }
 
-    // Sets launcher to horizontal
+    // Sets launcher to loading position
     public void setLaunchAngleLoading() {
-        setLaunchAngle(LOADING_LAUNCH_ANGLE);
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + LOADING_OFFSET);
     }
 
     // Sets launcher to vertical
     public void setLaunchAngleVertical() {
-        setLaunchAngle(VERTICAL_LAUNCH_ANGLE);
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + VERTICAL_OFFSET);
     }
 
     // Sets a launch angle

@@ -2,12 +2,14 @@ package org.firstinspires.ftc.teamcode.robot_components;
 
 import org.firstinspires.ftc.teamcode.cv_objects.CVObject;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
+import org.firstinspires.ftc.teamcode.data.MyScalar;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
 
@@ -15,7 +17,9 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     public Mat currentMat = new Mat();
 
     // Auxiliary Mat objects for temporarily storing data
-    private Mat dst = new Mat();
+    private static Mat dst1 = new Mat();
+    private static Mat dst2 = new Mat();
+    private static Mat dst3 = new Mat();
 
     public ArrayList<CVObject> activeObjects;
 
@@ -41,22 +45,55 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Updates crosshairValue
-//        crosshairHSV = findHSVCrosshair(input);
-//        dst.release();
+        crosshairHSV = findCenterHSVCrosshair(input);
 
         return currentMat;
     }
 
     // Finds HSV values of the point at the center of the screen
-    private String findHSVCrosshair(Mat input) {
+    public static String findHSVCrosshairString(Mat input, int column, int row) {
         // Converts to HSV
-        Imgproc.cvtColor(input, dst, Imgproc.COLOR_BGR2HSV);
-
-        int middleColumn = input.cols()/2;
-        int middleRow = input.rows()/2;
+        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
 
         // Extracting HSV value from center point of the input image
-        return (dst.row(middleRow)).col(middleColumn).dump();
+        dst2 = dst1.row(row);
+        dst3 = dst2.col(column);
+        String value = dst3.dump();
+
+        return value;
+    }
+
+    // Finds HSV values of the point at the center of the screen
+    public static MyScalar findHSVCrosshair(Mat input, int row, int column) {
+        // Converts to HSV
+        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
+        return new MyScalar(input.get(row, column)); // get returns a double[] array
+    }
+
+    // Finds HSV values of the point at the center of the screen
+    public static String findCenterHSVCrosshair(Mat input) {
+        int middleColumn = input.cols()/2;
+        int middleRow = input.rows()/2;
+        return findHSVCrosshair(input, middleColumn, middleRow).toString();
+    }
+
+    public static MyScalar cvtString2Scalar(String s) {
+        Scanner text = new Scanner(s);
+        int count = 0;
+        int[] val = new int[3];
+        while (text.hasNext()) {
+            if (text.hasNextInt()) {
+                val[count] = text.nextInt();
+                count++;
+            } else {
+                text.next();
+            }
+        }
+        return new MyScalar(val[0], val[1], val[2]);
+    }
+
+    public static MyScalar getScalar(Mat input, int column, int row) {
+        return cvtString2Scalar(findHSVCrosshairString(input, column, row));
     }
 
     /*

@@ -112,7 +112,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-//        telemetry.addData("crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+        telemetry.addData("crosshair: ", camera.webcamPipeline.crosshairHSV);
 
         if (!target.isActive()) {
             telemetry.addData("NOTE", target.name + " NOT ACTIVE");

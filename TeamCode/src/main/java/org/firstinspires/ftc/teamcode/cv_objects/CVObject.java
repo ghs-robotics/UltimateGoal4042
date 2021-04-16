@@ -178,6 +178,14 @@ public abstract class CVObject implements HSVConstants {
         resetPIDs();
     }
 
+    public void setToNotIdentified() {
+        this.x = 0;
+        this.y = 0;
+        this.w = 0;
+        this.h = 0;
+        identified = false;
+    }
+
     @Override
     public String toString() {
         return name + " (x = " + x + ", y = " + y + ", w = " + w + ", h = " + h + ")";
