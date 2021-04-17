@@ -51,9 +51,8 @@ public class Tele2 extends OpMode implements FieldPositions {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.initWithCV();
-//        robot.tower.activate();
-        robot.wall.activate();
-        robot.wall.setTargetH(50);
+        robot.wobble.activate();
+        robot.wobble.setTargetH(50);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();

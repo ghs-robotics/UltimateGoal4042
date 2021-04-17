@@ -27,14 +27,14 @@ public interface HSVConstants {
     MyScalar LOWER_TWIN_HSV = new MyScalar(0, 80, 60);
     MyScalar UPPER_TWIN_HSV = new MyScalar(80, 255, 220);
 
-    // Wall HSV values TODO : THESE VALUES ARE PLACEHOLDERS
+    // Wall HSV values
     MyScalar LOWER_WALL_HSV = new MyScalar(70, 75, 95);
     MyScalar UPPER_WALL_HSV = new MyScalar(130, 255, 255);
 
     // Wobble goal HSV values
 //    MyScalar LOWER_WOBBLE_HSV = new MyScalar(0, 0, 0);
 //    MyScalar UPPER_WOBBLE_HSV = new MyScalar(255, 255, 25);
-    MyScalar LOWER_WOBBLE_HSV = new MyScalar(0, 80, 100); // TODO : TEST THESE VALUES
+    MyScalar LOWER_WOBBLE_HSV = new MyScalar(0, 70, 80); // TODO : TEST THESE VALUES
     MyScalar UPPER_WOBBLE_HSV = new MyScalar(80, 255, 220);
 
     // For image processing (e.g. drawing rectangles)

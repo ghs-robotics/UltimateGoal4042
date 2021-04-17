@@ -4,7 +4,7 @@ package org.firstinspires.ftc.teamcode.data;
 public interface FieldPositions {
 
     // Generally useful positions
-    int[] PERFECT_LAUNCH_POS = new int[]{140, 58}; // Perfect launch position
+    int[] PERFECT_LAUNCH_POS = new int[]{136, 58}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{83, 61}; // Where to go to avoid first starter stack
     int[] PARK_POS = new int[]{132, 74}; // Where to park during autonomous
     int[] LEFT_POWERSHOT_POS = new int[]{83, 58}; // TODO : CALIBRATE

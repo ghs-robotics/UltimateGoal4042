@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.770; // Default launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.766; // Default launch angle
     public static double VERTICAL_OFFSET = 0.030; // Added to PERFECT LAUNCH ANGLE
     public static double LOADING_OFFSET = -0.040; // Added to PERFECT LAUNCH ANGLE
 
@@ -215,7 +215,7 @@ public class PowerLauncher {
 
     // Sets launcher to hit powershots
     public void setLaunchAnglePowershot() {
-        setLaunchAngle(PERFECT_LAUNCH_ANGLE - 0.008);
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE - 0.025);
     }
 
     // Toggles the two launcher motors between off and full power

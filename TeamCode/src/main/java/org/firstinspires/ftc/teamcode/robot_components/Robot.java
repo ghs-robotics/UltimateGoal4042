@@ -101,51 +101,62 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
 
 
-
     // ---------------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------
     // ------------------------------------   HELPER METHODS   -------------------------------------
     // ---------------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------------
 
+    // Call before using CV for field localization
+    public void activateFieldLocalization() {
+        tower.activate();
+        floor.activate();
+    }
 
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+        telemetry.addData("LAUNCH ANGLE", "" + powerLauncher.launchAngle);
+        telemetry.addData("", "");
+//        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
 //        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
 
-        if (!target.isActive()) {
-            telemetry.addData("NOTE", target.name + " NOT ACTIVE");
-        }
-        else if (!target.isIdentified()) {
-            telemetry.addData("NOTE", target.name + " NOT IDENTIFIED");
-        }
+//        if (!target.isActive()) {
+//            telemetry.addData("NOTE", target.name + " NOT ACTIVE");
+//        }
+//        else if (!target.isIdentified()) {
+//            telemetry.addData("NOTE", target.name + " NOT IDENTIFIED");
+//        }
 
-        if (!wall.isActive()) {
-            telemetry.addData("NOTE", "WALL NOT ACTIVE");
-        }
-        else if (!wall.isIdentified()) {
-            telemetry.addData("NOTE", "WALL NOT IDENTIFIED");
-        }
+//        if (!tower.isActive()) {
+//            telemetry.addData("NOTE", "TOWER NOT ACTIVE");
+//        }
+//        else if (!tower.isIdentified()) {
+//            telemetry.addData("NOTE", "TOWER NOT IDENTIFIED");
+//        }
+//
+//        if (!floor.isActive()) {
+//            telemetry.addData("NOTE", "FLOOR NOT ACTIVE");
+//        }
+//        else if (!floor.isIdentified()) {
+//            telemetry.addData("NOTE", "FLOOR NOT IDENTIFIED");
+//        }
 
-        if (!floor.isActive()) {
-            telemetry.addData("NOTE", "FLOOR NOT ACTIVE");
-        }
-        else if (!floor.isIdentified()) {
-            telemetry.addData("NOTE", "FLOOR NOT IDENTIFIED");
-        }
-
-        telemetry.addData("launchAngle", "" + powerLauncher.launchAngle);
         telemetry.addData("gyro angle", "" + gyro.getAngle());
-        telemetry.addData("target", "" + target.toString());
-        telemetry.addData("wall", "" + wall.toString());
-        telemetry.addData("floor", "" + floor.toString());
-        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-        telemetry.addData("Kp", target.depthPID.k_P);
-        telemetry.addData("Ki", target.depthPID.k_I);
-        telemetry.addData("Kd", target.depthPID.k_D);
+        telemetry.addData("TARGET", "" + target.toString());
+        telemetry.addData("TOWER", "" + tower.toString());
+        telemetry.addData("FLOOR", "" + floor.toString());
+//        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+//        telemetry.addData("Kp", target.depthPID.k_P);
+//        telemetry.addData("Ki", target.depthPID.k_I);
+//        telemetry.addData("Kd", target.depthPID.k_D);
         telemetry.update();
+    }
+
+    // Call after using CV for field localization in order to reduce lag in teleop
+    public void deactivateFieldLocalization() {
+        tower.deactivate();
+        floor.deactivate();
     }
 
     // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
@@ -158,8 +169,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         camera.initCamera();
         initWithoutCV();
         tower.activate();
-        wall.activate();
-        floor.activate(); // TODO : deactivate somewhere?
+        floor.activate();
     }
 
     public void initWithoutCV() {
@@ -232,8 +242,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
-        else if (!tower.isIdentified() || floor.y < 90 || wall.h < 35) { // When robot is too close to front of field
-            chaseObject(floor); // TODO : TEST wall.h < 30, do we want a front floor/wall identification?
+        // When robot is too close to front of field
+        else if (!tower.isIdentified() || (floor.isIdentified() && floor.y < 80) /* || (wall.isIdentified() && wall.h < 35) */) {
+            chaseObject(floor);
         }
         else {
             chaseObject(tower);

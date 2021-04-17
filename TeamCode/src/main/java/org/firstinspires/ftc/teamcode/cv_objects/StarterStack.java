@@ -10,7 +10,7 @@ public class StarterStack extends CVObject {
         super("stack", pipeline);
         lowerHSV = LOWER_STACK_HSV;
         upperHSV = UPPER_STACK_HSV;
-        cover = 0.65;
+        cover = 0.65; // TODO : UPDATE
     }
 
     @Override

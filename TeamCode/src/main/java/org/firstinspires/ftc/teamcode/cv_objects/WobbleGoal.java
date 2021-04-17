@@ -12,7 +12,7 @@ public class WobbleGoal extends CVObject {
         super.coverBackground();
         lowerHSV = LOWER_WOBBLE_HSV;
         upperHSV = UPPER_WOBBLE_HSV;
-        cover = 0.45; // TODO : ADJUST
+        cover = 0; // TODO : ADJUST
     }
 
     @Override

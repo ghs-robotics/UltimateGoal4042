@@ -56,6 +56,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
 
         robot.initWithCV();
+        robot.activateFieldLocalization();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -92,6 +93,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 phase = robot.moveInPhases(phase);
             }
             else {
+//                robot.deactivateFieldLocalization(); // Reduces lag
+
                 // Mecanum wheel drive
                 robot.calculateDrivePowers(
                         controller1.left_stick_x * SmoothnessRegulator.getFactor(),
@@ -128,7 +131,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             //
             if (controller1.a.equals("pressing")) {
-                // Automated position
+                robot.activateFieldLocalization();
+                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
+                robot.powerLauncher.setLaunchAnglePerfect();
+                phase = 3;
             }
 
             //
@@ -149,6 +155,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
+                robot.activateFieldLocalization();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
                 phase = 10;
@@ -156,6 +163,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Go to perfect launch position and set launch angle
             if (controller1.right_bumper.equals("pressing")) {
+                robot.activateFieldLocalization();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
                 phase = 3;
