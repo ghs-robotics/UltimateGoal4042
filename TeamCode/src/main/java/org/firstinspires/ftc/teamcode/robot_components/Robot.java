@@ -76,11 +76,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1);
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1, -1.0, 1.0);
 
         // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1);
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1, -1.0, 1.0);
 
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
@@ -89,7 +89,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         CVDetectionPipeline phone = camera.phoneCamPipeline;
 
         floor = new FieldFloor(phone, new PIDController(0.0600, 0.0035, 0.0020, 1)); // yPID
-        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 1)); // hPID
+        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0.5)); // hPID
         ring = new Ring(phone, xPID, wPID);
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
@@ -116,7 +116,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addData("LAUNCH ANGLE", "" + powerLauncher.launchAngle);
+        telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
+        telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
         telemetry.addData("", "");
 //        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
 //        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
@@ -128,25 +129,25 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 //            telemetry.addData("NOTE", target.name + " NOT IDENTIFIED");
 //        }
 
-//        if (!tower.isActive()) {
-//            telemetry.addData("NOTE", "TOWER NOT ACTIVE");
-//        }
-//        else if (!tower.isIdentified()) {
-//            telemetry.addData("NOTE", "TOWER NOT IDENTIFIED");
-//        }
-//
-//        if (!floor.isActive()) {
-//            telemetry.addData("NOTE", "FLOOR NOT ACTIVE");
-//        }
-//        else if (!floor.isIdentified()) {
-//            telemetry.addData("NOTE", "FLOOR NOT IDENTIFIED");
-//        }
+        if (!tower.isActive()) {
+            telemetry.addData("NOTE", "TOWER NOT ACTIVE");
+        }
+        else if (!tower.isIdentified()) {
+            telemetry.addData("NOTE", "TOWER NOT IDENTIFIED");
+        }
+
+        if (!floor.isActive()) {
+            telemetry.addData("NOTE", "FLOOR NOT ACTIVE");
+        }
+        else if (!floor.isIdentified()) {
+            telemetry.addData("NOTE", "FLOOR NOT IDENTIFIED");
+        }
 
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("TARGET", "" + target.toString());
         telemetry.addData("TOWER", "" + tower.toString());
         telemetry.addData("FLOOR", "" + floor.toString());
-//        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
 //        telemetry.addData("Kp", target.depthPID.k_P);
 //        telemetry.addData("Ki", target.depthPID.k_I);
 //        telemetry.addData("Kd", target.depthPID.k_D);
@@ -179,12 +180,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 
     // Launches a ring by moving the shooterServo
-    public void launchRings(int rings) { // TODO : CUT DOWN ON TIME
-        powerLauncher.toggleOn();
-        wait(0.9);
+    public void indexRings(int rings) {
         for (int i = 0; i < rings; i++) {
             powerLauncher.index();
-            wait(0.7);
+            wait(0.4);
         }
         powerLauncher.toggleOff();
     }
@@ -232,7 +231,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Makes the robot line up with the tower goal and shoot three rings
     public void adjustAndShoot(int rings) {
         moveToPos(PERFECT_LAUNCH_POS, 0.8, 2.0, 5.0);
-        launchRings(rings);
+        indexRings(rings);
     }
 
     // Makes the robot line up with the tower goal (if called repeatedly)
@@ -243,7 +242,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             adjustAngle();
         }
         // When robot is too close to front of field
-        else if (!tower.isIdentified() || (floor.isIdentified() && floor.y < 80) /* || (wall.isIdentified() && wall.h < 35) */) {
+        else if (!tower.isIdentified() /* || (10 < floor.y && floor.y < 80) || (wall.isIdentified() && wall.h < 35) */) {
             chaseObject(floor);
         }
         else {
@@ -275,8 +274,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         if (phase == 3) {
             tower.activate();
             floor.activate();
-            wall.activate();
-            wall.setTargetH(80);
             targetGyroAngle = getReasonableGyroAngle(0);
             phaseTimeStamp = elapsedTime.seconds();
             phase--;
@@ -303,7 +300,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             } else {
                 stopDrive();
 //                tower.deactivate(); // TODO
-//                wall.deactivate();
+//                floor.deactivate();
                 phase--;
             }
         }
@@ -325,11 +322,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         tower.activate();
-        wall.activate();
         floor.activate();
         tower.setTargetXW(pos);
-        wall.setTargetH(80);
-        floor.setTargetH(60);
         rotateToPos(0.0, 0.0);
         double t = getElapsedSeconds();
         while(  (!tower.isIdentified()
@@ -353,6 +347,29 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stopDrive();
 //        tower.deactivate(); // TODO
 //        wall.deactivate();
+    }
+
+    // Move to a certain distance from the back wall
+    // Only call this if the robot is already at least 2 feet from the back wall!
+    public void moveUsingFloor(int targetY, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        floor.activate();
+        floor.setTargetY(targetY);
+        rotateToPos(0.0, 0.0);
+        double t = getElapsedSeconds();
+        while(  (floor.getAbsErrorY() > 3 || getAbsoluteGyroError() > 4)
+                && elapsedTime.seconds() - t < maxBroadTuning) {
+            chaseObject(floor);
+        }
+        t = getElapsedSeconds();
+
+        // Start fresh by resetting this
+        floor.resetPIDs();
+
+        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+            chaseObject(floor);
+        }
+        stopDrive();
     }
 
     // Move to a certain distance from the back wall
@@ -381,10 +398,18 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Makes robot move forward and pick up wobble goal
     public void pickUpWobbleGoal() {
+        wall.activate();
         stopDrive();
         turnArm();
         toggleClaw();
-        move(0, -0.7, 0.5);
+        calculateDrivePowers(0, -0.3, 0);
+        sendDrivePowers();
+        double t = getElapsedSeconds();
+        while (wall.h < 98 && getElapsedSeconds() - t < 3.0) {
+            calculateDrivePowers(0, -0.3, getGyroPIDValue());
+        }
+        wall.deactivate();
+        stopDrive();
         toggleClaw();
         wait(0.4);
         turnArm();

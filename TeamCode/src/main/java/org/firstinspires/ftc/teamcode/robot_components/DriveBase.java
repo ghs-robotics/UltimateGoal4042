@@ -47,21 +47,25 @@ public class DriveBase {
         leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
         rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
 
-        // TODO : WHAT ABOUT ZERO POWER BEHAVIOR? FOR AUTO?
-
         // Default is to have the launcher be the front
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
         rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
 
+        // Makes the drive motors apply resistance when the power is zero
+        leftFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRearDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // Initializes gyro and sets starting angle to zero
         gyro = new Gyro(hardwareMap);
         resetGyroAngle();
 
         // gyroPID works best when Ki = 0
-        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.7); // TODO : TEST THIS TOLERANCE
-        metaGyroPID = new PIDController(0.0100, 0.0000, 0.0000, 0.3); // TODO : TEST
+        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.2); // TODO : TEST LOW TOLERANCE
+        metaGyroPID = new PIDController(0.0100, 0.0000, 0.0000, 0.2);
 
         // Initializes telemetry
         this.telemetry = telemetry;

@@ -53,9 +53,4 @@ public class TowerGoal extends CVObject {
         77      49
         110     45 (top of goal is out of view)
      */
-
-    @Override
-    public void updateData() {
-        super.updateData();
-    }
 }

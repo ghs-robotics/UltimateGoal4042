@@ -37,16 +37,6 @@ public class PIDController {
         resetValues();
     }
 
-    // Restarts the PID controller
-    public void resetValues() {
-        p_error = 0;
-        i_error = 0;
-        d_error = 0;
-        prevError = 0;
-        prevTime = 0;
-        time.reset();
-    }
-
     // Calculates the power value to be sent to the motor(s)
     public double calcVal(double error) {
         // If the error is small enough, the robot won't adjust
@@ -64,5 +54,20 @@ public class PIDController {
 
         // Returns the PID value to be sent to the motor
         return Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
+    }
+
+    // Restarts the PID controller
+    public void resetValues() {
+        p_error = 0;
+        i_error = 0;
+        d_error = 0;
+        prevError = 0;
+        prevTime = 0;
+        time.reset();
+    }
+
+    public void setMinMax(double min, double max) {
+        this.min = min;
+        this.max = max;
     }
 }
