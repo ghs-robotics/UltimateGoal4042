@@ -146,50 +146,53 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
     private void runFourRingAuto() {
 
         // Move forward but avoid starter stack
-        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0, 0, 1.3);
+        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0, 0, 1.5);
+        robot.powerLauncher.setLaunchAnglePerfect();
 
         // Shoot 3 preloaded rings
-        robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.5);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
         robot.indexRings(3);
 
         // Load 1 or 2 rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
         robot.runIntake(1.0);
-        robot.move(0, -0.4, 0.8);
+        robot.move(0, -0.6, 0.8);
 
         // Shoot 1 ring
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 0.9);
+        robot.powerLauncher.setLaunchAnglePerfect();
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
         robot.indexRings(1);
         robot.runIntake(0.0);
+        robot.powerLauncher.setLaunchAngleVertical(); // Avoid running into the wall
 
         // Deliver first wobble goal
-        robot.moveToPos(PRE_CONFIG_4_POS_I, 0.5, 0.8, 2.0);
-        robot.move(0, 1.0, 0.8);
-        robot.rotateToPos(-45, 0.5);
+        robot.moveToPos(PRE_CONFIG_4_POS_I, 0.4, 1.2, 2.0);
+        robot.move(0, 0.85, 0.8);
+        robot.rotateToPos(-70, 0.3);
         placeWobble();
 
         // Load remaining rings from starter stack
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.6, 2.0);
         robot.powerLauncher.setLaunchAngleLoading();
         robot.runIntake(1.0);
-        robot.move(0, -0.3, 1.0);
+        robot.move(0, -0.3, 2.4);
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 0.5, 1.7);
-        robot.pickUpWobbleGoal();
+//        robot.moveToPos(SECOND_WOBBLE_POS, 0.5, 1.7);
+//        robot.pickUpWobbleGoal();
 
         // Shoot remaining rings
         robot.powerLauncher.setLaunchAnglePerfect();
-        robot.runIntake(0.0);
 
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.0);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
+        robot.runIntake(0.0);
         robot.indexRings(3);
 
         // Deliver 2nd wobble goal
-        robot.moveToPos(PRE_CONFIG_4_POS_II, 0.5, 0.8, 2.0);
-        robot.move(0, 1.0, 0.8);
-        robot.rotateToPos(-45, 0.5);
-        placeWobble();
+//        robot.moveToPos(PRE_CONFIG_4_POS_I, 1.0, 1.5, 3.0);
+//        robot.move(0, 0.6, 0.8);
+//        robot.rotateToPos(-45, 0.5);
+//        placeWobble();
 
         // Move back to park over launch line
         robot.moveToPos(PARK_4_POS);

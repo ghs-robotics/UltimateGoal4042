@@ -5,7 +5,7 @@ public interface FieldPositions {
 
     // Generally useful positions
     int[] PERFECT_LAUNCH_POS = new int[]{140, 58}; // Perfect launch position
-    int[] NEXT_TO_STARTER_STACK_POS = new int[]{94, 65}; // Where to go to avoid first starter stack
+    int[] NEXT_TO_STARTER_STACK_POS = new int[]{94, 70}; // Where to go to avoid first starter stack
     int[] LEFT_POWERSHOT_POS = new int[]{94, 58}; // TODO : CALIBRATE
 
     // Park positions (where to park during autonomous)
