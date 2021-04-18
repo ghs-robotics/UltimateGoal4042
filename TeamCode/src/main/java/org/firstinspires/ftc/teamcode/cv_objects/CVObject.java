@@ -145,6 +145,10 @@ public abstract class CVObject implements HSVConstants {
         }
     }
 
+    public boolean inRange(double val, double min, double max) {
+        return (min <= val && val <= max);
+    }
+
     public boolean isActive() {
         return active;
     }
@@ -197,7 +201,14 @@ public abstract class CVObject implements HSVConstants {
 
     @Override
     public String toString() {
-        return name + " (x = " + x + ", y = " + y + ", w = " + w + ", h = " + h + ")";
+        String s = name.toUpperCase() + " (x = " + x + ", y = " + y + ", w = " + w + ", h = " + h + ")";
+        if (!active) {
+            s = "NOT ACTIVE: " + s;
+        }
+        else if (!identified) {
+            s = "NOT IDENTIFIED: " + s;
+        }
+        return s;
     }
 
     // Updates coordinates and identified boolean
@@ -219,7 +230,7 @@ public abstract class CVObject implements HSVConstants {
         Imgproc.findContours(currentHSVMask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
-        Imgproc.drawContours(input, contours, -1, GREEN_BGR, 1, Imgproc.LINE_8, hierarchy, 2, new Point());
+        Imgproc.drawContours(input, contours, -1, GREEN_BGR, 1, Imgproc.LINE_8, hierarchy, 2, new Point()); // TODO
 
         // Creates a rectangle called rect with default value of 0 for x, y, width, and height
         Rect largestRect = new Rect();
@@ -233,7 +244,7 @@ public abstract class CVObject implements HSVConstants {
         }
 
         // Draws largest rect on src image
-        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2);
+        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2); // TODO
 
         // Updates coordinates
         this.x = largestRect.x;

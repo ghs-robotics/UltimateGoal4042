@@ -94,7 +94,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
         wobble = new WobbleGoal(phone, xPID, wPID);
-        target = tower; // TODO : CHANGE
+        target = stack; // TODO : CHANGE
     }
 
 
@@ -110,41 +110,23 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Call before using CV for field localization
     public void activateFieldLocalization() {
         tower.activate();
-        floor.activate();
+        wall.activate();
+//        floor.activate();
     }
 
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
+        telemetry.addData("TARGET", "" + target.toString());
+        telemetry.addData("config", "" + identifyRingConfig());
+
         telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
         telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
         telemetry.addData("", "");
 //        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
 //        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
 
-//        if (!target.isActive()) {
-//            telemetry.addData("NOTE", target.name + " NOT ACTIVE");
-//        }
-//        else if (!target.isIdentified()) {
-//            telemetry.addData("NOTE", target.name + " NOT IDENTIFIED");
-//        }
-
-        if (!tower.isActive()) {
-            telemetry.addData("NOTE", "TOWER NOT ACTIVE");
-        }
-        else if (!tower.isIdentified()) {
-            telemetry.addData("NOTE", "TOWER NOT IDENTIFIED");
-        }
-
-        if (!floor.isActive()) {
-            telemetry.addData("NOTE", "FLOOR NOT ACTIVE");
-        }
-        else if (!floor.isIdentified()) {
-            telemetry.addData("NOTE", "FLOOR NOT IDENTIFIED");
-        }
-
         telemetry.addData("gyro angle", "" + gyro.getAngle());
-        telemetry.addData("TARGET", "" + target.toString());
         telemetry.addData("TOWER", "" + tower.toString());
         telemetry.addData("FLOOR", "" + floor.toString());
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
@@ -157,6 +139,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Call after using CV for field localization in order to reduce lag in teleop
     public void deactivateFieldLocalization() {
         tower.deactivate();
+        wall.deactivate();
         floor.deactivate();
     }
 
@@ -216,6 +199,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         armServo.setPosition(armAngle);
     }
 
+    // Turns the arm but not as far
+    public void turnArmAlmost() {
+        // Default angle is 0.37 (which is the up position)
+        armAngle = (armAngle == 0.8 ? 0.37 : 0.8);
+        armServo.setPosition(armAngle);
+    }
+
 
 
 
@@ -243,7 +233,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         }
         // When robot is too close to front of field
         else if (!tower.isIdentified() /* || (10 < floor.y && floor.y < 80) || (wall.isIdentified() && wall.h < 35) */) {
-            chaseObject(floor);
+            chaseObject(wall);
         }
         else {
             chaseObject(tower);

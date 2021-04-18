@@ -20,7 +20,7 @@ public interface HSVConstants {
     MyScalar UPPER_RING_HSV = new MyScalar(112, 255, 255); // original values: 112, 242, 255
 
     // Ring stack HSV values (they're slightly different because it's the webcam, not the phonecam)
-    MyScalar LOWER_STACK_HSV = new MyScalar(60, 103, 54); // original values: 74, 153, 144
+    MyScalar LOWER_STACK_HSV = new MyScalar(60, 73, 54); // original values: 74, 153, 144
     MyScalar UPPER_STACK_HSV = new MyScalar(130, 255, 255); // original values: 112, 242, 255
 
     // Blue column part of the tower goal

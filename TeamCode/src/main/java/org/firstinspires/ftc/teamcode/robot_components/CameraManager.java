@@ -9,7 +9,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CameraManager implements HSVConstants {
 
@@ -45,8 +45,8 @@ public class CameraManager implements HSVConstants {
         phoneCamPipeline = new CVDetectionPipeline();
         webcamPipeline = new CVDetectionPipeline();
 
-        phoneCamPipeline.activeObjects = new ArrayList<>(); // Initializes the ArrayLists in each pipeline
-        webcamPipeline.activeObjects = new ArrayList<>();
+        phoneCamPipeline.activeObjects = new CopyOnWriteArrayList<>(); // Initializes the ArrayLists in each pipeline
+        webcamPipeline.activeObjects = new CopyOnWriteArrayList<>();
 
         phoneCam.setPipeline(phoneCamPipeline);
         webcam.setPipeline(webcamPipeline);

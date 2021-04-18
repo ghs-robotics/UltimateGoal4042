@@ -32,9 +32,8 @@ package org.firstinspires.ftc.teamcode.teleop;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.SmoothnessRegulator;
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 @TeleOp(name="Tele1", group="Linear Opmode")
@@ -58,10 +57,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         robot.powerLauncher.setLaunchAngleLoading();
         robot.initWithCV();
         robot.activateFieldLocalization();
+        robot.stack.activate();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        SmoothnessRegulator.setController(controller1); // For toggling between smooth and choppy mode
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -79,7 +78,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Registers controller input
             controller1.update();
             controller2.update();
-            SmoothnessRegulator.update();
 
             // Tell launcher motors what to do
             if (queue == 10) { // doesn't terminate without pressing button
@@ -94,10 +92,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             // Checks if the robot should be performing an automated move function
-            if (phase == 10) {
-                robot.adjustPosition(); // doesn't terminate without pressing button
-            }
-            else if (phase > 0) {
+            if (phase > 0) {
                 phase = robot.moveInPhases(phase);
             }
             else {
@@ -105,10 +100,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
                 // Mecanum wheel drive
                 robot.calculateDrivePowers(
-                        controller1.left_stick_x * SmoothnessRegulator.getFactor(),
-                        controller1.left_stick_y * SmoothnessRegulator.getFactor(),
-                        controller1.right_stick_x * SmoothnessRegulator.getFactor(),
-                        controller1.right_stick_y * SmoothnessRegulator.getFactor()
+                        controller1.left_stick_x,
+                        controller1.left_stick_y,
+                        controller1.right_stick_x,
+                        controller1.right_stick_y
                 );
 
                 // TODO : TEST THIS
@@ -147,7 +142,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // NOTE: TO USE THESE FUNCTIONS PRESS START A
 
-            //
+            // Automated position
             if (controller1.a.equals("pressing")) {
                 robot.activateFieldLocalization();
                 robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
@@ -155,7 +150,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 phase = 3;
             }
 
-            //
+            // Automated position
             if (controller1.b.equals("pressing")) {
                 // Automated position
                 robot.activateFieldLocalization();
@@ -166,8 +161,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Reset the controls
             if (controller1.x.equals("pressing")) {
-                robot.speed = 1;
-                SmoothnessRegulator.deactivateSmoothMode();
+                robot.toggleSpeed();
             }
 
             // Terminate any automated functions
@@ -177,10 +171,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Go to perfect launch position and set launch angle
             if (controller1.left_bumper.equals("pressing")) {
-//                robot.activateFieldLocalization();
-//                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-//                robot.powerLauncher.setLaunchAnglePerfect();
-//                phase = 10;
+                robot.rotateToPos(0, 1.0);
             }
 
             // Go to perfect launch position and set launch angle
@@ -191,14 +182,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 phase = 3;
             }
 
-            // Toggle between choppy/smooth mode
-            if (controller1.right_stick_button.equals("pressing")) {
-                SmoothnessRegulator.switchMode();
-            }
-
-            // Toggle between full speed and 50%
+            // Set to full speed
             if (controller1.left_stick_button.equals("pressing")) {
-                robot.toggleSpeed();
+                robot.speed = 1;
             }
 
 

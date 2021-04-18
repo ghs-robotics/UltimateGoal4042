@@ -10,22 +10,20 @@ public class StarterStack extends CVObject {
         super("stack", pipeline);
         lowerHSV = LOWER_STACK_HSV;
         upperHSV = UPPER_STACK_HSV;
-        cover = 0.65; // TODO : UPDATE
     }
 
     @Override
-    protected void coverBackground() {
-        super.coverBackground();
-        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(140, 240), GREEN_BGR, -1);
-        Imgproc.rectangle(currentHSVMat, new Point(270, 0), new Point(320, 240), GREEN_BGR, -1);
+    protected void coverBackground() { // doesn't use cover
+        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(320, 200), GREEN_BGR, -1);
+        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(5, 240), GREEN_BGR, -1);
+        Imgproc.rectangle(currentHSVMat, new Point(130, 0), new Point(320, 240), GREEN_BGR, -1);
     }
 
     public int findConfig() {
         activate();
-        updateData();
         if (5 <= h && h <= 18) { // typically about 10
             return 1;
-        } else if (19 <= h && h <= 30) { // typically about 21
+        } else if (19 <= h && h <= 34) { // typically about 21
             return 4;
         } else {
             return 0;
@@ -47,7 +45,7 @@ public class StarterStack extends CVObject {
     // Testing to make sure the detected object is the starter stack
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
-        return (4 < w && 4 < h && h < 40 && x > 0);
+        return (4 < w && 4 < h && h < 40 && 15 < x && x < 72 && 200 < y && y < 240);
     }
 
     @Override

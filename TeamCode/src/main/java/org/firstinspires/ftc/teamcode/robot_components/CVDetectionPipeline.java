@@ -8,7 +8,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
 
@@ -18,7 +19,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // Auxiliary Mat objects for temporarily storing data
     private static Mat dst1 = new Mat();
 
-    public ArrayList<CVObject> activeObjects;
+    public CopyOnWriteArrayList<CVObject> activeObjects;
 
     // For sampling HSV values of individual pixels
     public String crosshairHSV = "";
@@ -31,7 +32,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
     // This method is called in the background (not by us) every time the camera receives a new
     // input, which happens multiple times a second while we're streaming
     @Override
-    public Mat processFrame(Mat input) {
+    public Mat processFrame(Mat input) throws ConcurrentModificationException {
 
         // Resizes image to make processing more uniform
         Imgproc.resize(input, input, new Size(320, 240));

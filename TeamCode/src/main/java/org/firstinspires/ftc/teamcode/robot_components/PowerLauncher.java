@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.760; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.670; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.050; // TODO : TEST
