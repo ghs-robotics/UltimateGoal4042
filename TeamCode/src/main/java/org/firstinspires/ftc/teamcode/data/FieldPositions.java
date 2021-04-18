@@ -6,7 +6,7 @@ public interface FieldPositions {
     int xOffset = -2;
 
     // Generally useful positions
-    int[] PERFECT_LAUNCH_POS = new int[]{140 + xOffset, 58}; // Perfect launch position
+    int[] PERFECT_LAUNCH_POS = new int[]{144 + xOffset, 58}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{94 + xOffset, 67}; // Where to go to avoid first starter stack
     int[] LEFT_POWERSHOT_POS = new int[]{94 + xOffset, 58}; // TODO : CALIBRATE
 
@@ -17,7 +17,7 @@ public interface FieldPositions {
 
     // Position pertaining to the wobble goals
     int[] CONFIG_0_POS_I = new int[]{180 + xOffset, 90}; // Where to drop first wobble goal
-    int[] CONFIG_0_POS_II = new int[]{140 + xOffset, 90}; // Where to drop second wobble goal
+    int[] CONFIG_0_POS_II = new int[]{156 + xOffset, 90}; // Where to drop second wobble goal
 
     int[] PRE_CONFIG_1_POS_I = new int[]{93 + xOffset, 85};
     int[] PRE_CONFIG_1_POS_II = new int[]{66 + xOffset, 85};
@@ -27,6 +27,6 @@ public interface FieldPositions {
     int[] PRE_CONFIG_4_POS_II = new int[]{157 + xOffset, 90};
     int CONFIG_4_WALL_HEIGHT = 24; // TODO : ROTATE
 
-    int[] SECOND_WOBBLE_POS = new int[]{136 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int[] SECOND_WOBBLE_POS = new int[]{142 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
     int SECOND_WOBBLE_WALL_HEIGHT = 75;
 }

@@ -64,7 +64,7 @@ public class DriveBase {
         resetGyroAngle();
 
         // gyroPID works best when Ki = 0
-        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.2); // TODO : TEST LOW TOLERANCE
+        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.2);
         metaGyroPID = new PIDController(0.0100, 0.0000, 0.0000, 0.2);
 
         // Initializes telemetry

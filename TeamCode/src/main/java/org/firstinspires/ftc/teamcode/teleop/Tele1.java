@@ -56,14 +56,14 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         robot.powerLauncher.setLaunchAngleLoading();
         robot.initWithCV();
-        robot.activateFieldLocalization();
-        robot.stack.activate();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        robot.deactivateFieldLocalization();
+        robot.camera.stopStreaming();
         robot.resetGyroAngle();
         robot.resetElapsedTime();
 
@@ -267,8 +267,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             if (controller2.left_stick_button.equals("pressed")) {
                 robot.powerLauncher.setLaunchAnglePerfect();
             }
-
-            sleep(50); // TODO : OPTIMIZE
         }
     }
 }

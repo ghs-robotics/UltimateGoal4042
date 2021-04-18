@@ -9,12 +9,12 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.457; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.195; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
-    public static double VERTICAL_OFFSET = 0.050; // TODO : TEST
+    public static double VERTICAL_OFFSET = 0.140; // TODO : TEST
     public static double LOADING_OFFSET = -0.050;
-    public static double POWERSHOT_OFFSET = -0.020;
+    public static double POWERSHOT_OFFSET = -0.010;
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -26,7 +26,7 @@ public class PowerLauncher {
     public double leftPower = 0;
     public double rightPower = 0;
 
-    public double launchAngle = PERFECT_LAUNCH_ANGLE + LOADING_OFFSET; // Default starting position
+    public double launchAngle = PERFECT_LAUNCH_ANGLE + VERTICAL_OFFSET; // Default starting position
     public double indexerAngle = INDEXER_BACK_POS;
 
     public boolean running = false; // If the launcher is running
@@ -126,7 +126,7 @@ public class PowerLauncher {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 1.4) { // TODO : ADJUST
+        else if (elapsedTime.seconds() - queueTimeStamp > 1.6) { // TODO : ADJUST
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             queue--;

@@ -19,8 +19,8 @@ public class FieldWall extends CVObject {
     @Override
     protected void coverBackground() {
         super.coverBackground();
-        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(120, 240), GREEN_BGR, -1);
-        Imgproc.rectangle(currentHSVMat, new Point(200, 0), new Point(320, 240), GREEN_BGR, -1);
+        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(154, 240), GREEN_BGR, -1);
+        Imgproc.rectangle(currentHSVMat, new Point(166, 0), new Point(320, 240), GREEN_BGR, -1);
     }
 
     // No side to side PID
@@ -42,7 +42,7 @@ public class FieldWall extends CVObject {
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
         // h ranges from 28 (across field) to 110 (very close to wall); 92 is 2 ft from wall
-        return w == 79 && 20 < h && h < 130;
+        return w == 11 && 15 < h && h < 130;
     }
     /*
         Some useful values

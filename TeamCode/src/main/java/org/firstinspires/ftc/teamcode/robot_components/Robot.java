@@ -111,7 +111,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public void activateFieldLocalization() {
         tower.activate();
         wall.activate();
-//        floor.activate();
     }
 
     // Displays a bunch of useful values on the DS phone
@@ -123,12 +122,12 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
         telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
         telemetry.addData("", "");
-//        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
-//        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
+        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
 
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("TOWER", "" + tower.toString());
-        telemetry.addData("FLOOR", "" + floor.toString());
+        telemetry.addData("WALL", "" + wall.toString());
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
 //        telemetry.addData("Kp", target.depthPID.k_P);
 //        telemetry.addData("Ki", target.depthPID.k_I);
@@ -140,7 +139,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public void deactivateFieldLocalization() {
         tower.deactivate();
         wall.deactivate();
-        floor.deactivate();
     }
 
     // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
@@ -153,7 +151,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         camera.initCamera();
         initWithoutCV();
         tower.activate();
-        floor.activate();
+        wall.activate();
     }
 
     public void initWithoutCV() {
@@ -269,7 +267,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public int moveInPhases(int phase) {
         if (phase == 3) {
             tower.activate();
-            floor.activate();
+            wall.activate();
             targetGyroAngle = getReasonableGyroAngle(0);
             phaseTimeStamp = elapsedTime.seconds();
             phase--;
@@ -295,8 +293,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
                 adjustPosition();
             } else {
                 stopDrive();
-//                tower.deactivate(); // TODO
-//                floor.deactivate();
                 phase--;
             }
         }
@@ -389,7 +385,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             chaseObject(wall);
         }
         stopDrive();
-//        wall.deactivate();
     }
 
     // Makes robot move forward and pick up wobble goal
@@ -398,16 +393,17 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stopDrive();
         turnArm();
         toggleClaw();
+        double t = getElapsedSeconds();
         calculateDrivePowers(0, -0.3, 0);
         sendDrivePowers();
-        double t = getElapsedSeconds();
-        while (wall.h < 96 && getElapsedSeconds() - t < 3.0) {
+        while (wall.h < 94 && getElapsedSeconds() - t < 3.0) {
             calculateDrivePowers(0, -0.3, getGyroPIDValue());
+            sendDrivePowers();
         }
         wall.deactivate();
         stopDrive();
         toggleClaw();
-        wait(0.4);
+        wait(0.5);
         turnArm();
     }
 }

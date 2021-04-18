@@ -8,7 +8,7 @@ public interface HSVConstants {
     MyScalar UPPER_BLACK_TOWER_HSV = new MyScalar(255, 255, 80);
 
     // Tower goal HSV values
-    MyScalar LOWER_BLUE_TOWER_HSV = new MyScalar(0, 80, 100);
+    MyScalar LOWER_BLUE_TOWER_HSV = new MyScalar(0, 80, 50); // used to be V = 80
     MyScalar UPPER_BLUE_TOWER_HSV = new MyScalar(80, 255, 220); // 80, 255, 220
 
     // Floor HSV values
@@ -28,7 +28,7 @@ public interface HSVConstants {
     MyScalar UPPER_TWIN_HSV = new MyScalar(80, 255, 220);
 
     // Wall HSV values
-    MyScalar LOWER_WALL_HSV = new MyScalar(70, 75, 95);
+    MyScalar LOWER_WALL_HSV = new MyScalar(70, 50, 110);
     MyScalar UPPER_WALL_HSV = new MyScalar(130, 255, 255);
 
     // Wobble goal HSV values

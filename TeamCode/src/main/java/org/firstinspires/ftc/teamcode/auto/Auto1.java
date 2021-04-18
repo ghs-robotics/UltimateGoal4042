@@ -31,6 +31,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         telemetry.addData("Status", "Initialized");
         telemetry.addData("Config", "" + robot.identifyRingConfig());
         robot.telemetry.update();
+        robot.powerLauncher.setLaunchAngleVertical();
 
         // Waiting for driver to hit PLAY
         waitForStart();
@@ -115,7 +116,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         // Deliver first wobble goal
         robot.moveToPos(PRE_CONFIG_1_POS_I, 0.5, 1.5, 2.0);
-        robot.move(0, 1.0, 0.6);
+        robot.move(0, 1.0, 0.7);
         placeWobble();
 
         // Shoot 3 preloaded rings
@@ -145,7 +146,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         // Deliver 2nd wobble goal
         robot.moveToPos(PRE_CONFIG_1_POS_II, 0.5, 1.5, 2.0);
-        robot.move(0, 1.0, 0.6);
+        robot.move(0, 1.0, 0.7);
         placeWobble();
 
         // Move back to park over launch line
@@ -159,28 +160,28 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.powerLauncher.setLaunchAnglePerfect();
 
         // Deliver first wobble goal
-        robot.moveToPos(PRE_CONFIG_4_POS_I, 0, 1.0, 2.0);
-        robot.move(0, 1.0, 0.52);
+        robot.moveToPos(PRE_CONFIG_4_POS_I, 0.2, 1.5, 2.0);
+        robot.move(0, 1.0, 0.57);
         robot.rotateToPos(-70, 0.3);
         placeWobble();
 
         // Shoot 3 preloaded rings
-        robot.rotateToPos(15, 0.2);
-        robot.move(0, -1.0, 0.8, true);
+        robot.rotateToPos(15, 0.4);
+        robot.move(0, -1.0, 0.7, true);
         robot.powerLauncher.toggleOn();
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 2.5);
         robot.indexRings(3);
 
         // Load 1 or 2 rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
         robot.runIntake(1.0);
         robot.powerLauncher.toggleOff();
-        robot.move(0, -0.4, 0.8);
+        robot.move(0, -0.3, 0.8);
 
         // Shoot 1 ring
         robot.powerLauncher.toggleOn();
         robot.powerLauncher.setLaunchAnglePerfect();
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 2.5);
         robot.wait(0.3);
         robot.runIntake(0.0);
         robot.indexRings(1);
@@ -189,17 +190,17 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         // Load remaining rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
         robot.runIntake(1.0);
-//        robot.move(0, -0.25, 2.4);
+        robot.move(0, -0.4, 2.8);
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 1.0, 1.7);
-        robot.pickUpWobbleGoal();
+//        robot.moveToPos(SECOND_WOBBLE_POS, 1.0, 1.7);
+//        robot.pickUpWobbleGoal();
 
         // Shoot remaining rings
         robot.powerLauncher.setLaunchAnglePerfect();
 
         robot.powerLauncher.toggleOn();
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 1.5);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 2.5);
         robot.runIntake(0.0);
         robot.indexRings(3);
         robot.powerLauncher.toggleOff();
@@ -211,6 +212,6 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 //        placeWobble();
 
         // Move back to park over launch line
-        robot.move(0, 1.0, 0.3);
+        robot.move(0, 1.0, 0.45);
     }
 }
