@@ -76,11 +76,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1, -1.0, 1.0);
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1);
 
         // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1, -1.0, 1.0);
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1);
 
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
@@ -218,12 +218,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // ---------------------------------------------------------------------------------------------
 
 
-    // Makes the robot line up with the tower goal and shoot three rings
-    public void adjustAndShoot(int rings) {
-        moveToPos(PERFECT_LAUNCH_POS, 0.8, 2.0, 5.0);
-        indexRings(rings);
-    }
-
     // Makes the robot line up with the tower goal (if called repeatedly)
     // Make sure the following things are accounted for before calling this:
     // targetGyroAngle, target values, reset PIDs, activate object, set launcher side as front
@@ -250,11 +244,23 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         updateDrive();
     }
 
-    // Calling move(0, 0.4, 3.0) makes the robot move forward 3.5 feet (a little over 1 ft/sec)
+    // Hardcoded movement
     public void move(double x, double y, double seconds) {
-        calculateDrivePowers(x, y, 0);
-        sendDrivePowers();
-        wait(seconds);
+        move(x, y, seconds, false);
+    }
+
+    public void move(double x, double y, double seconds, boolean gyro) {
+        if (gyro) {
+            double t = getElapsedSeconds();
+            while (getElapsedSeconds() - t < seconds) {
+                calculateDrivePowers(x, y, getGyroPIDValue());
+                sendDrivePowers();
+            }
+        } else {
+            calculateDrivePowers(x, y, 0);
+            sendDrivePowers();
+            wait(seconds);
+        }
         stopDrive();
     }
 
@@ -312,7 +318,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         tower.activate();
-        floor.activate();
+        wall.activate();
         tower.setTargetXW(pos);
         rotateToPos(0.0, 0.0);
         double t = getElapsedSeconds();
@@ -395,7 +401,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         calculateDrivePowers(0, -0.3, 0);
         sendDrivePowers();
         double t = getElapsedSeconds();
-        while (wall.h < 98 && getElapsedSeconds() - t < 3.0) {
+        while (wall.h < 96 && getElapsedSeconds() - t < 3.0) {
             calculateDrivePowers(0, -0.3, getGyroPIDValue());
         }
         wall.deactivate();

@@ -20,10 +20,10 @@ public class StarterStack extends CVObject {
     }
 
     public int findConfig() {
-        activate();
-        if (5 <= h && h <= 18) { // typically about 10
+        updateData();
+        if (5 <= h && h <= 20) { // typically about 10
             return 1;
-        } else if (19 <= h && h <= 34) { // typically about 21
+        } else if (21 <= h && h <= 34) { // typically about 21
             return 4;
         } else {
             return 0;
