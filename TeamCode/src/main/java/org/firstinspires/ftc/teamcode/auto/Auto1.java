@@ -181,8 +181,8 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         // Shoot 1 ring
         robot.powerLauncher.toggleOn();
         robot.powerLauncher.setLaunchAnglePerfect();
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 2.5);
-        robot.wait(0.3);
+        robot.moveToPos(PERFECT_LAUNCH_POS, 1.0, 2.5);
+//        robot.wait(0.3);
         robot.runIntake(0.0);
         robot.indexRings(1);
         robot.powerLauncher.toggleOff();

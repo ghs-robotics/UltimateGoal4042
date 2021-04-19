@@ -94,7 +94,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
         wobble = new WobbleGoal(phone, xPID, wPID);
-        target = stack; // TODO : CHANGE
+        target = tower;
     }
 
 
@@ -141,7 +141,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wall.deactivate();
     }
 
-    // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
+    // Classifies the starter stack
     public int identifyRingConfig() {
         return stack.findConfig();
     }
@@ -337,8 +337,6 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             adjustPosition();
         }
         stopDrive();
-//        tower.deactivate(); // TODO
-//        wall.deactivate();
     }
 
     // Move to a certain distance from the back wall

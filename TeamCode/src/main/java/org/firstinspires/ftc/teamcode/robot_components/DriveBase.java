@@ -105,7 +105,7 @@ public class DriveBase {
 
     // Internal helper method for completing drive power calculations
     protected void calculateDrivePowers(double x, double y, double rot, boolean meta) {
-        double r = Math.hypot(x, y); // TODO : MULTIPLY BY SQRT(2) ?
+        double r = Math.hypot(x, y);
         double angleOfMotion = Math.atan2(y, x) - Math.PI / 4;
         if (meta) {
             angleOfMotion -= Math.toRadians(gyro.getAngle() + metaOffset); // Factor in meta drive

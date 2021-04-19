@@ -9,7 +9,7 @@ public class Ring extends CVObject {
         super("ring", pipeline, xPID, wPID);
         lowerHSV = LOWER_RING_HSV;
         upperHSV = UPPER_RING_HSV;
-        cover = 0.65; // TODO : CALIBRATE
+        cover = 0.65;
     }
 
     // Testing to make sure the detected object is a ring

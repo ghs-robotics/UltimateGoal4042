@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.195; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.416; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
-    public static double VERTICAL_OFFSET = 0.140; // TODO : TEST
+    public static double VERTICAL_OFFSET = 0.140;
     public static double LOADING_OFFSET = -0.050;
     public static double POWERSHOT_OFFSET = -0.010;
 
@@ -126,12 +126,12 @@ public class PowerLauncher {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 1.6) { // TODO : ADJUST
+        else if (elapsedTime.seconds() - queueTimeStamp > 1.6) {
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             queue--;
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 1.0) { // TODO : ADJUST
+        else if (elapsedTime.seconds() - queueTimeStamp > 1.0) {
             setIndexerAngle(INDEXER_FORWARD_POS);
         }
         return queue;
@@ -144,12 +144,12 @@ public class PowerLauncher {
     // Moves the indexer servo, which launches a ring
     public void index() {
         setIndexerAngle(INDEXER_FORWARD_POS);
-        wait(0.4); // TODO : CHANGE
+        wait(0.4);
         setIndexerAngle(INDEXER_BACK_POS);
     }
 
     // Resets the encoder encoder position's of the motors to zero
-    public void resetMotors() { // TODO : USE???
+    public void resetMotors() {
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -202,19 +202,19 @@ public class PowerLauncher {
 
     // Sets a launch angle
     public void setLaunchAnglePerfect() {
-        if (launchAngle > PERFECT_LAUNCH_ANGLE) {
-            setLaunchAngleLoading();
-            wait(0.8); // TODO : TEST
-        }
+//        if (launchAngle > PERFECT_LAUNCH_ANGLE) {
+//            setLaunchAngleLoading();
+//            wait(0.8); // TODO : TEST
+//        }
         setLaunchAngle(PERFECT_LAUNCH_ANGLE);
     }
 
     // Sets launcher to hit powershots
     public void setLaunchAnglePowershot() {
-        if (launchAngle > PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET) {
-            setLaunchAngleLoading();
-            wait(0.8); // TODO : TEST
-        }
+//        if (launchAngle > PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET) {
+//            setLaunchAngleLoading();
+//            wait(0.8); // TODO : TEST
+//        }
         setLaunchAngle(PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET);
     }
 

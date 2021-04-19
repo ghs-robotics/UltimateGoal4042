@@ -8,8 +8,8 @@ public interface HSVConstants {
     MyScalar UPPER_BLACK_TOWER_HSV = new MyScalar(255, 255, 80);
 
     // Tower goal HSV values
-    MyScalar LOWER_BLUE_TOWER_HSV = new MyScalar(0, 80, 50); // used to be V = 80
-    MyScalar UPPER_BLUE_TOWER_HSV = new MyScalar(80, 255, 220); // 80, 255, 220
+    MyScalar LOWER_BLUE_TOWER_HSV = new MyScalar(0, 120, 79); // S = 135
+    MyScalar UPPER_BLUE_TOWER_HSV = new MyScalar(77, 255, 204);
 
     // Floor HSV values
     MyScalar LOWER_FLOOR_HSV = new MyScalar(0, 0, 0);

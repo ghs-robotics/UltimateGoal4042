@@ -21,7 +21,7 @@ public class Twins extends CVObject {
         super("twins", pipeline, xPID, wPID);
         lowerHSV = LOWER_TWIN_HSV;
         upperHSV = UPPER_TWIN_HSV;
-        cover = 0; // TODO : TEST
+        cover = 0;
         auxiliaryMat = new Mat();
     }
 
@@ -61,7 +61,7 @@ public class Twins extends CVObject {
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
         double r = 1.0 * h / w;
-        return (2 < w && w < 20 && 10 < h && h < 75 && r > 2.5); // TODO : TEST
+        return (2 < w && w < 20 && 10 < h && h < 75 && r > 2.5);
     }
 
     // Finds the black part of the tower goal and covers everything outside of it with rectangles
@@ -93,7 +93,7 @@ public class Twins extends CVObject {
         int deltaX = Math.abs(left.x - right.x);
         int errorY = Math.abs(left.y - right.y);
         int errorH = Math.abs(left.height - right.height);
-        if (26 < deltaX && deltaX < 115 && Math.max(errorY, errorH) < 5) { // TODO : TEST
+        if (26 < deltaX && deltaX < 115 && Math.max(errorY, errorH) < 5) {
             this.x = left.x;
             this.y = left.y;
             this.w = deltaX + right.width;

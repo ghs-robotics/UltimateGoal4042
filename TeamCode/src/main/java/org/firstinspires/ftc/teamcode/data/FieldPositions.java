@@ -6,9 +6,9 @@ public interface FieldPositions {
     int xOffset = -2;
 
     // Generally useful positions
-    int[] PERFECT_LAUNCH_POS = new int[]{144 + xOffset, 58}; // Perfect launch position
+    int[] PERFECT_LAUNCH_POS = new int[]{136 + xOffset, 58}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{94 + xOffset, 67}; // Where to go to avoid first starter stack
-    int[] LEFT_POWERSHOT_POS = new int[]{94 + xOffset, 58}; // TODO : CALIBRATE
+    int[] LEFT_POWERSHOT_POS = new int[]{94 + xOffset, 58};
 
     // Park positions (where to park during autonomous)
     int[] PARK_0_POS = new int[]{96 + xOffset, 74};
@@ -25,8 +25,8 @@ public interface FieldPositions {
 
     int[] PRE_CONFIG_4_POS_I = new int[]{180 + xOffset, 90};
     int[] PRE_CONFIG_4_POS_II = new int[]{157 + xOffset, 90};
-    int CONFIG_4_WALL_HEIGHT = 24; // TODO : ROTATE
+    int CONFIG_4_WALL_HEIGHT = 24;
 
-    int[] SECOND_WOBBLE_POS = new int[]{142 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int[] SECOND_WOBBLE_POS = new int[]{135 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
     int SECOND_WOBBLE_WALL_HEIGHT = 75;
 }

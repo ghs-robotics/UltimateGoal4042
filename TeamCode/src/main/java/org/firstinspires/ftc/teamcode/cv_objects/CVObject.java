@@ -230,7 +230,7 @@ public abstract class CVObject implements HSVConstants {
         Imgproc.findContours(currentHSVMask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Draw contours on the src image
-//        Imgproc.drawContours(input, contours, -1, GREEN_BGR, 1, Imgproc.LINE_8, hierarchy, 2, new Point()); // TODO
+//        Imgproc.drawContours(input, contours, -1, GREEN_BGR, 1, Imgproc.LINE_8, hierarchy, 2, new Point());
 
         // Creates a rectangle called rect with default value of 0 for x, y, width, and height
         Rect largestRect = new Rect();
@@ -244,7 +244,7 @@ public abstract class CVObject implements HSVConstants {
         }
 
         // Draws largest rect on src image
-        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2); // TODO
+        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2);
 
         // Updates coordinates
         this.x = largestRect.x;
