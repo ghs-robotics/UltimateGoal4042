@@ -9,12 +9,13 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.416; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.418; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.140;
     public static double LOADING_OFFSET = -0.050;
-    public static double POWERSHOT_OFFSET = -0.010;
+    public static double POWERSHOT_OFFSET = -0.025;
+    public static double SECOND_PERFECT_OFFSET = -0.008; // 2 ft behind perfect launch pos
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -120,13 +121,32 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
-    // Handle the queue of rings
+    // Handle the queue of rings (only indexing
+    public int handleIndexQueue(int queue) {
+        if (elapsedTime.seconds() - queueTimeStamp > 0.5) {
+            resetQueueTimeStamp();
+            queue--;
+        }
+        else if (elapsedTime.seconds() - queueTimeStamp > 0.25) {
+            setIndexerAngle(INDEXER_BACK_POS);
+        }
+        else {
+            setIndexerAngle(INDEXER_FORWARD_POS);
+        }
+        return queue;
+    }
+
+    public void resetQueueTimeStamp() {
+        queueTimeStamp = elapsedTime.seconds();
+    }
+
+    // Handle the queue of rings, including toggling launcher on
     public int handleQueue(int queue) {
         if (!running) {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 1.6) {
+        else if (elapsedTime.seconds() - queueTimeStamp > 1.2) {
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             queue--;
@@ -144,7 +164,7 @@ public class PowerLauncher {
     // Moves the indexer servo, which launches a ring
     public void index() {
         setIndexerAngle(INDEXER_FORWARD_POS);
-        wait(0.4);
+        wait(0.2);
         setIndexerAngle(INDEXER_BACK_POS);
     }
 
@@ -191,8 +211,10 @@ public class PowerLauncher {
 
     // Sets a launch angle
     public void setLaunchAngle(double angle) {
-        launchAngle = angle;
-        launchAngleServo.setPosition(launchAngle);
+        if (launchAngle != angle) {
+            launchAngle = angle;
+            launchAngleServo.setPosition(launchAngle);
+        }
     }
 
     // Sets launcher to loading position
@@ -202,19 +224,11 @@ public class PowerLauncher {
 
     // Sets a launch angle
     public void setLaunchAnglePerfect() {
-//        if (launchAngle > PERFECT_LAUNCH_ANGLE) {
-//            setLaunchAngleLoading();
-//            wait(0.8); // TODO : TEST
-//        }
         setLaunchAngle(PERFECT_LAUNCH_ANGLE);
     }
 
     // Sets launcher to hit powershots
     public void setLaunchAnglePowershot() {
-//        if (launchAngle > PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET) {
-//            setLaunchAngleLoading();
-//            wait(0.8); // TODO : TEST
-//        }
         setLaunchAngle(PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET);
     }
 
@@ -230,7 +244,6 @@ public class PowerLauncher {
         } else {
             toggleOn();
         }
-        running = !running;
     }
 
     // Turn launcher off

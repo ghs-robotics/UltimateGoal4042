@@ -53,6 +53,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         controller2 = new Controller(gamepad2); // Whoever presses start + b
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
         int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
+        String intakeSetting = "normal"; // "normal," "in," "out," "off"
 
         robot.powerLauncher.setLaunchAngleLoading();
         robot.initWithCV();
@@ -62,34 +63,27 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        robot.deactivateFieldLocalization();
-        robot.camera.stopStreaming();
+//        robot.deactivateFieldLocalization();
+//        robot.camera.stopStreaming();
         robot.resetGyroAngle();
         robot.resetElapsedTime();
 
         while (opModeIsActive()) {
 
-            // -----------------------------------------------------------------------------------------
-            // -----------------------------------------------------------------------------------------
-            // --------------------------------   CONTINUOUS UPDATES   ---------------------------------
-            // -----------------------------------------------------------------------------------------
-            // -----------------------------------------------------------------------------------------
-
             // Registers controller input
             controller1.update();
             controller2.update();
 
-            // Tell launcher motors what to do
-            if (queue == 10) { // doesn't terminate without pressing button
-                robot.powerLauncher.toggleOn();
-            }
-            else if (queue == 0) {
-                robot.powerLauncher.toggleOff();
-            }
-            else { // queue is positive
-                // Checks if any rings need to be shot and takes care of indexing
-                queue = robot.powerLauncher.handleQueue(queue);
-            }
+
+
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+            // ------------------------------   CONTROLLER 1 FUNCTIONS   -------------------------------
+            // -----------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------
+
+            // NOTE: TO USE THESE FUNCTIONS PRESS START A
+
 
             // Checks if the robot should be performing an automated move function
             if (phase > 0) {
@@ -106,80 +100,87 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                         controller1.right_stick_y
                 );
 
-                // TODO : TEST THIS
                 if (controller1.dpad_up.equals("pressed")) {
-                    robot.calculateDrivePowers(0.40, 0, 0);
+                    robot.calculateDrivePowers(0.50, 0, 0);
                 }
                 else if (controller1.dpad_down.equals("pressed")) {
-                    robot.calculateDrivePowers(-0.40, 0, 0);
+                    robot.calculateDrivePowers(-0.50, 0, 0);
                 }
                 else if (controller1.dpad_left.equals("pressed")) {
-                    robot.calculateDrivePowers(0, 0.35, 0);
+                    robot.calculateDrivePowers(0, 0.4, 0);
                 }
                 else if (controller1.dpad_right.equals("pressed")) {
-                    robot.calculateDrivePowers(0, -0.35, 0);
+                    robot.calculateDrivePowers(0, -0.4, 0);
                 }
 
                 // Reset gyro in case of emergency
                 else if (controller1.left_trigger + controller1.right_trigger > 1.8) {
                     robot.resetGyroAngle();
                 }
-                else if (controller1.left_trigger > 0.1) { // TODO TEST
+                else if (controller1.left_trigger > 0.1) {
                     robot.calculateDrivePowers(0, 0, -0.25 * controller1.left_trigger);
                 }
                 else if (controller1.right_trigger > 0.1) {
                     robot.calculateDrivePowers(0, 0, 0.25 * controller1.right_trigger);
                 }
 
+                // Rotate to face tower goal
+                else if (controller1.left_bumper.equals("pressed")) {
+                    robot.setTargetGyroAngle(0);
+                    robot.adjustAngle();
+                }
+
                 robot.updateDrive(); // Also updates telemetry
             }
 
-            // -----------------------------------------------------------------------------------------
-            // -----------------------------------------------------------------------------------------
-            // ------------------------------   CONTROLLER 1 FUNCTIONS   -------------------------------
-            // -----------------------------------------------------------------------------------------
-            // -----------------------------------------------------------------------------------------
-
-            // NOTE: TO USE THESE FUNCTIONS PRESS START A
-
             // Automated position
             if (controller1.a.equals("pressing")) {
-                robot.activateFieldLocalization();
-                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
-                robot.powerLauncher.setLaunchAnglePerfect();
-                phase = 3;
+//                robot.activateFieldLocalization();
+//                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
+//                robot.powerLauncher.setLaunchAnglePerfect();
+//                phase = 3;
+
+                if (intakeSetting.equals("in")) {
+                    intakeSetting = "off";
+                } else {
+                    intakeSetting = "in";
+                }
             }
 
             // Automated position
             if (controller1.b.equals("pressing")) {
-                // Automated position
-                robot.activateFieldLocalization();
-                robot.tower.setTargetXW(SECOND_WOBBLE_POS);
-                robot.powerLauncher.setLaunchAnglePerfect();
-                phase = 3;
+//                robot.activateFieldLocalization();
+//                robot.tower.setTargetXW(SECOND_WOBBLE_POS);
+//                robot.powerLauncher.setLaunchAnglePerfect();
+//                phase = 3;
+
+                if (intakeSetting.equals("out")) {
+                    intakeSetting = "off";
+                } else {
+                    intakeSetting = "out";
+                }
             }
 
             // Reset the controls
             if (controller1.x.equals("pressing")) {
-                robot.toggleSpeed();
+//                robot.toggleSpeed();
+                robot.camera.startMidStream();
+//                robot.activateFieldLocalization();
             }
 
             // Terminate any automated functions
             if (controller1.y.equals("pressing")) {
-                phase = 0;
-            }
-
-            // Go to perfect launch position and set launch angle
-            if (controller1.left_bumper.equals("pressing")) {
-                robot.rotateToPos(0, 1.0);
+//                phase = 0;
+                robot.camera.stopStreaming();
+//                robot.deactivateFieldLocalization();
             }
 
             // Go to perfect launch position and set launch angle
             if (controller1.right_bumper.equals("pressing")) {
-                robot.activateFieldLocalization();
-                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-                robot.powerLauncher.setLaunchAnglePerfect();
-                phase = 3;
+//                robot.activateFieldLocalization();
+//                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+//                robot.powerLauncher.setLaunchAnglePerfect();
+//                phase = 3;
             }
 
             // Set to full speed
@@ -196,6 +197,43 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // NOTE: TO USE THESE FUNCTIONS, PRESS START B
 
+
+            // Checks if any rings need to be shot and takes care of indexing
+            if (queue > 0) {
+                queue = robot.powerLauncher.handleIndexQueue(queue);
+                if (queue == 0) { // Turn launcher off after indexing
+                    robot.powerLauncher.toggleOff();
+                }
+            }
+
+            // Intake stuff
+            if (intakeSetting.equals("in")) {
+                robot.powerLauncher.setLaunchAngleLoading();
+                robot.runIntake(0.85);
+            }
+            else if (intakeSetting.equals("out")) {
+                robot.powerLauncher.setLaunchAngleLoading();
+                robot.runIntake(-0.85);
+            }
+            else if (intakeSetting.equals("off")) {
+                robot.runIntake(0);
+            }
+            else {
+                // Run intake with right joystick
+                robot.runIntake(-controller2.right_stick_y);
+            }
+
+            // Set loading launch angle if the intake is running
+            if (controller2.right_stick_y != 0) {
+                robot.powerLauncher.setLaunchAngleLoading();
+                intakeSetting = "normal";
+            }
+
+            // Toggle intake to gather rings
+            if (controller2.left_trigger + controller2.right_trigger > 1.8) {
+                intakeSetting = "in";
+            }
+
             // Right bumper toggles the claw
             if (controller2.right_bumper.equals("pressing")) {
                 robot.toggleClaw();
@@ -206,39 +244,36 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.turnArm();
             }
 
-            // Launch one ring at perfect launch angle
+            // Index 3 rings
             if (controller2.a.equals("pressing")) {
                 robot.powerLauncher.setLaunchAnglePerfect();
-                queue++;
+                robot.powerLauncher.resetQueueTimeStamp();
+                queue = 3;
             }
 
-            // Launch one ring at current angle
-            if (controller2.b.equals("pressing")) {
-                queue++;
-            }
-
-            // Manually index one ring
-            if (controller2.x.equals("pressing")) {
-                robot.powerLauncher.index();
-            }
-
-            // Toggle launcher
+            // Toggle launcher and set perfect launch angle
             // Note: You can interrupt queues this way! TODO : EXPLAIN
-            if (controller2.y.equals("pressing")) {
-                queue = (queue == 0 ? 10 : 0);
+            if (controller2.b.equals("pressing")) {
+                robot.powerLauncher.setLaunchAnglePerfect();
+                robot.powerLauncher.toggle();
+                queue = 0;
             }
 
-            // Run intake with right joystick
-            robot.runIntake(-controller2.right_stick_y);
+            // Manually index one ring (e.g. for powershots)
+            if (controller2.x.equals("pressing")) {
+                robot.indexRings(1);
+            }
 
-            // Set loading launch angle if the intake is running
-            if (!robot.powerLauncher.hasLoadingLaunchAngle() && controller2.right_stick_y != 0) {
-                robot.powerLauncher.setLaunchAngleLoading();
+            // Toggle launcher motors
+            if (controller2.y.equals("pressing")) {
+                robot.powerLauncher.toggle();
+                queue = 0;
             }
 
             // Angle the launcher up a tiny bit and set to default angle
             if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.030);
+                robot.powerLauncher.changeLaunchAngle(-0.010);
+                robot.powerLauncher.setCurrentAngleToDefault();
             }
 
             // Angle the launcher down a tiny bit and set to default angle
@@ -264,7 +299,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             // Go to default launch angle
-            if (controller2.left_stick_button.equals("pressed")) {
+            if (controller2.left_stick_button.equals("pressing")) {
                 robot.powerLauncher.setLaunchAnglePerfect();
             }
         }

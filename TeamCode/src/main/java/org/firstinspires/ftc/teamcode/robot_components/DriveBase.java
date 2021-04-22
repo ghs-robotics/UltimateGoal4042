@@ -98,7 +98,7 @@ public class DriveBase {
     public void calculateDrivePowers(double x1, double y1, double x2, double y2) {
         double r2 = Math.hypot(x2, y2);
         double angleOfRotation = Math.atan2(y2, x2); // Angle to rotate to (with launcher side)
-        targetGyroAngle = getReasonableGyroAngle(Math.toDegrees(angleOfRotation));
+        setTargetGyroAngle(Math.toDegrees(angleOfRotation));
         double rot = r2 * getMetaGyroPIDValue();
         calculateDrivePowers(x1, y1, rot, true);
     }
@@ -162,7 +162,7 @@ public class DriveBase {
 
     // Makes the robot rotate to a certain angle
     public void rotateToPos(double angle, double maxFineTuning) {
-        targetGyroAngle = getReasonableGyroAngle(angle);
+        setTargetGyroAngle(angle);
         gyroPID.resetValues();
         double t = getElapsedSeconds();
         while(getAbsoluteGyroError() > 5 && elapsedTime.seconds() - t < 5) {
@@ -193,6 +193,10 @@ public class DriveBase {
     // Sets speed to desired value
     public void setDriveSpeed(double speed) {
         this.speed = speed;
+    }
+
+    public void setTargetGyroAngle(double angle) {
+        targetGyroAngle = getReasonableGyroAngle(angle);
     }
 
     // Makes the robot stop driving

@@ -164,9 +164,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public void indexRings(int rings) {
         for (int i = 0; i < rings; i++) {
             powerLauncher.index();
-            wait(0.4);
+            wait(0.3);
         }
-        powerLauncher.toggleOff();
     }
 
     // Sets servos to starting positions

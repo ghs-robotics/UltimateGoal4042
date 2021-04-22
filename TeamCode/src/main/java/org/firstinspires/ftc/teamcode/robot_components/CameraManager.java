@@ -13,6 +13,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CameraManager implements HSVConstants {
 
+    private int cameraMonitorViewId;
+
     // Cameras
     public OpenCvCamera phoneCam;
     public OpenCvCamera webcam;
@@ -21,20 +23,24 @@ public class CameraManager implements HSVConstants {
     public CVDetectionPipeline phoneCamPipeline;
     public CVDetectionPipeline webcamPipeline;
 
+    HardwareMap hardwareMap;
+
     // Constructs a CameraManager with two cameras
     public CameraManager(HardwareMap hardwareMap) {
 
+        this.hardwareMap = hardwareMap;
+
         // Initializes some CV variables/objects
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+        cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "cameraMonitorViewId",
                 "id",
                 hardwareMap.appContext.getPackageName());
 
 
         // Uncomment ONE of the below statements ONLY
-//        setUpDualPort(hardwareMap, cameraMonitorViewId);
-//        setUpSinglePhonePort(hardwareMap, cameraMonitorViewId);
-        setUpSingleWebcamPort(hardwareMap, cameraMonitorViewId);
+//        setUpDualPort(hardwareMap);
+//        setUpSinglePhonePort(hardwareMap);
+        setUpSingleWebcamPort(hardwareMap);
 //        setUpNoStreamPort(hardwareMap);
 
         // Opens cameras
@@ -57,7 +63,7 @@ public class CameraManager implements HSVConstants {
         startStreaming();
     }
 
-    private void setUpDualPort(HardwareMap hardwareMap, int cameraMonitorViewId) {
+    private void setUpDualPort(HardwareMap hardwareMap) {
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
                         2, // The number of sub-containers to create
@@ -77,14 +83,14 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.get(WebcamName.class,"Webcam 1"));
     }
 
-    private void setUpSinglePhonePort(HardwareMap hardwareMap, int cameraMonitorViewId) {
+    private void setUpSinglePhonePort(HardwareMap hardwareMap) {
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"));
     }
 
-    private void setUpSingleWebcamPort(HardwareMap hardwareMap, int cameraMonitorViewId) {
+    private void setUpSingleWebcamPort(HardwareMap hardwareMap) {
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
@@ -95,6 +101,16 @@ public class CameraManager implements HSVConstants {
     public void startStreaming() {
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+    }
+
+    // Stream in the middle of a match TODO : MAKE ASYNC
+    public void startMidStream() {
+        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class,"Webcam 1"));
+        webcam.openCameraDevice();
+        webcam.setPipeline(webcamPipeline);
         webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
     }
 
