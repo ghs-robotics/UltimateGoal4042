@@ -21,6 +21,8 @@ public class Controller {
     public String right_stick_button;
     public String left_bumper;
     public String right_bumper;
+    public String left_trigger_state;
+    public String right_trigger_state;
 
     public double left_stick_x;
     public double left_stick_y;
@@ -47,6 +49,8 @@ public class Controller {
         right_stick_button = "released";
         left_bumper = "released";
         right_bumper = "released";
+        left_trigger_state = "released";
+        right_trigger_state = "released";
 
         left_stick_x = 0;
         left_stick_y = 0;
@@ -66,6 +70,9 @@ public class Controller {
         dpad_up    = check(dpad_up,    gamepad.dpad_up);
         dpad_left  = check(dpad_left,  gamepad.dpad_left);
         dpad_down  = check(dpad_down,  gamepad.dpad_down);
+
+//        left_trigger_state  = check(tri, gamepad.left_trigger > 0.95);
+//        right_trigger_state = check(dpad_up,    gamepad.right_trigger > 0.95);
 
         back  = check(back,  gamepad.back);
         guide = check(guide, gamepad.guide);

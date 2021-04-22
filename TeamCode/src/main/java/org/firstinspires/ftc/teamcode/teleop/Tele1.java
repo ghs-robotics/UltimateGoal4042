@@ -246,7 +246,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Index 3 rings
             if (controller2.a.equals("pressing")) {
-                robot.powerLauncher.setLaunchAnglePerfect();
                 robot.powerLauncher.resetQueueTimeStamp();
                 queue = 3;
             }
