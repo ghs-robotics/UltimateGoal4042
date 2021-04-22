@@ -3,474 +3,406 @@ package org.firstinspires.ftc.teamcode.robot_components;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.opencv.core.Scalar;
+import org.firstinspires.ftc.teamcode.cv_objects.CVObject;
+import org.firstinspires.ftc.teamcode.cv_objects.FieldFloor;
+import org.firstinspires.ftc.teamcode.cv_objects.FieldWall;
+import org.firstinspires.ftc.teamcode.cv_objects.Ring;
+import org.firstinspires.ftc.teamcode.cv_objects.StarterStack;
+import org.firstinspires.ftc.teamcode.cv_objects.TowerGoal;
+import org.firstinspires.ftc.teamcode.cv_objects.WobbleGoal;
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
+import org.firstinspires.ftc.teamcode.data.HSVConstants;
 
-public class Robot {
-    // HSV constants
-    public static final Scalar LOWER_RING_HSV = new Scalar(74, 153, 144); // original values: 74, 153, 144
-    public static final Scalar UPPER_RING_HSV = new Scalar(112, 242, 255); // original values: 112, 242, 255
-    public static final Scalar LOWER_TOWER_HSV = new Scalar(0, 80, 100); // original values: 0, 124, 60
-    public static final Scalar UPPER_TOWER_HSV = new Scalar(80, 255, 220); // original values: 54, 212, 255
-    public static final Scalar LOWER_WOBBLE_HSV = new Scalar(0, 117, 0);
-    public static final Scalar UPPER_WOBBLE_HSV = new Scalar(77, 255, 97);
+public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
-    public int mode = 1; //0 is POV, 1 is meta, ... (might add more later)
-    public int metaOffset = 0; //Change the direction of meta mode, default will be facing the tower goals
+    public CameraManager camera; // Manages the webcam and phone camera
 
-    // CV detection variables
-    public static Scalar lower = LOWER_RING_HSV; // We identify rings by default to start out
-    public static Scalar upper = UPPER_RING_HSV;
-    public static double cover = 0; // The fraction of the top part of the camera screen that is
-    // covered, which is useful when we don't want the phone to detect anything beyond the field
+    // Objects to be detected through CV
+    public CVObject target;
+    public FieldFloor floor;
+    public FieldWall wall;
+    public Ring ring;
+    public StarterStack stack;
+    public TowerGoal tower;
+    public WobbleGoal wobble;
 
-    private boolean objectNotIdentified = false; // The program will know when the object isn't in view
-    public PhoneCamManager camera;
-
-    private int targetX = 100;
-    private int targetY = 140;
-    private int targetWidth = 95;
-    private int objectX = 0;
-    private int objectY = 0;
-    private int objectWidth = 0;
-    private int objectHeight = 0;
+    // Used in several methods for regulating motor powers for in automated functions
     private double x = 0;
     private double y = 0;
-    public double targetAngle = 0; // gyroscope will target this angle
 
-    private String currentTargetObject = "ring";
+    // Stores data for automated functions in TeleOp
+    private double phaseTimeStamp = 0;
 
     // Robot variables and objects
-    private double leftFrontPower = 0;
-    private double rightFrontPower = 0;
-    private double leftRearPower = 0;
-    private double rightRearPower = 0;
     private double intakePower = 0;
-    public double armAngle = 0.45; // Up position
-    public double grabAngle = 0.15; // Closed position
-    public double shooterAngle = 0.58; // Back (regular) position
-    public double speed = 1;
-    public double config = 0;
+    public double armAngle = 0.37; // Up position
+    public double clawAngle = 0.92; // Closed position
 
-    public DcMotor leftFrontDrive;
-    public DcMotor rightFrontDrive;
-    public DcMotor leftRearDrive;
-    public DcMotor rightRearDrive;
     public DcMotor intakeMotor;
     public Servo armServo;
-    public Servo grabServo;
-    public Servo shooterServo;
+    public Servo clawServo;
 
-    public Diffy diffy;
-
-    public ElapsedTime elapsedTime;
-    public Gyro gyro;
-    public Telemetry telemetry;
+    public PowerLauncher powerLauncher;
 
     // PID controllers
-    public PIDController xPID; // For the x-position of the robot
-    public PIDController yPID; // For the y-position of the robot
-    public PIDController wPID; // For the width of the tower goal
-    public PIDController gyroPID; // Controls the angle
+    public PIDController towerXPID; // For the x-position of the tower goal
+    public PIDController towerWPID; // For the width of the tower goal
+    public PIDController xPID;
+    public PIDController wPID; // For the y-position of the robot
 
-    // Creates a robot object with methods that we can use in both Auto and TeleOp
+    // Constructs a robot object with methods that we can use in both Auto and TeleOp
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
 
+        // Calls the constructor in DriveBase, which handles all the drive base motors
+        super(hardwareMap, telemetry);
+
         // These are the names to use in the phone config (in quotes below)
-        leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFrontDrive");
-        leftRearDrive = hardwareMap.get(DcMotor.class, "leftRearDrive");
-        rightRearDrive = hardwareMap.get(DcMotor.class, "rightRearDrive");
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
-        grabServo = hardwareMap.get(Servo.class, "grabServo");
-        shooterServo = hardwareMap.get(Servo.class, "shooterServo");
+        clawServo = hardwareMap.get(Servo.class, "clawServo");
 
         // Defines the forward direction for each of our motors/servos
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        leftRearDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightRearDrive.setDirection(DcMotor.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotor.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         armServo.setDirection(Servo.Direction.FORWARD);
-        grabServo.setDirection(Servo.Direction.FORWARD);
-        shooterServo.setDirection(Servo.Direction.FORWARD);
+        clawServo.setDirection(Servo.Direction.FORWARD);
 
-        // Initializes some other useful tools for our robot (the gyroscope, the timer, etc.)
-        diffy = new Diffy(hardwareMap);
-        gyro = new Gyro(hardwareMap);
-        gyro.resetAngle();
-        camera = new PhoneCamManager(hardwareMap);
-        elapsedTime = new ElapsedTime();
-        elapsedTime.reset();
-        this.telemetry = telemetry;
+        // Initializes some other useful tools/objects for our robot
+        powerLauncher = new PowerLauncher(hardwareMap);
+        camera = new CameraManager(hardwareMap);
 
         // Initializing PID objects
-        xPID = new PIDController(0.0120, 0.0022, 0.0015, 2);
-        yPID = new PIDController(0.0200, 0.0025, 0.0010, 2);
-        wPID = new PIDController(0.0450, 0.0015, 0.0020, 2); //0.0440, 0.0016, 0.0010
-        gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 2); //works best when Ki = 0
+
+        // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
+        // When working together with wPID, having Ki and Kd be zero works best
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1);
+
+        // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
+        // Having Ki and Kd be zero normally works fine though
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1);
+
+        xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
+        wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
+
+        CVDetectionPipeline web = camera.webcamPipeline;
+        CVDetectionPipeline phone = camera.phoneCamPipeline;
+
+        floor = new FieldFloor(phone, new PIDController(0.0600, 0.0035, 0.0020, 1)); // yPID
+        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0.5)); // hPID
+        ring = new Ring(phone, xPID, wPID);
+        stack = new StarterStack(web);
+        tower = new TowerGoal(web, towerXPID, towerWPID);
+        wobble = new WobbleGoal(phone, xPID, wPID);
+        target = tower;
+    }
+
+
+
+
+
+    // ---------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    // ------------------------------------   HELPER METHODS   -------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+
+    // Call before using CV for field localization
+    public void activateFieldLocalization() {
+        tower.activate();
+        wall.activate();
+    }
+
+    // Displays a bunch of useful values on the DS phone
+    @Override
+    public void addTelemetryData() {
+        telemetry.addData("TARGET", "" + target.toString());
+        telemetry.addData("config", "" + identifyRingConfig());
+
+        telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
+        telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
+        telemetry.addData("", "");
+        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
+
+        telemetry.addData("gyro angle", "" + gyro.getAngle());
+        telemetry.addData("TOWER", "" + tower.toString());
+        telemetry.addData("WALL", "" + wall.toString());
+        telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
+//        telemetry.addData("Kp", target.depthPID.k_P);
+//        telemetry.addData("Ki", target.depthPID.k_I);
+//        telemetry.addData("Kd", target.depthPID.k_D);
+        telemetry.update();
+    }
+
+    // Call after using CV for field localization in order to reduce lag in teleop
+    public void deactivateFieldLocalization() {
+        tower.deactivate();
+        wall.deactivate();
+    }
+
+    // Classifies the starter stack
+    public int identifyRingConfig() {
+        return stack.findConfig();
     }
 
     // To use at the start of each OpMode that uses CV
-    public void init() {
-        resetServos();
+    public void initWithCV() {
         camera.initCamera();
+        initWithoutCV();
+        tower.activate();
+        wall.activate();
     }
 
-    // Updates the coordinates of the object being detected on the screen
-    public void updateObjectValues() {
-        int[] val = camera.getObjectData(currentTargetObject);
-        objectX = val[0];
-        objectY = val[1];
-        objectWidth = val[2];
-        objectHeight = val[3];
+    public void initWithoutCV() {
+        resetServos();
+        resetGyroAngle();
+        wait(1.0);
     }
 
-    // Switches the object that the robot is trying to detect to a ring
-    public void setTargetToRing(int x, int y) {
-        currentTargetObject = "ring";
-        xPID.resetValues();
-        yPID.resetValues();
-        cover = 0;
-        lower = LOWER_RING_HSV;
-        upper = UPPER_RING_HSV;
-        targetX = x;
-        targetY = y;
+    // Launches a ring by moving the shooterServo
+    public void indexRings(int rings) {
+        for (int i = 0; i < rings; i++) {
+            powerLauncher.index();
+            wait(0.3);
+        }
     }
-
-    // Switches the object that the robot is trying to detect to the wobble goal
-    public void setTargetToWobble(int x, int y) {
-        currentTargetObject = "wobble";
-        xPID.resetValues();
-        yPID.resetValues();
-        cover = 0;
-        lower = LOWER_WOBBLE_HSV;
-        upper = UPPER_WOBBLE_HSV;
-        targetX = x;
-        targetY = y;
-    }
-
-    // Switches the object that the robot is trying to detect to the tower goal
-    public void setTargetToTower(int x, int w) {
-        currentTargetObject = "tower";
-        xPID.resetValues();
-        wPID.resetValues();
-        cover = 0;
-        lower = LOWER_TOWER_HSV;
-        upper = UPPER_TOWER_HSV;
-        targetX = x;
-        targetWidth = w;
-    }
-
-    // Set a target and use default values for the target position
-    public void setTargetToRing() { setTargetToRing(180, 190); } // Originally: y = 220
-    public void setTargetToWobble() { setTargetToWobble(60, 160); }
-    public void setTargetToTower() { setTargetToTower(140, 70); }
 
     // Sets servos to starting positions
     public void resetServos() {
+        clawServo.setPosition(clawAngle);
+        wait(0.6);
         armServo.setPosition(armAngle);
-        grabServo.setPosition(grabAngle);
-        shooterServo.setPosition(shooterAngle);
+        powerLauncher.resetServos();
     }
 
-    // Makes the robot stop driving
-    public void stopDrive() {
-        leftFrontPower = 0;
-        rightFrontPower = 0;
-        leftRearPower = 0;
-        rightRearPower = 0;
-        sendDrivePowers();
-    }
-
-    // Calculates powers for mecanum wheel drive
-    public void calculateDrivePowers(double x, double y, double rotation) {
-        double r = Math.hypot(x, y);
-        double robotAngle = Math.atan2(y, x) - Math.PI / 4 + (mode == 1 ? Math.toRadians(gyro.getAngle() + metaOffset) : 0);
-        leftFrontPower = Range.clip(r * Math.cos(robotAngle) + rotation, -1.0, 1.0) * speed;
-        rightFrontPower = Range.clip(r * Math.sin(robotAngle) - rotation, -1.0, 1.0) * speed;
-        leftRearPower = Range.clip(r * Math.sin(robotAngle) + rotation, -1.0, 1.0) * speed;
-        rightRearPower = Range.clip(r * Math.cos(robotAngle) - rotation, -1.0, 1.0) * speed;
-    }
-
-    // Sends power to drive motors
-    public void sendDrivePowers() {
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftRearDrive.setPower(leftRearPower);
-        rightRearDrive.setPower(rightRearPower);
-    }
-
-    // Updates the powers being sent to the drive motors
-    public void updateDrive() {
-        //Displays motor powers on the phone
-//        telemetry.addData("encoderPos", "" + diffy.getPosition());
-        telemetry.addData("leftDiffy", "" + diffy.leftDiffyPower);
-        telemetry.addData("rightDiffy", "" + diffy.rightDiffyPower);
-        telemetry.addData("shooterAngle", "" + shooterAngle);
-        telemetry.addData("angle", "" + gyro.getAngle());
-        telemetry.addData("config: ", "" + config);
-        telemetry.update();
-        sendDrivePowers();
-    }
-
-    // Turns the robot to a desired angle (if called repeatedly)
-    public void adjustAngle() {
-        calculateDrivePowers(0, 0, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
-        sendDrivePowers();
-    }
-
-    // Displays important values on the phone screen
-    private void chaseObject(double x, double y, double rotation) {
-        calculateDrivePowers(x, y, rotation);
-        sendDrivePowers();
-
-        String t = currentTargetObject;
-
-        if (objectNotIdentified) {
-            telemetry.addData("ATTENTION: ", "OBJECT NOT IDENTIFIED");
-        }
-
-        if (t.equals("tower")) {
-            telemetry.addData("towerX = ", objectX + " (target = " + targetX + ")");
-            telemetry.addData("towerY = ", objectY);
-            telemetry.addData("width = ", objectWidth + " (target = " + targetWidth + ")");
-            telemetry.addData("height = ", objectHeight);
-            telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-            telemetry.addData("Kp (w): ", wPID.k_P);
-            telemetry.addData("Ki (w): ", wPID.k_I);
-            telemetry.addData("Kd (w): ", wPID.k_D);
-        } else {
-            telemetry.addData(t + "X = ", objectX + " (target = " + targetX + ")");
-            telemetry.addData(t + "Y = ", objectY + " (target = " + targetY + ")");
-            telemetry.addData("width = ", objectWidth);
-            telemetry.addData("height = ", objectHeight);
-            telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-            telemetry.addData("Kp (x): ", xPID.k_P);
-            telemetry.addData("Ki (x): ", xPID.k_I);
-            telemetry.addData("Kd (x): ", xPID.k_D);
-        }
-
-        telemetry.addData("HSV MIN, MAX: ", lower + ", " + upper);
-        telemetry.update();
-    }
-
-    // Makes the robot chase the closest ring (if called repeatedly)
-    public void chaseRing() {
-        if (!currentTargetObject.equals("ring")) { setTargetToRing(); }
-        updateObjectValues();
-
-        x = xPID.calcVal(targetX - objectX);
-        y = -yPID.calcVal(targetY - objectY);
-
-        double h = objectHeight;
-        double w = objectWidth;
-        double r = 1.0 * w / h;
-
-        // Testing to make sure the detected object is a ring
-        if (!(h > 8 && h < 23 && w > 32 && w < 90 && r > 1.5 && r < 5)) { // 8,23,22,90,1.5,7
-            // TODO: Make sure we aren't double-checking this condition in the pipeline or here!
-            x = 0;
-            y = 0;
-        }
-
-        chaseObject(x, 0, 0); // TODO : change back to y
-    }
-
-    // Makes the robot chase the wobble goal (if called repeatedly); TO DO: NEEDS GYRO IMPLEMENTATION
-    public void chaseWobble() {
-        if (!currentTargetObject.equals("wobble")) { setTargetToWobble(); }
-        updateObjectValues();
-
-        double dy = targetY - objectY;
-        double dx = targetX - objectX;
-
-        // Adjust x and y values according to how far away the robot is from the target
-        if (Math.abs(dx) < 10) {
-            x = 0;
-        } else {
-            x += Range.clip(dx / 400.0, -0.2, 0.2);
-        }
-        if (Math.abs(dy) < 10) {
-            y = 0;
-        } else {
-            y -= Range.clip(dy / 400.0, -0.2, 0.2);
-        }
-
-        // Make sure the robot doesn't go too fast
-        y = Range.clip(y, -0.6, 0.6);
-        x = Range.clip(x, -0.6, 0.6);
-
-        double h = objectHeight;
-        double w = objectWidth;
-
-        // Testing to make sure the detected object is a wobble goal
-        if (!(h > 10 && h < 200 && w > 10 && w < 200)) {
-            x = 0;
-            y = 0;
-        }
-
-        chaseObject(x, y, 0);
-    }
-
-    // Makes the robot line up with the tower goal (if called repeatedly)
-    public void chaseTower() {
-        if (!currentTargetObject.equals("tower")) { setTargetToTower(); }
-        updateObjectValues();
-
-        x = xPID.calcVal(targetX - objectX);
-        y = -wPID.calcVal(targetWidth - objectWidth);
-
-        if (!(objectWidth > 40 && objectWidth < 150)) { // TODO : perhaps adjust these values
-            x = 0;
-            y = 0;
-            objectNotIdentified = true;
-        } else if (objectNotIdentified == true) {
-            objectNotIdentified = false;
-        }
-
-//        chaseObject(x, y, -gyroPID.calcVal(targetAngle - gyro.getAngle()));
-        chaseObject(x, y, 0); // TODO : comment out
-//        chaseObject(0, 0, 0);
-    }
-
-    public void moveToPos(int[] pos) {
-        moveToPos(pos, 1.0);
-    }
-
-    // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double maxSeconds) {
-        setTargetToTower(pos[0], pos[1]); // Setting targetX and targetWidth
-        updateObjectValues();
-        double t = getElapsedTimeSeconds();
-        while((Math.abs(targetWidth - objectWidth) > 8 || Math.abs(targetX - objectX) > 8)
-                && elapsedTime.seconds() - t < 5) {
-            chaseTower();
-        }
-        t = getElapsedTimeSeconds();
-        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
-                || rightFrontPower != 0) && elapsedTime.seconds() - t < maxSeconds) {
-            chaseTower();
-        }
-        //stopDrive();
-    }
-
-    // Makes the robot rotate to a certain angle
-    public void rotateToPos(int angle, int maxSeconds) {
-        targetAngle = angle;
-        double t = getElapsedTimeSeconds();
-        while(Math.abs(targetAngle - gyro.getAngle()) > 5 && elapsedTime.seconds() - t < 5) {
-            adjustAngle();
-        }
-        t = getElapsedTimeSeconds();
-        while ((Math.abs(targetAngle - gyro.getAngle()) > 1)
-                && elapsedTime.seconds() - t < maxSeconds) {
-            adjustAngle();
-        }
-        //stopDrive();
-    }
-
-    // Makes the robot line up with the tower goal and shoot three rings
-    public void adjustAndShoot() {
-        setTargetToTower(95,80);
-        updateObjectValues();
-        double t = getElapsedTimeSeconds();
-        while(Math.abs(targetWidth - objectWidth) > 2 || Math.abs(targetX - objectX) > 2 && elapsedTime.seconds() - t < 4) {
-            chaseTower();
-        }
-        t = getElapsedTimeSeconds();
-        chaseTower();
-        toggleShooter();
-        while ((leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0
-                || rightFrontPower != 0) && elapsedTime.seconds() - t < 3) {
-            chaseTower();
-        }
-        stopDrive();
-        for (int i = 0; i < 3; i++) {
-            launchRing();
-            wait(0.4);
-        }
-        toggleShooter();
-    }
-
-    // Toggles the drive speed between 50% and normal
-    public void toggleSpeed() {
-        speed = (speed == 1 ? 0.5 : 1);
-    }
-
-    // Turns the shooter motor on or off
-    public void toggleShooter() { diffy.toggleShooter(0); }
-
-    // Turns the intake motor on or off
-    public void toggleIntake() {
-        intakePower = (intakePower == 0 ? 0.6 : 0);
+    // Run intake with specified power; negative values make intake run backward
+    public void runIntake(double power) {
+        intakePower = power;
         intakeMotor.setPower(intakePower);
+    }
+
+    // Toggles the wobble gripper/claw
+    public void toggleClaw() {
+        // Default angle is 0.15 (which means the gripper is closed)
+        clawAngle = (clawAngle == 0.55 ? 0.92 : 0.55);
+        clawServo.setPosition(clawAngle);
     }
 
     // Turns the arm
     public void turnArm() {
-        // Default angle is 0.5 (which is the up position)
-        armAngle = (armAngle == 0.88 ? 0.45 : 0.88);
+        // Default angle is 0.37 (which is the up position)
+        armAngle = (armAngle == 0.88 ? 0.37 : 0.88);
         armServo.setPosition(armAngle);
     }
 
-    // Toggles the wobble gripper
-    public void toggleGrab() {
-        // Default angle is 0.15 (which means the gripper is closed)
-        grabAngle = (grabAngle == 0.48 ? 0.15 : 0.48);
-        grabServo.setPosition(grabAngle);
+    // Turns the arm but not as far
+    public void turnArmAlmost() {
+        // Default angle is 0.37 (which is the up position)
+        armAngle = (armAngle == 0.8 ? 0.37 : 0.8);
+        armServo.setPosition(armAngle);
     }
 
-    // Launches a ring by moving the shooterServo
-    public void launchRing() {
-        shooterAngle = 0.46; // Forward position
-        shooterServo.setPosition(shooterAngle);
-        wait(0.5);
-        shooterAngle = 0.58; // Back position
-        shooterServo.setPosition(shooterAngle);
-    }
 
-    // Makes robot move forward and pick up wobble goal
-    public void pickUpWobbleGoal(double sec) {
-        turnArm();
-        toggleGrab();
-        calculateDrivePowers(0,-0.4,0);
-        sendDrivePowers();
-        wait(sec); //Adjust this later
-        stopDrive();
-        toggleGrab();
-        wait(0.6);
-        turnArm();
-    }
 
-    // Classifies the starter stack; TODO: NEEDS TO BE TESTED ADJUSTED
-    public void identifyRingConfig() {
-        setTargetToRing();
-        updateObjectValues();
-        if (!(objectWidth == 0)) {
-            config = 1.0 * objectHeight / objectWidth;
+
+
+
+    // ---------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+    // ---------------------------------   AUTOMATED FUNCTIONS   -----------------------------------
+    // ---------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------
+
+
+    // Makes the robot line up with the tower goal (if called repeatedly)
+    // Make sure the following things are accounted for before calling this:
+    // targetGyroAngle, target values, reset PIDs, activate object, set launcher side as front
+    public void adjustPosition() {
+        if (getAbsoluteGyroError() > 4) {
+            adjustAngle();
+        }
+        // When robot is too close to front of field
+        else if (!tower.isIdentified() /* || (10 < floor.y && floor.y < 80) || (wall.isIdentified() && wall.h < 35) */) {
+            chaseObject(wall);
+        }
+        else {
+            chaseObject(tower);
         }
     }
 
-    // Resets the timer
-    public void resetElapsedTime() {
-        elapsedTime.reset();
+    // Makes the robot chase the target object (if called repeatedly)
+    // Make sure the following things are accounted for before calling this:
+    // gyro angle, target values, reset PIDs, activate object, set launcher side as front
+    public void chaseObject(CVObject target) {
+        x = target.getBreadthPIDValue();
+        y = target.getDepthPIDValue();
+        calculateDrivePowers(x, y, getGyroPIDValue());
+        updateDrive();
     }
 
-    // Returns how many seconds have passed since the timer was last reset
-    public double getElapsedTimeSeconds() {
-        return elapsedTime.seconds();
+    // Hardcoded movement
+    public void move(double x, double y, double seconds) {
+        move(x, y, seconds, false);
     }
 
-    // Makes the robot wait (i.e. do nothing) for a specified number of seconds
-    public void wait(double seconds) {
-        double start = getElapsedTimeSeconds();
-        while (getElapsedTimeSeconds() - start < seconds) {}
+    public void move(double x, double y, double seconds, boolean gyro) {
+        if (gyro) {
+            double t = getElapsedSeconds();
+            while (getElapsedSeconds() - t < seconds) {
+                calculateDrivePowers(x, y, getGyroPIDValue());
+                sendDrivePowers();
+            }
+        } else {
+            calculateDrivePowers(x, y, 0);
+            sendDrivePowers();
+            wait(seconds);
+        }
+        stopDrive();
+    }
+
+    // Automated move to position function that uses phases and must be called repeatedly
+    // This allows us to terminate the function early (because we can just set phase to be 0)
+    public int moveInPhases(int phase) {
+        if (phase == 3) {
+            tower.activate();
+            wall.activate();
+            targetGyroAngle = getReasonableGyroAngle(0);
+            phaseTimeStamp = elapsedTime.seconds();
+            phase--;
+        }
+        else if (phase == 2) {
+            if ((!tower.isIdentified()
+                    || tower.getAbsErrorW() > 8
+                    || tower.getAbsErrorX() > 8
+                    || tower.getAbsErrorX() > 8
+                    || getAbsoluteGyroError() > 4)
+                    && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
+                adjustPosition();
+            } else {
+                phaseTimeStamp = elapsedTime.seconds();
+                tower.resetPIDs();
+                wall.resetPIDs();
+                phase--;
+            }
+        }
+        else if (phase == 1) {
+            if (elapsedTime.seconds() - phaseTimeStamp < 2.0 &&
+                    (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
+                adjustPosition();
+            } else {
+                stopDrive();
+                phase--;
+            }
+        }
+        return phase;
+    }
+
+    public void moveToPos(int[] pos) {
+        moveToPos(pos, 0.0, 2.0, 5.0);
+    }
+
+    public void moveToPos(int[] pos, double maxFineTuning) {
+        moveToPos(pos, 0.0, maxFineTuning, 5.0);
+    }
+
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning) {
+        moveToPos(pos, minFineTuning, maxFineTuning, 5.0);
+    }
+
+    // Makes the robot move to a certain position relative to the tower goal
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        tower.activate();
+        wall.activate();
+        tower.setTargetXW(pos);
+        rotateToPos(0.0, 0.0);
+        double t = getElapsedSeconds();
+        while(  (!tower.isIdentified()
+                || tower.getAbsErrorW() > 8
+                || tower.getAbsErrorX() > 8
+                || tower.getAbsErrorX() > 8
+                || getAbsoluteGyroError() > 4)
+                && elapsedTime.seconds() - t < maxBroadTuning) {
+            adjustPosition();
+        }
+        t = getElapsedSeconds();
+
+        // Start fresh by resetting these
+        tower.resetPIDs();
+        wall.resetPIDs();
+
+        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+            adjustPosition();
+        }
+        stopDrive();
+    }
+
+    // Move to a certain distance from the back wall
+    // Only call this if the robot is already at least 2 feet from the back wall!
+    public void moveUsingFloor(int targetY, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        floor.activate();
+        floor.setTargetY(targetY);
+        rotateToPos(0.0, 0.0);
+        double t = getElapsedSeconds();
+        while(  (floor.getAbsErrorY() > 3 || getAbsoluteGyroError() > 4)
+                && elapsedTime.seconds() - t < maxBroadTuning) {
+            chaseObject(floor);
+        }
+        t = getElapsedSeconds();
+
+        // Start fresh by resetting this
+        floor.resetPIDs();
+
+        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+            chaseObject(floor);
+        }
+        stopDrive();
+    }
+
+    // Move to a certain distance from the back wall
+    // Only call this if the robot is already at least 2 feet from the back wall!
+    public void moveUsingWall(int wallH, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        wall.activate();
+        wall.setTargetH(wallH);
+        rotateToPos(0.0, 0.0);
+        double t = getElapsedSeconds();
+        while(  (wall.getAbsErrorH() > 3 || getAbsoluteGyroError() > 4)
+                && elapsedTime.seconds() - t < maxBroadTuning) {
+            chaseObject(wall);
+        }
+        t = getElapsedSeconds();
+
+        // Start fresh by resetting this
+        wall.resetPIDs();
+
+        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
+                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+            chaseObject(wall);
+        }
+        stopDrive();
+    }
+
+    // Makes robot move forward and pick up wobble goal
+    public void pickUpWobbleGoal() {
+        wall.activate();
+        stopDrive();
+        turnArm();
+        toggleClaw();
+        double t = getElapsedSeconds();
+        calculateDrivePowers(0, -0.3, 0);
+        sendDrivePowers();
+        while (wall.h < 94 && getElapsedSeconds() - t < 3.0) {
+            calculateDrivePowers(0, -0.3, getGyroPIDValue());
+            sendDrivePowers();
+        }
+        wall.deactivate();
+        stopDrive();
+        toggleClaw();
+        wait(0.5);
+        turnArm();
     }
 }
 
-//Documentation: https://ftctechnh.github.io/ftc_app/doc/javadoc/index.html
+// Documentation: https://ftctechnh.github.io/ftc_app/doc/javadoc/index.html

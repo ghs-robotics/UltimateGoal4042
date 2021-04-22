@@ -17,6 +17,15 @@ public class PIDController {
     private double prevTime; // measured in seconds!
     private ElapsedTime time;
 
+    public PIDController() {
+        this(0, 0, 0, 1.0);
+    }
+
+    // Default values for min and max are -1.0 and 1.0, respectively
+    public PIDController(double Kp, double Ki, double Kd, double tolerance) {
+        this(Kp, Ki, Kd, tolerance, -1.0, 1.0);
+    }
+
     public PIDController(double Kp, double Ki, double Kd, double tolerance, double min, double max) {
         k_P = Kp;
         k_I = Ki;
@@ -28,25 +37,10 @@ public class PIDController {
         resetValues();
     }
 
-    // Default values for min and max are -1.0 and 1.0, respectively
-    public PIDController(double Kp, double Ki, double Kd, double tolerance) {
-        this(Kp, Ki, Kd, tolerance, -1.0, 1.0);
-    }
-
-    // Restarts the PID controller
-    public void resetValues() {
-        p_error = 0;
-        i_error = 0;
-        d_error = 0;
-        prevError = 0;
-        prevTime = 0;
-        time.reset();
-    }
-
     // Calculates the power value to be sent to the motor(s)
     public double calcVal(double error) {
         // If the error is small enough, the robot won't adjust
-        if (Math.abs(error) < toleranceRadius) { return 0; }
+        if (Math.abs(error) <= toleranceRadius) { return 0; }
 
         // Calculates the different errors
         double deltaTime = time.seconds() - prevTime;
@@ -60,5 +54,20 @@ public class PIDController {
 
         // Returns the PID value to be sent to the motor
         return Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
+    }
+
+    // Restarts the PID controller
+    public void resetValues() {
+        p_error = 0;
+        i_error = 0;
+        d_error = 0;
+        prevError = 0;
+        prevTime = 0;
+        time.reset();
+    }
+
+    public void setMinMax(double min, double max) {
+        this.min = min;
+        this.max = max;
     }
 }
