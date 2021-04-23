@@ -49,7 +49,7 @@ public class Controller {
         right_stick_button = "released";
         left_bumper = "released";
         right_bumper = "released";
-        left_trigger_state = "released";
+        left_trigger_state = "released"; // pretending the triggers are buttons (with >0.95 counting as being pressed)
         right_trigger_state = "released";
 
         left_stick_x = 0;
@@ -71,8 +71,8 @@ public class Controller {
         dpad_left  = check(dpad_left,  gamepad.dpad_left);
         dpad_down  = check(dpad_down,  gamepad.dpad_down);
 
-        left_trigger_state  = check(left_trigger, gamepad.left_trigger > 0.95);
-        right_trigger_state = check(right_trigger,    gamepad.right_trigger > 0.95);
+        left_trigger_state  = check(left_trigger_state, gamepad.left_trigger > 0.95);
+        right_trigger_state = check(right_trigger_state,    gamepad.right_trigger > 0.95);
 
         back  = check(back,  gamepad.back);
         guide = check(guide, gamepad.guide);
