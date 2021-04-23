@@ -51,10 +51,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1); // Whoever presses start + a
         controller2 = new Controller(gamepad2); // Whoever presses start + b
+
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
         int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
         String intakeSetting = "normal"; // "normal," "in," "out," "off"
-        boolean directionToggled = false; // true when the robot should always face the tower goal
 
         robot.powerLauncher.setLaunchAngleLoading();
         robot.initWithCV();
@@ -64,7 +64,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        robot.deactivateFieldLocalization();
         robot.camera.stopStreaming();
         robot.resetGyroAngle();
         robot.resetElapsedTime();
@@ -91,10 +90,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 phase = robot.moveInPhases(phase);
             }
             else {
-//                robot.deactivateFieldLocalization(); // Reduces lag
-
-                if (!directionToggled) {
-                    // Mecanum wheel drive
+                if (!controller1.right_bumper.equals("pressed")) {
+                    // Mecanum wheel drive in meta mode
                     robot.calculateDrivePowers(
                             controller1.left_stick_x,
                             controller1.left_stick_y,
@@ -102,38 +99,16 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                             controller1.right_stick_y
                     );
                 }
-                else { // Always rotate to face tower goal
+                else {
+                    // Always rotate to face tower goal
                     robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
                 }
 
-                if (controller1.dpad_up.equals("pressed")) {
-                    robot.calculateDrivePowers(0.50, 0, 0);
-                }
-                else if (controller1.dpad_down.equals("pressed")) {
-                    robot.calculateDrivePowers(-0.50, 0, 0);
-                }
-                else if (controller1.dpad_left.equals("pressed")) {
-                    robot.calculateDrivePowers(0, 0.4, 0);
-                }
-                else if (controller1.dpad_right.equals("pressed")) {
-                    robot.calculateDrivePowers(0, -0.4, 0);
-                }
-
-                // Reset gyro in case of emergency
-                else if (controller1.left_trigger + controller1.right_trigger > 1.8) {
-                    robot.resetGyroAngle();
-                }
-                else if (controller1.left_trigger > 0.1) {
+                if (controller1.left_trigger > 0.1) {
                     robot.calculateDrivePowers(0, 0, -0.25 * controller1.left_trigger);
                 }
                 else if (controller1.right_trigger > 0.1) {
                     robot.calculateDrivePowers(0, 0, 0.25 * controller1.right_trigger);
-                }
-
-                // Rotate to face tower goal
-                else if (controller1.left_bumper.equals("pressed")) {
-                    robot.setTargetGyroAngle(0);
-                    robot.adjustAngle();
                 }
 
                 robot.updateDrive(); // Also updates telemetry
@@ -141,11 +116,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Automated position
             if (controller1.a.equals("pressing")) {
-//                robot.activateFieldLocalization();
-//                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
-//                robot.powerLauncher.setLaunchAnglePerfect();
-//                phase = 3;
-
                 if (intakeSetting.equals("in")) {
                     intakeSetting = "off";
                 } else {
@@ -155,44 +125,53 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Automated position
             if (controller1.b.equals("pressing")) {
-//                robot.activateFieldLocalization();
-//                robot.tower.setTargetXW(SECOND_WOBBLE_POS);
-//                robot.powerLauncher.setLaunchAnglePerfect();
-//                phase = 3;
-
-//                if (intakeSetting.equals("out")) {
-//                    intakeSetting = "off";
-//                } else {
-//                    intakeSetting = "out";
-//                }
+                if (intakeSetting.equals("out")) {
+                    intakeSetting = "off";
+                } else {
+                    intakeSetting = "out";
+                }
             }
 
             // Reset the controls
             if (controller1.x.equals("pressing")) {
                 robot.toggleSpeed();
-//                robot.camera.startMidStream();
-//                robot.activateFieldLocalization();
             }
 
             // Terminate any automated functions
             if (controller1.y.equals("pressing")) {
-                phase = 0;
                 robot.camera.stopStreaming();
-//                robot.deactivateFieldLocalization();
+                phase = 0;
             }
 
-            // Go to perfect launch position and set launch angle
-            if (controller1.right_bumper.equals("pressing")) {
-//                robot.activateFieldLocalization();
-//                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-//                robot.powerLauncher.setLaunchAnglePerfect();
-//                phase = 3;
-                directionToggled = !directionToggled;
+            // Reset gyro in case of emergency
+            if (controller1.left_bumper.equals("pressing")) {
+                robot.resetGyroAngle();
             }
 
             // Set to full speed
             if (controller1.left_stick_button.equals("pressing")) {
                 robot.speed = 1;
+                phase = 0;
+            }
+
+            if (controller1.dpad_right.equals("pressed")) {
+                robot.camera.startMidStream();
+            }
+            else if (controller1.dpad_up.equals("pressed")) {
+                robot.activateFieldLocalization();
+                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+                robot.powerLauncher.setLaunchAnglePerfect();
+                phase = 3;
+            }
+            else if (controller1.dpad_left.equals("pressed")) {
+                robot.powerLauncher.setLaunchAnglePerfect();
+                robot.powerLauncher.toggle();
+                queue = 0;
+            }
+            else if (controller1.dpad_down.equals("pressed")) {
+                robot.powerLauncher.resetQueueTimeStamp();
+                queue = 3;
+                robot.camera.stopStreaming();
             }
 
 

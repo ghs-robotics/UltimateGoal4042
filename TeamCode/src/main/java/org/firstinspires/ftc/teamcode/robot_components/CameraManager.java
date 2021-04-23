@@ -14,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class CameraManager implements HSVConstants {
 
     private int cameraMonitorViewId;
+    private boolean streaming = false;
 
     // Cameras
     public OpenCvCamera phoneCam;
@@ -63,6 +64,10 @@ public class CameraManager implements HSVConstants {
         startStreaming();
     }
 
+    public boolean isStreaming() {
+        return streaming;
+    }
+
     private void setUpDualPort(HardwareMap hardwareMap) {
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
@@ -101,21 +106,36 @@ public class CameraManager implements HSVConstants {
     public void startStreaming() {
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+        });
+        streaming = true;
     }
 
-    // Stream in the middle of a match TODO : MAKE ASYNC
+    // Stream in the middle of a match
     public void startMidStream() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
         webcam = OpenCvCameraFactory.getInstance().createWebcam(
                 hardwareMap.get(WebcamName.class,"Webcam 1"));
         webcam.openCameraDevice();
         webcam.setPipeline(webcamPipeline);
-        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+        });
+        streaming = true;
     }
 
     // Stops streaming frames on the phone camera
     public void stopStreaming() {
+        streaming = false;
         phoneCam.stopStreaming();
         webcam.stopStreaming();
     }

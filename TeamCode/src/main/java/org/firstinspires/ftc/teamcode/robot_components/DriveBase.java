@@ -65,7 +65,7 @@ public class DriveBase {
 
         // gyroPID works best when Ki = 0
         gyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.2);
-        metaGyroPID = new PIDController(0.0100, 0.0000, 0.0000, 0.2);
+        metaGyroPID = new PIDController(0.0330, 0.0000, 0.0020, 0.2); // Used to be 0.0100, 0, 0
 
         // Initializes telemetry
         this.telemetry = telemetry;

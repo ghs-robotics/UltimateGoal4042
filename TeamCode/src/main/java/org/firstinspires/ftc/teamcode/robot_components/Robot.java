@@ -116,14 +116,15 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addData("TARGET", "" + target.toString());
-        telemetry.addData("config", "" + identifyRingConfig());
+        telemetry.addLine("" + target.toString());
+        telemetry.addLine("STREAMING: " + camera.isStreaming());
+        telemetry.addLine("CONFIG: " + identifyRingConfig());
 
         telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
         telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
-        telemetry.addData("", "");
-        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
-        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
+        telemetry.addLine();
+//        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
+//        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
 
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("TOWER", "" + tower.toString());
@@ -149,15 +150,16 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // To use at the start of each OpMode that uses CV
     public void initWithCV() {
         camera.initCamera();
-        initWithoutCV();
+        resetServos();
+        resetGyroAngle();
         tower.activate();
         wall.activate();
     }
 
     public void initWithoutCV() {
-        resetServos();
-        resetGyroAngle();
-        wait(1.0);
+        initWithCV();
+        camera.stopStreaming();
+        camera.stopStreaming();
     }
 
     // Launches a ring by moving the shooterServo

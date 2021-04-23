@@ -43,7 +43,7 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Updates crosshairValue of center point
-        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
+        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV); // TODO : COMMENT OUT
         crosshairHSV = findHSV(dst1, input.rows()/2, input.cols()/2).toString();
 
         return currentMat;
