@@ -125,11 +125,22 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Automated position
             if (controller1.b.equals("pressing")) {
-                if (intakeSetting.equals("out")) {
-                    intakeSetting = "off";
-                } else {
-                    intakeSetting = "out";
-                }
+//                if (intakeSetting.equals("out")) {
+//                    intakeSetting = "off";
+//                } else {
+//                    intakeSetting = "out";
+//                }
+                robot.powerLauncher.setLaunchAnglePowershot();
+                robot.powerLauncher.toggleOn();
+                robot.wait(0.9);
+                robot.indexRings(1);
+                robot.move(0.6, 0, 0.6, true);
+//                robot.rotateToPos(0, 0.5);
+                robot.indexRings(1);
+                robot.move(0.6, 0, 0.8, true);
+//                robot.rotateToPos(0, 0.5);
+                robot.indexRings(1);
+                robot.powerLauncher.toggleOff();
             }
 
             // Reset the controls
@@ -156,15 +167,17 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             if (controller1.dpad_right.equals("pressed")) {
                 robot.camera.startMidStream();
+                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
+                robot.powerLauncher.setLaunchAnglePowershot();
+                phase = 3;
             }
             else if (controller1.dpad_up.equals("pressed")) {
-                robot.activateFieldLocalization();
+                robot.camera.startMidStream();
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 robot.powerLauncher.setLaunchAnglePerfect();
                 phase = 3;
             }
             else if (controller1.dpad_left.equals("pressed")) {
-                robot.powerLauncher.setLaunchAnglePerfect();
                 robot.powerLauncher.toggle();
                 queue = 0;
             }

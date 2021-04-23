@@ -7,8 +7,12 @@ public interface FieldPositions {
 
     // Generally useful positions
     int[] PERFECT_LAUNCH_POS = new int[]{136 + xOffset, 58}; // Perfect launch position
+    int[] SECOND_PERFECT_LAUNCH_POS = new int[]{136 + xOffset, 48}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{94 + xOffset, 67}; // Where to go to avoid first starter stack
-    int[] LEFT_POWERSHOT_POS = new int[]{94 + xOffset, 58};
+
+    int[] LEFT_POWERSHOT_POS = new int[]{94 + xOffset, 58}; // 6.5 degrees
+    int[] MID_POWERSHOT_POS = new int[]{74 + xOffset, 58};
+    int[] RIGHT_POWERSHOT_POS = new int[]{64 + xOffset, 58}; // - 6.5 degrees
 
     // Park positions (where to park during autonomous)
     int[] PARK_0_POS = new int[]{96 + xOffset, 74};

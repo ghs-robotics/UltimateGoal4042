@@ -65,10 +65,10 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.powerLauncher.setLaunchAnglePowershot();
         robot.moveToPos(LEFT_POWERSHOT_POS, 1.5, 3.0);
         robot.indexRings(1);
-        robot.move(-0.6, 0, 0.6);
+        robot.move(-0.6, 0, 0.6, true);
         robot.rotateToPos(0, 0.5);
         robot.indexRings(1);
-        robot.move(-0.6, 0, 0.6);
+        robot.move(-0.6, 0, 0.6, true);
         robot.rotateToPos(0, 0.5);
         robot.indexRings(1);
     }

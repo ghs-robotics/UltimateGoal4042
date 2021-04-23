@@ -76,11 +76,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 1);
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0); // Used to have tolerance of 1
 
         // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 1);
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 0); // Used to have tolerance of 1
 
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better

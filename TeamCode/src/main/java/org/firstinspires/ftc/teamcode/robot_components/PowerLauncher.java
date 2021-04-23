@@ -14,8 +14,8 @@ public class PowerLauncher {
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.140;
     public static double LOADING_OFFSET = -0.050;
-    public static double POWERSHOT_OFFSET = -0.025;
-    public static double SECOND_PERFECT_OFFSET = -0.008; // 2 ft behind perfect launch pos
+    public static double POWERSHOT_OFFSET = -0.020;
+    public static double SECOND_PERFECT_OFFSET = -0.010; // 2 ft behind perfect launch pos
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -230,6 +230,11 @@ public class PowerLauncher {
     // Sets launcher to hit powershots
     public void setLaunchAnglePowershot() {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET);
+    }
+
+    // Sets launcher to hit powershots
+    public void setLaunchAngle2ndPerfect() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + SECOND_PERFECT_OFFSET);
     }
 
     // Sets launcher to vertical

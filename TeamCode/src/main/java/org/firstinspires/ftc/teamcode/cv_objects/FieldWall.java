@@ -13,7 +13,7 @@ public class FieldWall extends CVObject {
         lowerHSV = LOWER_WALL_HSV;
         upperHSV = UPPER_WALL_HSV;
         cover = 0.10;
-        targetH = 55; // Tower should be in view from here
+        targetH = 70;
     }
 
     @Override
