@@ -47,7 +47,7 @@ public class ChaseObject extends LinearOpMode implements FieldPositions
 
         while (opModeIsActive())
         {
-            robot.adjustPosition();
+            robot.adjustPosition(0);
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

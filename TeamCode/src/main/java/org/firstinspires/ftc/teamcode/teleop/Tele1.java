@@ -56,8 +56,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
         String intakeSetting = "normal"; // "normal," "in," "out," "off"
 
-        robot.powerLauncher.setLaunchAngleLoading();
         robot.initWithCV();
+        robot.powerLauncher.setLaunchAngleLoading();
+        robot.turnArmUpFull();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -67,7 +68,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         robot.camera.stopStreaming();
         robot.resetGyroAngle();
         robot.resetElapsedTime();
-        robot.turnArm();
 
         while (opModeIsActive()) {
 

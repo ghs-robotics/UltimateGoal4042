@@ -37,7 +37,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Robot variables and objects
     private double intakePower = 0;
-    public double armAngle = 0; // init position
+    public double armAngle = 0.42; // TODO : init position is 0
     public double clawAngle = 0.92; // Closed position
 
     public DcMotor intakeMotor;
@@ -185,6 +185,12 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         intakeMotor.setPower(intakePower);
     }
 
+    // Turn arm to specified position
+    private void setArmAngle(double armAngle) {
+        this.armAngle = armAngle;
+        armServo.setPosition(armAngle);
+    }
+
     // Toggles the wobble gripper/claw
     public void toggleClaw() {
         // Default angle is 0.15 (which means the gripper is closed)
@@ -195,21 +201,27 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Turns the arm
     public void turnArm() {
         // Default angle is 0.42 (which is the up position)
-        armAngle = (armAngle != 0.42 ? 0.42 : 0.88);
-        armServo.setPosition(armAngle);
+        setArmAngle(armAngle != 0.42 ? 0.42 : 0.88);
     }
 
-    // Wobble will dangle upside down above phone mount
-    public void turnArm2PostInit() {
-        armAngle = 0.27;
-        armServo.setPosition(armAngle);
+    // Good position for grabbing a wobble goal
+    public void turnArmDownFull() {
+        setArmAngle(0.88);
     }
 
-    // Turns the arm but not as far
-    public void turnArmAlmost() {
-        // Default angle is 0.37 (which is the up position)
-        armAngle = (armAngle == 0.8 ? 0.37 : 0.8);
-        armServo.setPosition(armAngle);
+    // Good position for placing a wobble goal during auto
+    public void turnArmDownSlight() {
+        setArmAngle(0.80);
+    }
+
+    // Good position for holding the wobble goal right above ground
+    public void turnArmDownDrag() {
+        setArmAngle(0.75);
+    }
+
+    // For holding the wobble above the wall height
+    public void turnArmUpFull() {
+        setArmAngle(0.42);
     }
 
 
@@ -227,25 +239,25 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Makes the robot line up with the tower goal (if called repeatedly)
     // Make sure the following things are accounted for before calling this:
     // targetGyroAngle, target values, reset PIDs, activate object, set launcher side as front
-    public void adjustPosition() {
+    public void adjustPosition(double minAbsVal) {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
         // When robot is too close to front of field
         else if (!tower.isIdentified()) {
-            chaseObject(wall);
+            chaseObject(wall, minAbsVal);
         }
         else {
-            chaseObject(tower);
+            chaseObject(tower, minAbsVal);
         }
     }
 
     // Makes the robot chase the target object (if called repeatedly)
     // Make sure the following things are accounted for before calling this:
     // gyro angle, target values, reset PIDs, activate object, set launcher side as front
-    public void chaseObject(CVObject target) {
-        x = target.getBreadthPIDValue(0.115);
-        y = target.getDepthPIDValue(0.115);
+    public void chaseObject(CVObject target, double minAbsVal) {
+        x = target.getBreadthPIDValue(minAbsVal); // 0.115
+        y = target.getDepthPIDValue(minAbsVal);
         calculateDrivePowers(x, y, getGyroPIDValue());
         updateDrive();
     }
@@ -296,7 +308,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
                     || tower.getAbsErrorX() > 8
                     || getAbsoluteGyroError() > 4)
                     && elapsedSecs() - phaseTimeStamp < maxBroadTuning) {
-                adjustPosition();
+                adjustPosition(0);
             } else {
                 phaseTimeStamp = elapsedSecs();
                 tower.resetPIDs();
@@ -307,7 +319,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         else if (phase == 1) {
             if (elapsedSecs() - phaseTimeStamp < minFineTuning
                     || (elapsedSecs() - phaseTimeStamp < maxFineTuning && driveMotorsRunning())) {
-                adjustPosition();
+                adjustPosition(0.115);
             } else {
                 stopDrive();
                 phase--;
@@ -328,8 +340,12 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         moveToPos(pos, minFineTuning, maxFineTuning, 5.0);
     }
 
-    // Makes the robot move to a certain position relative to the tower goal
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        moveToPos(pos, minFineTuning, maxFineTuning, maxBroadTuning, 0);
+    }
+
+    // Makes the robot move to a certain position relative to the tower goal
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning, double minAbsVal) {
         tower.activate();
         wall.activate();
         tower.setTargetXW(pos);
@@ -340,7 +356,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
                 || tower.getAbsErrorX() > 8
                 || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
-            adjustPosition();
+            adjustPosition(0);
         }
         t = elapsedSecs();
 
@@ -350,7 +366,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         while (elapsedSecs() - t < minFineTuning
                 || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
-            adjustPosition();
+            adjustPosition(minAbsVal);
         }
         stopDrive();
     }
@@ -364,7 +380,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         double t = elapsedSecs();
         while(  (floor.getAbsErrorY() > 3 || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
-            chaseObject(floor);
+            chaseObject(floor, 0);
         }
         t = elapsedSecs();
 
@@ -372,7 +388,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         floor.resetPIDs();
 
         while (elapsedSecs() - t < minFineTuning || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
-            chaseObject(floor);
+            chaseObject(floor, 0);
         }
         stopDrive();
     }
@@ -386,7 +402,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         double t = elapsedSecs();
         while(  (wall.getAbsErrorH() > 3 || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
-            chaseObject(wall);
+            chaseObject(wall, 0);
         }
         t = elapsedSecs();
 
@@ -394,21 +410,21 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wall.resetPIDs();
 
         while (elapsedSecs() - t < minFineTuning || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
-            chaseObject(wall);
+            chaseObject(wall, 0);
         }
         stopDrive();
     }
 
     // Makes robot move forward and pick up wobble goal
-    public void pickUpWobbleGoal() {
+    public void pickUpWobbleGoal(String finalArmPos) {
         wall.activate();
         stopDrive();
-        turnArm();
+        turnArmDownFull();
         toggleClaw();
         double t = elapsedSecs();
         calculateDrivePowers(0, -0.3, 0);
         sendDrivePowers();
-        while (wall.h < 94 && elapsedSecs() - t < 3.0) {
+        while (/*wall.h < 108 &&*/ elapsedSecs() - t < 1.45) {
             calculateDrivePowers(0, -0.3, getGyroPIDValue());
             sendDrivePowers();
         }
@@ -416,7 +432,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stopDrive();
         toggleClaw();
         wait(0.5);
-        turnArm();
+        if (finalArmPos.equals("up")) {
+            turnArmUpFull();
+        } else {
+            turnArmDownDrag();
+        }
     }
 
     // Use when you are in the LEFT_POWERSHOT_POS
@@ -426,10 +446,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         powerLauncher.toggleOn(0.85);
         wait(0.9);
         indexRings(1);
-        move(0.6, 0, 0.71, true);
+        move(0.6, 0, 0.7, true);
         rotateToPos(0, 0.5);
         indexRings(1);
-        move(0.6, 0, 0.65, true);
+        move(0.6, 0, 0.7, true);
         rotateToPos(0, 0.5);
         indexRings(1);
         powerLauncher.toggleOff();

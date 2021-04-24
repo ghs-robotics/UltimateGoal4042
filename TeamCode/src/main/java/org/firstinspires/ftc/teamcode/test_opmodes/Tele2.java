@@ -109,7 +109,7 @@ public class Tele2 extends OpMode implements FieldPositions {
 
 
         if (chasing) {
-            robot.chaseObject(robot.wall);
+            robot.chaseObject(robot.wall, 0.0);
         } else {
             robot.updateDrive();
         }
