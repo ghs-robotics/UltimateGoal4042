@@ -89,6 +89,11 @@ public class DriveBase {
         sendDrivePowers();
     }
 
+    // Returns true if any of the drive motors are running
+    public boolean driveMotorsRunning() {
+        return (leftFrontPower != 0 || rightFrontPower != 0 || leftRearPower != 0 || rightRearPower != 0);
+    }
+
     // Calculates powers for mecanum wheel drive
     public void calculateDrivePowers(double x, double y, double rot) { // rot is rotation
         calculateDrivePowers(x, y, rot, false);
@@ -116,6 +121,11 @@ public class DriveBase {
         rightRearPower = Range.clip(r * Math.cos(angleOfMotion) - rot, -1.0, 1.0) * speed;
     }
 
+    // Returns how many seconds have passed since the timer was last reset
+    public double elapsedSecs() {
+        return elapsedTime.seconds();
+    }
+
     // Finds an equivalent gyro angle (mod 360) within range of the actual current robot angle
     public double getReasonableGyroAngle(double desiredAngle) {
         double actualAngle = gyro.getAngle();
@@ -131,11 +141,6 @@ public class DriveBase {
 
     public double getAbsoluteGyroError() {
         return Math.abs(getGyroError());
-    }
-
-    // Returns how many seconds have passed since the timer was last reset
-    public double getElapsedSeconds() {
-        return elapsedTime.seconds();
     }
 
     public double getGyroError() {
@@ -164,11 +169,11 @@ public class DriveBase {
     public void rotateToPos(double angle, double maxFineTuning) {
         setTargetGyroAngle(angle);
         gyroPID.resetValues();
-        double t = getElapsedSeconds();
+        double t = elapsedSecs();
         while(getAbsoluteGyroError() > 5 && elapsedTime.seconds() - t < 5) {
             adjustAngle();
         }
-        t = getElapsedSeconds();
+        t = elapsedSecs();
         gyroPID.resetValues();
         while ((getAbsoluteGyroError() > 1)
                 && elapsedTime.seconds() - t < maxFineTuning) {
@@ -217,7 +222,7 @@ public class DriveBase {
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds
     public void wait(double seconds) {
-        double start = getElapsedSeconds();
-        while (getElapsedSeconds() - start < seconds) {}
+        double start = elapsedSecs();
+        while (elapsedSecs() - start < seconds) {}
     }
 }

@@ -74,11 +74,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         // Initializing PID objects
 
-        // xPID works best on its own with following values: 0.0900, 0.0015, 0.0075
         // When working together with wPID, having Ki and Kd be zero works best
         towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0); // Used to have tolerance of 1
 
-        // wPID works best on its own with following values: 0.0750, 0.0010, 0.0080
         // Having Ki and Kd be zero normally works fine though
         towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 0); // Used to have tolerance of 1
 
@@ -225,7 +223,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             adjustAngle();
         }
         // When robot is too close to front of field
-        else if (!tower.isIdentified() /* || (10 < floor.y && floor.y < 80) || (wall.isIdentified() && wall.h < 35) */) {
+        else if (!tower.isIdentified()) {
             chaseObject(wall);
         }
         else {
@@ -237,8 +235,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Make sure the following things are accounted for before calling this:
     // gyro angle, target values, reset PIDs, activate object, set launcher side as front
     public void chaseObject(CVObject target) {
-        x = target.getBreadthPIDValue();
-        y = target.getDepthPIDValue();
+        x = target.getBreadthPIDValue(0.115);
+        y = target.getDepthPIDValue(0.115);
         calculateDrivePowers(x, y, getGyroPIDValue());
         updateDrive();
     }
@@ -250,8 +248,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     public void move(double x, double y, double seconds, boolean gyro) {
         if (gyro) {
-            double t = getElapsedSeconds();
-            while (getElapsedSeconds() - t < seconds) {
+            double t = elapsedSecs();
+            while (elapsedSecs() - t < seconds) {
                 calculateDrivePowers(x, y, getGyroPIDValue());
                 sendDrivePowers();
             }
@@ -263,35 +261,44 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stopDrive();
     }
 
+    public int moveInPhases(int phase) {
+        return moveInPhases(phase, 0.0, 2.0, 5.0);
+    }
+
     // Automated move to position function that uses phases and must be called repeatedly
     // This allows us to terminate the function early (because we can just set phase to be 0)
-    public int moveInPhases(int phase) {
-        if (phase == 3) {
+    public int moveInPhases(int phase, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        if (phase == 4) {
             tower.activate();
             wall.activate();
             targetGyroAngle = getReasonableGyroAngle(0);
-            phaseTimeStamp = elapsedTime.seconds();
+            phaseTimeStamp = elapsedSecs();
             phase--;
+        }
+        else if (phase == 3) {
+            if (camera.isStreaming()) {
+                phaseTimeStamp = elapsedSecs();
+                phase--;
+            }
         }
         else if (phase == 2) {
             if ((!tower.isIdentified()
-                    || tower.getAbsErrorW() > 8
-                    || tower.getAbsErrorX() > 8
+                    || tower.getAbsErrorW() > 8 // TODO : TRY MAKING THESE SMALLER
                     || tower.getAbsErrorX() > 8
                     || getAbsoluteGyroError() > 4)
-                    && elapsedTime.seconds() - phaseTimeStamp < 5.0) {
+                    && elapsedSecs() - phaseTimeStamp < maxBroadTuning) {
                 adjustPosition();
             } else {
-                phaseTimeStamp = elapsedTime.seconds();
+                phaseTimeStamp = elapsedSecs();
                 tower.resetPIDs();
                 wall.resetPIDs();
                 phase--;
             }
         }
         else if (phase == 1) {
-            if (elapsedTime.seconds() - phaseTimeStamp < 2.0 &&
-                    (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0)) {
-                adjustPosition();
+            if (elapsedSecs() - phaseTimeStamp < minFineTuning
+                    || (elapsedSecs() - phaseTimeStamp < maxFineTuning && driveMotorsRunning())) {
+                adjustPosition(); // TODO : TEST A PID WITH A MINIMUM VALUE HERE?
             } else {
                 stopDrive();
                 phase--;
@@ -318,23 +325,22 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wall.activate();
         tower.setTargetXW(pos);
         rotateToPos(0.0, 0.0);
-        double t = getElapsedSeconds();
+        double t = elapsedSecs();
         while(  (!tower.isIdentified()
                 || tower.getAbsErrorW() > 8
                 || tower.getAbsErrorX() > 8
-                || tower.getAbsErrorX() > 8
                 || getAbsoluteGyroError() > 4)
-                && elapsedTime.seconds() - t < maxBroadTuning) {
+                && elapsedSecs() - t < maxBroadTuning) {
             adjustPosition();
         }
-        t = getElapsedSeconds();
+        t = elapsedSecs();
 
         // Start fresh by resetting these
         tower.resetPIDs();
         wall.resetPIDs();
 
-        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
-                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+        while (elapsedSecs() - t < minFineTuning
+                || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
             adjustPosition();
         }
         stopDrive();
@@ -346,18 +352,17 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         floor.activate();
         floor.setTargetY(targetY);
         rotateToPos(0.0, 0.0);
-        double t = getElapsedSeconds();
+        double t = elapsedSecs();
         while(  (floor.getAbsErrorY() > 3 || getAbsoluteGyroError() > 4)
-                && elapsedTime.seconds() - t < maxBroadTuning) {
+                && elapsedSecs() - t < maxBroadTuning) {
             chaseObject(floor);
         }
-        t = getElapsedSeconds();
+        t = elapsedSecs();
 
         // Start fresh by resetting this
         floor.resetPIDs();
 
-        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
-                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+        while (elapsedSecs() - t < minFineTuning || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
             chaseObject(floor);
         }
         stopDrive();
@@ -369,18 +374,17 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wall.activate();
         wall.setTargetH(wallH);
         rotateToPos(0.0, 0.0);
-        double t = getElapsedSeconds();
+        double t = elapsedSecs();
         while(  (wall.getAbsErrorH() > 3 || getAbsoluteGyroError() > 4)
-                && elapsedTime.seconds() - t < maxBroadTuning) {
+                && elapsedSecs() - t < maxBroadTuning) {
             chaseObject(wall);
         }
-        t = getElapsedSeconds();
+        t = elapsedSecs();
 
         // Start fresh by resetting this
         wall.resetPIDs();
 
-        while (elapsedTime.seconds() - t < minFineTuning || (elapsedTime.seconds() - t < maxFineTuning &&
-                (leftRearPower != 0 || rightRearPower != 0 || leftFrontPower != 0 || rightFrontPower != 0))) {
+        while (elapsedSecs() - t < minFineTuning || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
             chaseObject(wall);
         }
         stopDrive();
@@ -392,10 +396,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         stopDrive();
         turnArm();
         toggleClaw();
-        double t = getElapsedSeconds();
+        double t = elapsedSecs();
         calculateDrivePowers(0, -0.3, 0);
         sendDrivePowers();
-        while (wall.h < 94 && getElapsedSeconds() - t < 3.0) {
+        while (wall.h < 94 && elapsedSecs() - t < 3.0) {
             calculateDrivePowers(0, -0.3, getGyroPIDValue());
             sendDrivePowers();
         }
@@ -404,6 +408,22 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         toggleClaw();
         wait(0.5);
         turnArm();
+    }
+
+    // Use when you are in the LEFT_POWERSHOT_POS
+    public void shootPowerShots() {
+        stopDrive();
+        powerLauncher.setLaunchAnglePerfect();
+        powerLauncher.toggleOn(0.85);
+        wait(0.9);
+        indexRings(1);
+        move(0.6, 0, 0.71, true);
+        rotateToPos(0, 0.5);
+        indexRings(1);
+        move(0.6, 0, 0.65, true);
+        rotateToPos(0, 0.5);
+        indexRings(1);
+        powerLauncher.toggleOff();
     }
 }
 

@@ -129,8 +129,12 @@ public abstract class CVObject implements HSVConstants {
 
     // Uses x value by default
     public double getBreadthPIDValue() {
+        return getBreadthPIDValue(0.0);
+    }
+
+    public double getBreadthPIDValue(double minAbsVal) {
         if (identified) {
-            return -breadthPID.calcVal(getErrorX());
+            return -breadthPID.calcVal(getErrorX(), minAbsVal);
         } else {
             return 0;
         }
@@ -138,8 +142,12 @@ public abstract class CVObject implements HSVConstants {
 
     // Uses width by default
     public double getDepthPIDValue() {
+        return getDepthPIDValue(0.0);
+    }
+
+    public double getDepthPIDValue(double minAbsVal) {
         if (identified) {
-            return depthPID.calcVal(getErrorW());
+            return depthPID.calcVal(getErrorW(), minAbsVal);
         } else {
             return 0;
         }

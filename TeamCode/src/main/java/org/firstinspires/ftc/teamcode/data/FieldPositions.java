@@ -3,16 +3,19 @@ package org.firstinspires.ftc.teamcode.data;
 // Contains the coordinates (x position + tower width) for useful locations on the field
 public interface FieldPositions {
 
-    int xOffset = -2;
+    // Smaller x values mean the robot will be further to the right (away from driver)
+    // Larger x values mean the robot will be further to the left (closer to driver)
+
+    int xOffset = 0;
 
     // Generally useful positions
     int[] PERFECT_LAUNCH_POS = new int[]{136 + xOffset, 58}; // Perfect launch position
     int[] SECOND_PERFECT_LAUNCH_POS = new int[]{136 + xOffset, 48}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{94 + xOffset, 67}; // Where to go to avoid first starter stack
 
-    int[] LEFT_POWERSHOT_POS = new int[]{94 + xOffset, 58}; // 6.5 degrees
-    int[] MID_POWERSHOT_POS = new int[]{74 + xOffset, 58};
-    int[] RIGHT_POWERSHOT_POS = new int[]{64 + xOffset, 58}; // - 6.5 degrees
+    int[] LEFT_POWERSHOT_POS = new int[]{99 + xOffset, 58}; // 6.5 degrees
+    int[] MID_POWERSHOT_POS = new int[]{77 + xOffset, 58};
+    int[] RIGHT_POWERSHOT_POS = new int[]{67 + xOffset, 58}; // - 6.5 degrees
 
     // Park positions (where to park during autonomous)
     int[] PARK_0_POS = new int[]{96 + xOffset, 74};

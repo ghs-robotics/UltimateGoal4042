@@ -118,19 +118,20 @@ public class CameraManager implements HSVConstants {
 
     // Stream in the middle of a match
     public void startMidStream() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(
-                hardwareMap.get(WebcamName.class,"Webcam 1"));
-        webcam.openCameraDevice();
-        webcam.setPipeline(webcamPipeline);
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
-            }
-        });
-        streaming = true;
+        if (!streaming) {
+            phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
+            webcam = OpenCvCameraFactory.getInstance().createWebcam(
+                    hardwareMap.get(WebcamName.class, "Webcam 1"));
+            webcam.setPipeline(webcamPipeline);
+            webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                @Override
+                public void onOpened() {
+                    webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                }
+            });
+            webcam.openCameraDevice();
+            streaming = true;
+        }
     }
 
     // Stops streaming frames on the phone camera

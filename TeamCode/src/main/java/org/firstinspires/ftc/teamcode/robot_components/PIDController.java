@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 public class PIDController {
+
     public double k_P; // TO DO: change to private later
     public double k_I;
     public double k_D;
@@ -37,8 +38,12 @@ public class PIDController {
         resetValues();
     }
 
-    // Calculates the power value to be sent to the motor(s)
     public double calcVal(double error) {
+        return calcVal(error, 0.0);
+    }
+
+    // Calculates the power value to be sent to the motor(s)
+    public double calcVal(double error, double minAbsVal) {
         // If the error is small enough, the robot won't adjust
         if (Math.abs(error) <= toleranceRadius) { return 0; }
 
@@ -52,8 +57,12 @@ public class PIDController {
         prevError = error;
         prevTime = time.seconds();
 
-        // Returns the PID value to be sent to the motor
-        return Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
+        // Calculates the PID value to be sent to the motor
+        double val = Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
+        if (minAbsVal > 0) {
+            val = Math.signum(val) * (minAbsVal + Math.abs(val));
+        }
+        return val;
     }
 
     // Restarts the PID controller
