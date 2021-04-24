@@ -38,6 +38,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         robot.resetElapsedTime();
         robot.powerLauncher.setLaunchAngleLoading();
+        robot.turnArm2PostInit();
 
         // Determine how many rings in the starting ring stacks
         int config = robot.identifyRingConfig();
@@ -60,19 +61,6 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.stopDrive();
     }
 
-    private void getPowerShots() {
-        // Shoot power shots
-        robot.powerLauncher.setLaunchAnglePowershot();
-        robot.moveToPos(LEFT_POWERSHOT_POS, 1.5, 3.0);
-        robot.indexRings(1);
-        robot.move(-0.6, 0, 0.6, true);
-        robot.rotateToPos(0, 0.5);
-        robot.indexRings(1);
-        robot.move(-0.6, 0, 0.6, true);
-        robot.rotateToPos(0, 0.5);
-        robot.indexRings(1);
-    }
-
     private void placeWobble() {
         //once there, place down the wobble goal
         robot.turnArmAlmost();
@@ -92,12 +80,14 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         placeWobble();
 
         // Shoot 3 preloaded rings
-        robot.powerLauncher.toggleOn();
-        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 2.0);
-        robot.indexRings(3);
+//        robot.powerLauncher.toggleOn();
+//        robot.moveToPos(PERFECT_LAUNCH_POS, 0.5, 2.0);
+//        robot.indexRings(3);
+        robot.moveToPos(LEFT_POWERSHOT_POS, 0.5, 3.0, 5.0);
+        robot.shootPowerShots();
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS);
+        robot.moveToPos(SECOND_WOBBLE_POS, 0.5, 3.0);
         robot.pickUpWobbleGoal();
 
         // Deliver 2nd wobble goal

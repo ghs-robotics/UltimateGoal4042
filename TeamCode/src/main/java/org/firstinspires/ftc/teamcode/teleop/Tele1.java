@@ -64,9 +64,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-//        robot.camera.stopStreaming();
+        robot.camera.stopStreaming();
         robot.resetGyroAngle();
         robot.resetElapsedTime();
+        robot.turnArm();
 
         while (opModeIsActive()) {
 
@@ -87,7 +88,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Checks if the robot should be performing an automated move function
             if (phase > 0) {
-                phase = robot.moveInPhases(phase, 5.0, 8.0, 5.0); // TODO : CHANGE
+                phase = robot.moveInPhases(phase, 0.0, 3.0, 5.0); // TODO : CHANGE
             }
             else {
                 if (!controller1.right_bumper.equals("pressed")) {
@@ -114,33 +115,36 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.updateDrive(); // Also updates telemetry
             }
 
-            // Automated position
+            //
             if (controller1.a.equals("pressing")) {
-//                if (intakeSetting.equals("in")) {
-//                    intakeSetting = "off";
-//                } else {
-//                    intakeSetting = "in";
-//                }
-                robot.moveToPos(LEFT_POWERSHOT_POS, 0, 3.0, 5.0);
-                robot.shootPowerShots();
+                if (intakeSetting.equals("in")) {
+                    intakeSetting = "off";
+                } else {
+                    intakeSetting = "in";
+                }
             }
 
-            // Automated position
+            //
             if (controller1.b.equals("pressing")) {
-//                if (intakeSetting.equals("out")) {
-//                    intakeSetting = "off";
-//                } else {
-//                    intakeSetting = "out";
-//                }
-                robot.shootPowerShots();
+                if (intakeSetting.equals("out")) {
+                    intakeSetting = "off";
+                } else {
+                    intakeSetting = "out";
+                }
             }
 
-            // Reset the controls
+            // Toggle speed
             if (controller1.x.equals("pressing")) {
-                robot.toggleSpeed();
+//                robot.toggleSpeed();
+                intakeSetting = "off";
+                robot.powerLauncher.setLaunchAnglePerfect();
+                robot.powerLauncher.toggleOn();
+                robot.wait(0.6);
+                robot.powerLauncher.resetQueueTimeStamp();
+                queue = 3;
             }
 
-            // Terminate any automated functions
+            // Terminate any automated functions and stop streaming
             if (controller1.y.equals("pressing")) {
                 robot.camera.stopStreaming();
                 phase = 0;
@@ -151,32 +155,31 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.resetGyroAngle();
             }
 
-            // Set to full speed
+            // Reset any controls
             if (controller1.left_stick_button.equals("pressing")) {
                 robot.speed = 1;
                 phase = 0;
             }
 
             if (controller1.dpad_right.equals("pressed")) {
+                robot.stopDrive();
                 robot.camera.startMidStream();
-                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
-                robot.powerLauncher.setLaunchAnglePowershot();
-                phase = 4;
             }
             else if (controller1.dpad_up.equals("pressed")) {
+                robot.stopDrive();
                 robot.camera.startMidStream();
-                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-                robot.powerLauncher.setLaunchAnglePerfect();
+                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
                 phase = 4;
             }
             else if (controller1.dpad_left.equals("pressed")) {
-                robot.powerLauncher.toggle();
-                queue = 0;
+                phase = 0;
+                robot.shootPowerShots();
             }
             else if (controller1.dpad_down.equals("pressed")) {
-                robot.powerLauncher.resetQueueTimeStamp();
-                queue = 3;
-                robot.camera.stopStreaming();
+                robot.stopDrive();
+                robot.camera.startMidStream();
+                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+                phase = 4;
             }
 
 
@@ -260,36 +263,34 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 queue = 0;
             }
 
-            // Angle the launcher up a tiny bit
+            //
             if (controller2.left_trigger_state.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.010);
+                robot.powerLauncher.toggleOn(robot.powerLauncher.rightPower - 0.025);
+            }
+
+            //
+            if (controller2.right_trigger_state.equals("pressing")) {
+                robot.powerLauncher.toggleOn(robot.powerLauncher.rightPower + 0.025);
             }
 
             // Angle the launcher down a tiny bit
-            if (controller2.right_trigger_state.equals("pressing")) {
+            if (controller2.dpad_up.equals("pressing")) {
+                robot.powerLauncher.changeLaunchAngle(-0.010);
+            }
+
+            // Angle the launcher up a tiny bit
+            if (controller2.dpad_down.equals("pressing")) {
                 robot.powerLauncher.changeLaunchAngle(0.010);
             }
 
-            // Make default angle slightly lower
-            if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.PERFECT_LAUNCH_ANGLE -= 0.010;
-                robot.powerLauncher.setLaunchAnglePerfect();
-            }
-
-            // Make default angle slightly higher
-            if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.PERFECT_LAUNCH_ANGLE += 0.010;
-                robot.powerLauncher.setLaunchAnglePerfect();
-            }
-
-            // Set current launch angle to the default
+            // Set current angle to default angle
             if (controller2.dpad_right.equals("pressing")) {
                 robot.powerLauncher.setCurrentAngleToDefault();
             }
 
-            // Set current launch angle to the default TODO : EXPLAIN
+            // Update the launch angle for 2nd perfect launch pos
             if (controller2.dpad_left.equals("pressing")) {
-                robot.powerLauncher.setLaunchAnglePowershot();
+                robot.powerLauncher.updateSecondPerfectOffset();
             }
 
             // Change current launch Angle (but keep default the same)

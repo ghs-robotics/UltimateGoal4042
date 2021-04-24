@@ -37,7 +37,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Robot variables and objects
     private double intakePower = 0;
-    public double armAngle = 0.37; // Up position
+    public double armAngle = 0; // init position
     public double clawAngle = 0.92; // Closed position
 
     public DcMotor intakeMotor;
@@ -114,12 +114,15 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
+        telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
+        telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
+        telemetry.addLine();
+
         telemetry.addLine("" + target.toString());
         telemetry.addLine("STREAMING: " + camera.isStreaming());
         telemetry.addLine("CONFIG: " + identifyRingConfig());
+        telemetry.addLine("LAUNCHER POWER: " + powerLauncher.leftPower);
 
-        telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
-        telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
         telemetry.addLine();
 //        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
 //        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
@@ -191,8 +194,14 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Turns the arm
     public void turnArm() {
-        // Default angle is 0.37 (which is the up position)
-        armAngle = (armAngle == 0.88 ? 0.37 : 0.88);
+        // Default angle is 0.42 (which is the up position)
+        armAngle = (armAngle != 0.42 ? 0.42 : 0.88);
+        armServo.setPosition(armAngle);
+    }
+
+    // Wobble will dangle upside down above phone mount
+    public void turnArm2PostInit() {
+        armAngle = 0.27;
         armServo.setPosition(armAngle);
     }
 
@@ -276,7 +285,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             phase--;
         }
         else if (phase == 3) {
-            if (camera.isStreaming()) {
+            if (camera.isStreaming() && camera.isWebcamReady()) {
                 phaseTimeStamp = elapsedSecs();
                 phase--;
             }
@@ -298,7 +307,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         else if (phase == 1) {
             if (elapsedSecs() - phaseTimeStamp < minFineTuning
                     || (elapsedSecs() - phaseTimeStamp < maxFineTuning && driveMotorsRunning())) {
-                adjustPosition(); // TODO : TEST A PID WITH A MINIMUM VALUE HERE?
+                adjustPosition();
             } else {
                 stopDrive();
                 phase--;

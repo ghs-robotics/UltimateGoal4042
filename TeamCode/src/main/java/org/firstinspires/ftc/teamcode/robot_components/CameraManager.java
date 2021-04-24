@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
@@ -25,11 +26,13 @@ public class CameraManager implements HSVConstants {
     public CVDetectionPipeline webcamPipeline;
 
     HardwareMap hardwareMap;
+    ElapsedTime elapsedTime;
 
     // Constructs a CameraManager with two cameras
     public CameraManager(HardwareMap hardwareMap) {
 
         this.hardwareMap = hardwareMap;
+        elapsedTime = new ElapsedTime();
 
         // Initializes some CV variables/objects
         cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
@@ -66,6 +69,10 @@ public class CameraManager implements HSVConstants {
 
     public boolean isStreaming() {
         return streaming;
+    }
+
+    public boolean isWebcamReady() {
+        return elapsedTime.seconds() > 2.0;
     }
 
     private void setUpDualPort(HardwareMap hardwareMap) {
@@ -131,6 +138,7 @@ public class CameraManager implements HSVConstants {
             });
             webcam.openCameraDevice();
             streaming = true;
+            elapsedTime.reset();
         }
     }
 

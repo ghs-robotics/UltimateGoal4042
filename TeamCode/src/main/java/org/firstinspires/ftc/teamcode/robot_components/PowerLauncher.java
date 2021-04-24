@@ -9,13 +9,12 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.343; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.350; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.140;
     public static double LOADING_OFFSET = -0.050;
-    public static double POWERSHOT_OFFSET = -0.015;
-    public static double SECOND_PERFECT_OFFSET = -0.010; // 2 ft behind perfect launch pos
+    public static double SECOND_PERFECT_OFFSET = -0.012; // 2 ft behind perfect launch pos
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -228,11 +227,6 @@ public class PowerLauncher {
     }
 
     // Sets launcher to hit powershots
-    public void setLaunchAnglePowershot() {
-        setLaunchAngle(PERFECT_LAUNCH_ANGLE + POWERSHOT_OFFSET);
-    }
-
-    // Sets launcher to hit powershots
     public void setLaunchAngle2ndPerfect() {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE + SECOND_PERFECT_OFFSET);
     }
@@ -266,10 +260,13 @@ public class PowerLauncher {
 
     // Turn launcher on
     public void toggleOn(double power) {
-        if (!running) {
-            sendPowers(power);
-            running = true;
-        }
+        sendPowers(power);
+        running = true;
+    }
+
+    // Make the current angle the SECOND_PERFECT_OFFSET
+    public void updateSecondPerfectOffset() {
+        SECOND_PERFECT_OFFSET = launchAngle - PERFECT_LAUNCH_ANGLE;
     }
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds

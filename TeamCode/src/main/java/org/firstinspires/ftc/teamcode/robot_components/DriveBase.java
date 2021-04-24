@@ -209,9 +209,9 @@ public class DriveBase {
         sendDrivePowers(0, 0, 0);
     }
 
-    // Toggles the drive speed between 50% and normal
+    // Toggles the drive speed between 60% and normal
     public void toggleSpeed() {
-        speed = (speed == 1 ? 0.5 : 1);
+        speed = (speed == 1 ? 0.6 : 1);
     }
 
     // Displays telemetry values and updates the powers being sent to the drive motors
