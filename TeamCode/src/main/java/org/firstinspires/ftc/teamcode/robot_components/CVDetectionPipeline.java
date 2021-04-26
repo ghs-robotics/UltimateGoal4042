@@ -11,7 +11,13 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static java.lang.Thread.sleep;
+
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
+
+    // The amount of time between image processing should take
+    // The higher this value, the lower the lag during teleOp
+    public static long sleepTimeMS = 0;
 
     // Stores the most recent frame
     public Mat currentMat = new Mat();
@@ -43,8 +49,14 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Updates crosshairValue of center point
-        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV); // TODO : COMMENT OUT
-        crosshairHSV = findHSV(dst1, input.rows()/2, input.cols()/2).toString();
+//        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV); // TODO : COMMENT OUT
+//        crosshairHSV = findHSV(dst1, input.rows()/2, input.cols()/2).toString();
+
+        try {
+            sleep(sleepTimeMS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         return currentMat;
     }

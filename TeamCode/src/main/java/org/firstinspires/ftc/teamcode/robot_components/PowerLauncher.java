@@ -9,12 +9,13 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.337; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.225; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
-    public static double VERTICAL_OFFSET = 0.140;
-    public static double LOADING_OFFSET = -0.050;
-    public static double SECOND_PERFECT_OFFSET = -0.012; // 2 ft behind perfect launch pos
+    public static double VERTICAL_OFFSET = 0.615;
+    public static double LOADING_OFFSET = -0.170;
+    public static double SECOND_PERFECT_OFFSET = -0.032; // 2 ft behind perfect launch pos
+    public static double THIRD_PERFECT_OFFSET = -0.038; // 4 ft behind perfect launch pos
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -226,9 +227,14 @@ public class PowerLauncher {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE);
     }
 
-    // Sets launcher to hit powershots
+    // Sets launcher to shoot from 2 ft behind perfect launch pos
     public void setLaunchAngle2ndPerfect() {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE + SECOND_PERFECT_OFFSET);
+    }
+
+    // Sets launcher to shoot from 4 ft behind perfect launch pos
+    public void setLaunchAngle3rdPerfect() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + THIRD_PERFECT_OFFSET);
     }
 
     // Sets launcher to vertical

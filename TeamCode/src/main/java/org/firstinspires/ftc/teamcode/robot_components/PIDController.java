@@ -12,6 +12,7 @@ public class PIDController {
     private double i_error;
     private double d_error;
     private double toleranceRadius; // PID won't adjust within this range
+    private double minAbsVal;
     private double min;
     private double max;
     private double prevError;
@@ -27,11 +28,20 @@ public class PIDController {
         this(Kp, Ki, Kd, tolerance, -1.0, 1.0);
     }
 
+    public PIDController(double Kp, double Ki, double Kd, double tolerance, double minAbsVal) {
+        this(Kp, Ki, Kd, tolerance, minAbsVal, -1.0, 1.0);
+    }
+
     public PIDController(double Kp, double Ki, double Kd, double tolerance, double min, double max) {
+        this(Kp, Ki, Kd, tolerance, 0, min, max);
+    }
+
+    public PIDController(double Kp, double Ki, double Kd, double tolerance, double minAbsVal, double min, double max) {
         k_P = Kp;
         k_I = Ki;
         k_D = Kd;
         toleranceRadius = tolerance;
+        this.minAbsVal = minAbsVal;
         this.min = min;
         this.max = max;
         time = new ElapsedTime();

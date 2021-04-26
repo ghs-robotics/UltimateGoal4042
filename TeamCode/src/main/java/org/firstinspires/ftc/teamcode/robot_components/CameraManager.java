@@ -72,7 +72,7 @@ public class CameraManager implements HSVConstants {
     }
 
     public boolean isWebcamReady() {
-        return elapsedTime.seconds() > 2.0;
+        return elapsedTime.seconds() > 1.7;
     }
 
     private void setUpDualPort(HardwareMap hardwareMap) {

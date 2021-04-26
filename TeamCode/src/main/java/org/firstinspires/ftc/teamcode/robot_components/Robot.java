@@ -114,8 +114,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addData("CURRENT LAUNCH ANGLE", "" + powerLauncher.launchAngle);
-        telemetry.addData("PERFECT LAUNCH ANGLE", "" + powerLauncher.PERFECT_LAUNCH_ANGLE);
+        telemetry.addLine("sleepTimeMS: " + CVDetectionPipeline.sleepTimeMS);
+        telemetry.addData("CURRENT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.launchAngle) / 1000.0);
+        telemetry.addData("PERFECT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.PERFECT_LAUNCH_ANGLE) / 1000.0);
+        double dist = tower.cvtH2VerticalDist();
+        telemetry.addData("Dist", "" + dist);
+        telemetry.addData("Launch offset", "" + tower.cvtFt2LaunchOffset(dist));
+
         telemetry.addLine();
 
         telemetry.addLine("" + target.toString());
@@ -290,8 +295,12 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // This allows us to terminate the function early (because we can just set phase to be 0)
     public int moveInPhases(int phase, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         if (phase == 4) {
+            stopDrive();
+            CVDetectionPipeline.sleepTimeMS = 0;
             tower.activate();
             wall.activate();
+            camera.startMidStream();
+            camera.webcam.resumeViewport();
             targetGyroAngle = getReasonableGyroAngle(0);
             phaseTimeStamp = elapsedSecs();
             phase--;
@@ -322,6 +331,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
                 adjustPosition(0.115);
             } else {
                 stopDrive();
+                CVDetectionPipeline.sleepTimeMS = 500;
+                camera.webcam.pauseViewport();
                 phase--;
             }
         }
@@ -439,11 +450,16 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         }
     }
 
+    public void setAssistedLaunchAngle() {
+        powerLauncher.setLaunchAngle(tower.findLaunchAngle(gyro.getAngle()));
+    }
+
     // Use when you are in the LEFT_POWERSHOT_POS
     public void shootPowerShots() {
         stopDrive();
         powerLauncher.setLaunchAnglePerfect();
-        powerLauncher.toggleOn(0.85);
+        powerLauncher.changeLaunchAngle(0.016);
+        powerLauncher.toggleOn(0.8);
         wait(0.9);
         indexRings(1);
         move(0.6, 0, 0.7, true);
