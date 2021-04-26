@@ -138,12 +138,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Toggle speed
             if (controller1.x.equals("pressing")) {
 //                robot.toggleSpeed();
-                intakeSetting = "off";
-                robot.powerLauncher.setLaunchAnglePerfect();
-                robot.powerLauncher.toggleOn();
-                robot.wait(0.6);
-                robot.powerLauncher.resetQueueTimeStamp();
-                queue = 3;
             }
 
             // Terminate any automated functions and stop streaming
@@ -164,20 +158,24 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             if (controller1.dpad_right.equals("pressed")) {
-                robot.stopDrive();
-                robot.camera.startMidStream();
-            }
-            else if (controller1.dpad_up.equals("pressed")) {
                 robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
                 phase = 4;
             }
-            else if (controller1.dpad_left.equals("pressed")) {
+            else if (controller1.dpad_up.equals("pressed")) {
                 phase = 0;
                 robot.shootPowerShots();
             }
-            else if (controller1.dpad_down.equals("pressed")) {
+            else if (controller1.dpad_left.equals("pressed")) {
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
                 phase = 4;
+            }
+            else if (controller1.dpad_down.equals("pressed")) {
+                intakeSetting = "off";
+                robot.powerLauncher.setLaunchAnglePerfect();
+                robot.powerLauncher.toggleOn();
+                robot.wait(0.6);
+                robot.powerLauncher.resetQueueTimeStamp();
+                queue = 3;
             }
 
 

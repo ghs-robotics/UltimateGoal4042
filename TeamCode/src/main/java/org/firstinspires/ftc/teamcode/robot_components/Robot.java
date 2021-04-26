@@ -129,8 +129,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         telemetry.addLine("LAUNCHER POWER: " + powerLauncher.leftPower);
 
         telemetry.addLine();
-//        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
-//        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
+        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV); // TODO
+        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV); // TODO
 
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("TOWER", "" + tower.toString());
