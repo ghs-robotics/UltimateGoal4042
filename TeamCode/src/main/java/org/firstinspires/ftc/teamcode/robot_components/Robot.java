@@ -75,10 +75,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         // Initializing PID objects
 
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0); // Used to have tolerance of 1
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0, 0.115);
 
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 0); // Used to have tolerance of 1
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 0, 0.115);
 
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
@@ -87,7 +87,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         CVDetectionPipeline phone = camera.phoneCamPipeline;
 
         floor = new FieldFloor(phone, new PIDController(0.0600, 0.0035, 0.0020, 1)); // yPID
-        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0.5)); // hPID
+        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0.5, 0.115)); // hPID
         ring = new Ring(phone, xPID, wPID);
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
@@ -244,25 +244,36 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Makes the robot line up with the tower goal (if called repeatedly)
     // Make sure the following things are accounted for before calling this:
     // targetGyroAngle, target values, reset PIDs, activate object, set launcher side as front
-    public void adjustPosition(double minAbsVal) {
+    public void adjustPosition() {
         if (getAbsoluteGyroError() > 4) {
             adjustAngle();
         }
         // When robot is too close to front of field
         else if (!tower.isIdentified()) {
-            chaseObject(wall, minAbsVal);
+            chaseObject(wall);
         }
         else {
-            chaseObject(tower, minAbsVal);
+            chaseObject(tower);
+        }
+    }
+
+    public void adjustToTower() {
+        if (tower.isIdentified()) {
+            // Distance between tower goal and left side of screen: tower.x
+            // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
+            calculateDrivePowers(0, 0, gyroPID.calcVal(tower.x - (320 - tower.x - tower.w))); // TODO
+            sendDrivePowers();
+        } else {
+            adjustAngle();
         }
     }
 
     // Makes the robot chase the target object (if called repeatedly)
     // Make sure the following things are accounted for before calling this:
     // gyro angle, target values, reset PIDs, activate object, set launcher side as front
-    public void chaseObject(CVObject target, double minAbsVal) {
-        x = target.getBreadthPIDValue(minAbsVal); // 0.115
-        y = target.getDepthPIDValue(minAbsVal);
+    public void chaseObject(CVObject target) {
+        x = target.getBreadthPIDValue();
+        y = target.getDepthPIDValue();
         calculateDrivePowers(x, y, getGyroPIDValue());
         updateDrive();
     }
@@ -288,7 +299,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 
     public int moveInPhases(int phase) {
-        return moveInPhases(phase, 0.0, 2.0, 5.0);
+        return moveInPhases(phase, 0.0, 2.5, 5.0); // TODO
     }
 
     // Automated move to position function that uses phases and must be called repeatedly
@@ -297,8 +308,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         if (phase == 4) {
             stopDrive();
             CVDetectionPipeline.sleepTimeMS = 0;
-            tower.activate();
-            wall.activate();
+            activateFieldLocalization();
             camera.startMidStream();
             camera.webcam.resumeViewport();
             targetGyroAngle = getReasonableGyroAngle(0);
@@ -313,11 +323,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         }
         else if (phase == 2) {
             if ((!tower.isIdentified()
-                    || tower.getAbsErrorW() > 8 // TODO : TRY MAKING THESE SMALLER
+                    || tower.getAbsErrorW() > 4 // TODO : TRY MAKING THESE SMALLER
                     || tower.getAbsErrorX() > 8
                     || getAbsoluteGyroError() > 4)
                     && elapsedSecs() - phaseTimeStamp < maxBroadTuning) {
-                adjustPosition(0);
+                adjustPosition();
             } else {
                 phaseTimeStamp = elapsedSecs();
                 tower.resetPIDs();
@@ -328,11 +338,12 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         else if (phase == 1) {
             if (elapsedSecs() - phaseTimeStamp < minFineTuning
                     || (elapsedSecs() - phaseTimeStamp < maxFineTuning && driveMotorsRunning())) {
-                adjustPosition(0.115);
+                adjustPosition();
             } else {
                 stopDrive();
                 CVDetectionPipeline.sleepTimeMS = 500;
                 camera.webcam.pauseViewport();
+                deactivateFieldLocalization();
                 phase--;
             }
         }
@@ -351,12 +362,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         moveToPos(pos, minFineTuning, maxFineTuning, 5.0);
     }
 
-    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
-        moveToPos(pos, minFineTuning, maxFineTuning, maxBroadTuning, 0);
-    }
-
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning, double minAbsVal) {
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
         tower.activate();
         wall.activate();
         tower.setTargetXW(pos);
@@ -367,7 +374,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
                 || tower.getAbsErrorX() > 8
                 || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
-            adjustPosition(0);
+            adjustPosition();
         }
         t = elapsedSecs();
 
@@ -377,7 +384,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
         while (elapsedSecs() - t < minFineTuning
                 || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
-            adjustPosition(minAbsVal);
+            adjustPosition();
         }
         stopDrive();
     }
@@ -391,7 +398,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         double t = elapsedSecs();
         while(  (floor.getAbsErrorY() > 3 || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
-            chaseObject(floor, 0);
+            chaseObject(floor);
         }
         t = elapsedSecs();
 
@@ -399,7 +406,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         floor.resetPIDs();
 
         while (elapsedSecs() - t < minFineTuning || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
-            chaseObject(floor, 0);
+            chaseObject(floor);
         }
         stopDrive();
     }
@@ -413,7 +420,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         double t = elapsedSecs();
         while(  (wall.getAbsErrorH() > 3 || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
-            chaseObject(wall, 0);
+            chaseObject(wall);
         }
         t = elapsedSecs();
 
@@ -421,7 +428,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wall.resetPIDs();
 
         while (elapsedSecs() - t < minFineTuning || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
-            chaseObject(wall, 0);
+            chaseObject(wall);
         }
         stopDrive();
     }
@@ -448,6 +455,54 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         } else {
             turnArmDownDrag();
         }
+    }
+
+    // Automated move to position function that uses phases and must be called repeatedly
+    // This allows us to terminate the function early (because we can just set phase to be 0)
+    public int rotateToTowerInPhases(int phase, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        if (phase == 4) {
+            stopDrive();
+            gyroPID.resetValues();
+            CVDetectionPipeline.sleepTimeMS = 0;
+            activateFieldLocalization();
+            camera.startMidStream();
+            camera.webcam.resumeViewport();
+            targetGyroAngle = getReasonableGyroAngle(0);
+            phaseTimeStamp = elapsedSecs();
+            phase--;
+        }
+        else if (phase == 3) {
+            if (camera.isStreaming() && camera.isWebcamReady()) {
+                phaseTimeStamp = elapsedSecs();
+                phase--;
+            }
+        }
+        else if (phase == 2) {
+            if ((!tower.isIdentified()
+                    || tower.getAbsErrorW() > 4 // TODO : TRY MAKING THESE SMALLER
+                    || tower.getAbsErrorX() > 8
+                    || getAbsoluteGyroError() > 4)
+                    && elapsedSecs() - phaseTimeStamp < maxBroadTuning) {
+                adjustAngle();
+            } else {
+                phaseTimeStamp = elapsedSecs();
+                gyroPID.resetValues();
+                phase--;
+            }
+        }
+        else if (phase == 1) {
+            if (elapsedSecs() - phaseTimeStamp < minFineTuning
+                    || (elapsedSecs() - phaseTimeStamp < maxFineTuning && driveMotorsRunning())) {
+                adjustToTower();
+            } else {
+                stopDrive();
+                CVDetectionPipeline.sleepTimeMS = 500;
+                camera.webcam.pauseViewport();
+                deactivateFieldLocalization();
+                phase--;
+            }
+        }
+        return phase;
     }
 
     public void setAssistedLaunchAngle() {

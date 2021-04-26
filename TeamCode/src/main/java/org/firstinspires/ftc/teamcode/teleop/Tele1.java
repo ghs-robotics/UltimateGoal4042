@@ -90,7 +90,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Checks if the robot should be performing an automated move function
             if (phase > 0) {
-                phase = robot.moveInPhases(phase, 0.0, 3.0, 5.0); // TODO : CHANGE
+                phase = robot.moveInPhases(phase);
             }
             else {
                 if (!controller1.right_bumper.equals("pressed")) {
@@ -137,7 +137,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Toggle speed
             if (controller1.x.equals("pressing")) {
-//                robot.toggleSpeed();
+                robot.toggleSpeed();
             }
 
             // Terminate any automated functions and stop streaming
@@ -177,6 +177,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.powerLauncher.resetQueueTimeStamp();
                 queue = 3;
             }
+
 
 
             // -----------------------------------------------------------------------------------------

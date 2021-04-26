@@ -25,14 +25,9 @@ public class FieldWall extends CVObject {
 
     // No side to side PID
     @Override
-    public double getBreadthPIDValue(double minAbsVal) {
-        return 0;
-    }
-
-    @Override
-    public double getDepthPIDValue(double minAbsVal) {
+    public double getDepthPIDValue() {
         if (identified) {
-            return -depthPID.calcVal(getErrorH(), minAbsVal);
+            return -depthPID.calcVal(getErrorH());
         } else {
             return 0;
         }

@@ -49,7 +49,7 @@ public class PIDController {
     }
 
     public double calcVal(double error) {
-        return calcVal(error, 0.0);
+        return calcVal(error, minAbsVal);
     }
 
     // Calculates the power value to be sent to the motor(s)

@@ -79,7 +79,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.turnArmDownDrag();
 
         // Shoot power shots with preloaded rings
-        robot.moveToPos(LEFT_POWERSHOT_POS, 0, 2.0, 5.0, 0.11); // 1.0, 3.0
+        robot.moveToPos(LEFT_POWERSHOT_POS, 0, 2.0, 5.0); // 1.0, 3.0
         robot.shootPowerShots();
 
         // Deliver first wobble goal
@@ -87,7 +87,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         dropWobble();
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 1.0, 3.0, 3.0, 0.11);
+        robot.moveToPos(SECOND_WOBBLE_POS, 1.0, 3.0, 3.0);
         robot.pickUpWobbleGoal("down");
 
         // Deliver 2nd wobble goal
@@ -105,7 +105,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.turnArmDownDrag();
 
         // Shoot power shots with preloaded rings
-        robot.moveToPos(LEFT_POWERSHOT_POS, 0, 2.0, 5.0, 0.11); // 1.0, 3.0
+        robot.moveToPos(LEFT_POWERSHOT_POS, 0, 2.0, 5.0); // 1.0, 3.0
         robot.shootPowerShots();
 
         robot.towerXPID.setMinMax(-0.7, 0.7);
@@ -125,7 +125,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 1.5, 2.1, 5.0, 0.11);
+        robot.moveToPos(SECOND_WOBBLE_POS, 1.5, 2.1, 5.0);
         robot.pickUpWobbleGoal("down");
 
         // Shoot one ring
