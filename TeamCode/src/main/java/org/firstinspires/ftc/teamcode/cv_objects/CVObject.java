@@ -244,7 +244,7 @@ public abstract class CVObject implements HSVConstants {
         }
 
         // Draws largest rect on src image
-        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2);
+        Imgproc.rectangle(input, largestRect, GREEN_BGR, 1);
 
         // Updates coordinates
         this.x = largestRect.x;

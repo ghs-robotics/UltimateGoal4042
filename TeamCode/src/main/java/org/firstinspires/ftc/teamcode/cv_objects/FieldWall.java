@@ -23,6 +23,11 @@ public class FieldWall extends CVObject {
         Imgproc.rectangle(currentHSVMat, new Point(166, 0), new Point(320, 240), GREEN_BGR, -1);
     }
 
+    @Override
+    public double getBreadthPIDValue() {
+        return 0;
+    }
+
     // No side to side PID
     @Override
     public double getDepthPIDValue() {

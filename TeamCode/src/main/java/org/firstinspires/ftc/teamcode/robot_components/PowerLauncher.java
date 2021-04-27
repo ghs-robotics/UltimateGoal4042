@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.225; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.215; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.615;
@@ -121,17 +121,24 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
+    public double getTimePassed() {
+        return elapsedTime.seconds() - queueTimeStamp;
+    }
+
     // Handle the queue of rings (only indexing
     public int handleIndexQueue(int queue) {
-        if (elapsedTime.seconds() - queueTimeStamp > 0.5) {
+        if (getTimePassed() > 0.5) {
             resetQueueTimeStamp();
             queue--;
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 0.25) {
+        else if (getTimePassed() > 0.25) {
             setIndexerAngle(INDEXER_BACK_POS);
         }
         else {
             setIndexerAngle(INDEXER_FORWARD_POS);
+        }
+        if (queue == 0) { // Turn launcher off after indexing
+            toggleOff();
         }
         return queue;
     }
@@ -146,12 +153,12 @@ public class PowerLauncher {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 1.2) {
+        else if (getTimePassed() > 1.2) {
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             queue--;
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 1.0) {
+        else if (getTimePassed() > 1.0) {
             setIndexerAngle(INDEXER_FORWARD_POS);
         }
         return queue;
@@ -165,6 +172,14 @@ public class PowerLauncher {
     public void index() {
         setIndexerAngle(INDEXER_FORWARD_POS);
         wait(0.2);
+        setIndexerAngle(INDEXER_BACK_POS);
+    }
+
+    public void setIndexerForwardPos() {
+        setIndexerAngle(INDEXER_FORWARD_POS);
+    }
+
+    public void setIndexerBackPos() {
         setIndexerAngle(INDEXER_BACK_POS);
     }
 

@@ -31,10 +31,10 @@ public interface HSVConstants {
     MyScalar LOWER_WALL_HSV = new MyScalar(70, 50, 110);
     MyScalar UPPER_WALL_HSV = new MyScalar(130, 255, 255);
 
-    // Wobble goal HSV values
+    // Wobble goal HSV values NOT TESTED
 //    MyScalar LOWER_WOBBLE_HSV = new MyScalar(0, 0, 0);
 //    MyScalar UPPER_WOBBLE_HSV = new MyScalar(255, 255, 25);
-    MyScalar LOWER_WOBBLE_HSV = new MyScalar(0, 70, 80); // TODO : TEST THESE VALUES
+    MyScalar LOWER_WOBBLE_HSV = new MyScalar(0, 70, 80);
     MyScalar UPPER_WOBBLE_HSV = new MyScalar(80, 255, 220);
 
     // For image processing (e.g. drawing rectangles)

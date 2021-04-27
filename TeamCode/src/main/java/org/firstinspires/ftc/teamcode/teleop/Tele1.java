@@ -54,8 +54,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         controller2 = new Controller(gamepad2); // Whoever presses start + b
 
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
-        int phase = 0; // 0 is normal; not 0 means robot will perform an automated function
-        String intakeSetting = "normal"; // "normal," "in," "out," "off"
+        int movePhase = 0; // 0 is normal; not 0 means robot will perform an automated function
+        int autoAimPhase = 0; // 0 is normal; not 0 means robot will perform an automated function
+        String intakeSetting = "normal"; // "normal," "in," "out"
 
         robot.initWithCV();
         robot.powerLauncher.setLaunchAngleLoading();
@@ -66,8 +67,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-        CVDetectionPipeline.sleepTimeMS = 500;
-        robot.camera.webcam.pauseViewport();
+//        robot.camera.webcam.pauseViewport();
+        robot.activateFieldLocalization();
+
         robot.resetGyroAngle();
         robot.resetElapsedTime();
 
@@ -89,10 +91,16 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
 
             // Checks if the robot should be performing an automated move function
-            if (phase > 0) {
-                phase = robot.moveInPhases(phase);
+            if (movePhase > 0) {
+                CVDetectionPipeline.sleepTimeMS = 0;
+                movePhase = robot.moveInPhases(movePhase);
+            }
+            else if (autoAimPhase > 0) {
+                CVDetectionPipeline.sleepTimeMS = 0;
+                autoAimPhase = robot.rotateToTowerInPhases(autoAimPhase);
             }
             else {
+                CVDetectionPipeline.sleepTimeMS = 500;
                 if (!controller1.right_bumper.equals("pressed")) {
                     // Mecanum wheel drive in meta mode
                     robot.calculateDrivePowers(
@@ -120,7 +128,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             //
             if (controller1.a.equals("pressing")) {
                 if (intakeSetting.equals("in")) {
-                    intakeSetting = "off";
+                    intakeSetting = "normal";
                 } else {
                     intakeSetting = "in";
                 }
@@ -129,7 +137,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             //
             if (controller1.b.equals("pressing")) {
                 if (intakeSetting.equals("out")) {
-                    intakeSetting = "off";
+                    intakeSetting = "normal";
                 } else {
                     intakeSetting = "out";
                 }
@@ -143,7 +151,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Terminate any automated functions and stop streaming
             if (controller1.y.equals("pressing")) {
                 robot.camera.stopStreaming();
-                phase = 0;
+                movePhase = 0;
+                autoAimPhase = 0;
             }
 
             // Reset gyro in case of emergency
@@ -154,28 +163,28 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Reset any controls
             if (controller1.left_stick_button.equals("pressing")) {
                 robot.speed = 1;
-                phase = 0;
+                movePhase = 0;
+                autoAimPhase = 0;
+                CVDetectionPipeline.sleepTimeMS = 500;
+                robot.powerLauncher.toggleOff();
             }
 
             if (controller1.dpad_right.equals("pressed")) {
                 robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
-                phase = 4;
+                movePhase = 4;
             }
             else if (controller1.dpad_up.equals("pressed")) {
-                phase = 0;
+                movePhase = 0;
+                autoAimPhase = 0;
                 robot.shootPowerShots();
             }
             else if (controller1.dpad_left.equals("pressed")) {
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-                phase = 4;
+                movePhase = 4;
             }
             else if (controller1.dpad_down.equals("pressed")) {
-                intakeSetting = "off";
-                robot.powerLauncher.setLaunchAnglePerfect();
-                robot.powerLauncher.toggleOn();
-                robot.wait(0.6);
-                robot.powerLauncher.resetQueueTimeStamp();
-                queue = 3;
+                intakeSetting = "normal";
+                autoAimPhase = 9;
             }
 
 
@@ -192,9 +201,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
                 queue = robot.powerLauncher.handleIndexQueue(queue);
-                if (queue == 0) { // Turn launcher off after indexing
-                    robot.powerLauncher.toggleOff();
-                }
             }
 
             // Intake stuff
@@ -205,9 +211,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             else if (intakeSetting.equals("out")) {
                 robot.powerLauncher.setLaunchAngleLoading();
                 robot.runIntake(-0.85);
-            }
-            else if (intakeSetting.equals("off")) {
-                robot.runIntake(0);
             }
             else {
                 // Run intake with right joystick
@@ -272,12 +275,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Angle the launcher down a tiny bit
             if (controller2.dpad_up.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(-0.010);
+                robot.powerLauncher.PERFECT_LAUNCH_ANGLE -= 0.005;
             }
 
             // Angle the launcher up a tiny bit
             if (controller2.dpad_down.equals("pressing")) {
-                robot.powerLauncher.changeLaunchAngle(0.010);
+                robot.powerLauncher.PERFECT_LAUNCH_ANGLE += 0.005;
             }
 
             // Set current angle to default angle
@@ -292,7 +295,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Change current launch Angle (but keep default the same)
             if (controller2.left_stick_y != 0) {
-                double val = -((int) (50 * controller2.left_stick_y)) / 1000.0;
+                double val = -((int) (40 * controller2.left_stick_y)) / 1000.0;
                 robot.powerLauncher.changeLaunchAngleGradually(val);
             }
 
