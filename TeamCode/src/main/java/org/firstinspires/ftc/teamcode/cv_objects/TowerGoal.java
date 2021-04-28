@@ -55,6 +55,14 @@ public class TowerGoal extends CVObject {
         110     45 (top of goal is out of view)
      */
 
+    public boolean onTarget() {
+        return getErrorX() == 0 && getErrorW() == 0;
+    }
+
+    public boolean targetInRange(int radius) {
+        return getAbsErrorX() <= radius && getAbsErrorW() <= radius;
+    }
+
     public double cvtH2VerticalDist() {
         return -0.0000270563 * Math.pow(h, 5) + 0.00422078 * Math.pow(h, 4)
                 - 0.260795 * Math.pow(h, 3) + 7.98312 * Math.pow(h, 2) - 121.456 * h + 747;

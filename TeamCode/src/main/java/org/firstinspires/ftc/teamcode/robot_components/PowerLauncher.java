@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.215; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.370; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.615;
-    public static double LOADING_OFFSET = -0.170;
+    public static double LOADING_OFFSET = -0.150;
     public static double SECOND_PERFECT_OFFSET = -0.032; // 2 ft behind perfect launch pos
     public static double THIRD_PERFECT_OFFSET = -0.038; // 4 ft behind perfect launch pos
 
@@ -170,8 +170,12 @@ public class PowerLauncher {
 
     // Moves the indexer servo, which launches a ring
     public void index() {
+        index(0.25); // TODO : was 0.2, plz test
+    }
+
+    public void index(double time) {
         setIndexerAngle(INDEXER_FORWARD_POS);
-        wait(0.2);
+        wait(time);
         setIndexerAngle(INDEXER_BACK_POS);
     }
 

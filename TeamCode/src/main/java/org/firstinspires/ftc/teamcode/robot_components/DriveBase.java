@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -35,11 +36,14 @@ public class DriveBase {
 
     // For displaying things on the DS phone
     public Telemetry telemetry;
+    public HardwareMap hardwareMap;
 
     public ElapsedTime elapsedTime;
 
     // Constructs a DriveBase object with four drive motors
     public DriveBase(HardwareMap hardwareMap, Telemetry telemetry) {
+
+        this.hardwareMap = hardwareMap;
 
         // These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
@@ -124,6 +128,17 @@ public class DriveBase {
     // Returns how many seconds have passed since the timer was last reset
     public double elapsedSecs() {
         return elapsedTime.seconds();
+    }
+
+    // TODO : TEST THIS
+    double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) { result = Math.min(result, voltage);
+            }
+        }
+        return result;
     }
 
     // Finds an equivalent gyro angle (mod 360) within range of the actual current robot angle

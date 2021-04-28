@@ -13,8 +13,8 @@ public interface FieldPositions {
     int[] SECOND_PERFECT_LAUNCH_POS = new int[]{136, 48}; // Perfect launch position
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{94 + xOffset, 67}; // Where to go to avoid first starter stack
 
-//    int[] LEFT_POWERSHOT_POS = new int[]{97, 58}; // 6.5 degrees
-    int[] LEFT_POWERSHOT_POS = new int[]{108, 58}; // 6.5 degrees
+    int[] LEFT_MOVING_POWERSHOT_POS = new int[]{108, 58};
+    int[] LEFT_POWERSHOT_POS = new int[]{97, 58};
     int[] MID_POWERSHOT_POS = new int[]{77, 58};
     int[] RIGHT_POWERSHOT_POS = new int[]{67, 58}; // - 6.5 degrees
 

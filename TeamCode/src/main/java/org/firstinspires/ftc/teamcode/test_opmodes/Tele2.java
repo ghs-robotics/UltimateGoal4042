@@ -85,31 +85,31 @@ public class Tele2 extends OpMode implements FieldPositions {
 
         if (controller1.a.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(35);
+            robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
         }
 
         if (controller1.b.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(50);
+            robot.tower.setTargetXW(CONFIG_0_POS_I);
         }
 
         if (controller1.y.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(91);
+            robot.tower.setTargetXW(SECOND_WOBBLE_POS);
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.wall.depthPID.k_P -= 0.005; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wall.depthPID.k_P += 0.005; }
+        if (controller1.left_bumper.equals("pressing")) { robot.tower.depthPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.tower.depthPID.k_P += 0.005; }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wall.depthPID.k_I -= 0.0005; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wall.depthPID.k_I += 0.0005; }
+        if (controller1.dpad_down.equals("pressing")) { robot.tower.depthPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.tower.depthPID.k_I += 0.0005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.wall.depthPID.k_D -= 0.0005; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wall.depthPID.k_D += 0.0005; }
+        if (controller1.dpad_left.equals("pressing")) { robot.tower.depthPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.tower.depthPID.k_D += 0.0005; }
 
 
         if (chasing) {
-            robot.chaseObject(robot.wall);
+            robot.chaseObject(robot.tower);
         } else {
             robot.updateDrive();
         }

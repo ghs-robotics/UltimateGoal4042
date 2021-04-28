@@ -54,8 +54,6 @@ public class PIDController {
 
     // Calculates the power value to be sent to the motor(s)
     public double calcVal(double error, double minAbsVal) {
-        // If the error is small enough, the robot won't adjust
-        if (Math.abs(error) <= toleranceRadius) { return 0; }
 
         // Calculates the different errors
         double deltaTime = time.seconds() - prevTime;
@@ -67,11 +65,16 @@ public class PIDController {
         prevError = error;
         prevTime = time.seconds();
 
+        // If the error is small enough, the robot won't adjust
+        if (Math.abs(error) <= toleranceRadius) {
+            return 0;
+        }
+
         // Calculates the PID value to be sent to the motor
         double val = Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
         if (minAbsVal > 0) {
-//            val = Math.signum(val) * (minAbsVal + Math.abs(val));
-            val = Math.signum(val) * Math.max(minAbsVal, Math.abs(val));
+            val = Math.signum(val) * (minAbsVal + Math.abs(val));
+//            val = Math.signum(val) * Math.max(minAbsVal, Math.abs(val));
         }
         return val;
     }

@@ -37,6 +37,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Robot variables and objects
     private double intakePower = 0;
+    private double batteryVoltage;
     public double armAngle = 0; // init position
     public double clawAngle = 0.92; // Closed position
 
@@ -75,10 +76,10 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         // Initializing PID objects
 
         // When working together with wPID, having Ki and Kd be zero works best
-        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0, 0.115);
+        towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0, 0.26);
 
         // Having Ki and Kd be zero normally works fine though
-        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 0, 0.115);
+        towerWPID = new PIDController(0.0450, 0.0010, 0.0000, 0, 0.15);
 
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
@@ -87,12 +88,14 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         CVDetectionPipeline phone = camera.phoneCamPipeline;
 
         floor = new FieldFloor(phone, new PIDController(0.0600, 0.0035, 0.0020, 1)); // yPID
-        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0.5, 0.115)); // hPID
+        wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0, 0.115)); // hPID
         ring = new Ring(phone, xPID, wPID);
         stack = new StarterStack(web);
         tower = new TowerGoal(web, towerXPID, towerWPID);
         wobble = new WobbleGoal(phone, xPID, wPID);
-        target = stack;
+        target = tower;
+
+        batteryVoltage = getBatteryVoltage();
     }
 
 
@@ -107,6 +110,12 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Call before using CV for field localization
     public void activateFieldLocalization() {
+        startUp();
+        camera.startMidStream(); // start streaming image input
+        camera.webcam.resumeViewport(); // show webcam images on phone in real time
+    }
+
+    public void startUp() {
         stopDrive();
         tower.activate();
         wall.activate();
@@ -114,19 +123,18 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         wall.resetPIDs();
         gyroPID.resetValues();
         CVDetectionPipeline.sleepTimeMS = 0; // increase FPS to maximum
-        camera.startMidStream(); // start streaming image input
-        camera.webcam.resumeViewport(); // show webcam images on phone in real time
         targetGyroAngle = getReasonableGyroAngle(0);
     }
 
     // Displays a bunch of useful values on the DS phone
     @Override
     public void addTelemetryData() {
-        telemetry.addLine("Left side: " + tower.x);
-        telemetry.addLine("Right side: " +  (320 - tower.x - tower.w));
+
+//        telemetry.addLine("Left side: " + tower.x);
+//        telemetry.addLine("Right side: " +  (320 - tower.x - tower.w));
         telemetry.addLine("sleepTimeMS: " + CVDetectionPipeline.sleepTimeMS);
-        telemetry.addData("CURRENT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.launchAngle) / 1000.0);
-        telemetry.addData("PERFECT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.PERFECT_LAUNCH_ANGLE) / 1000.0);
+        telemetry.addData("CURRENT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.launchAngle));
+        telemetry.addData("PERFECT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.PERFECT_LAUNCH_ANGLE));
         double dist = tower.cvtH2VerticalDist();
         telemetry.addData("Dist", "" + dist);
         telemetry.addData("Launch offset", "" + tower.cvtFt2LaunchOffset(dist));
@@ -139,16 +147,16 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         telemetry.addLine("LAUNCHER POWER: " + powerLauncher.leftPower);
 
         telemetry.addLine();
-        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV); // TODO
-        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV); // TODO
+//        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV); // TODO
+//        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV); // TODO
 
         telemetry.addData("gyro angle", "" + gyro.getAngle());
         telemetry.addData("TOWER", "" + tower.toString());
         telemetry.addData("WALL", "" + wall.toString());
         telemetry.addData("(x, y)", "( " + x + ", " + y + " )");
-//        telemetry.addData("Kp", target.depthPID.k_P);
-//        telemetry.addData("Ki", target.depthPID.k_I);
-//        telemetry.addData("Kd", target.depthPID.k_D);
+        telemetry.addData("Kp", target.depthPID.k_P);
+        telemetry.addData("Ki", target.depthPID.k_I);
+        telemetry.addData("Kd", target.depthPID.k_D);
         telemetry.update();
     }
 
@@ -189,7 +197,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Launches a ring by moving the shooterServo
     public void indexRings(int rings) {
         for (int i = 0; i < rings; i++) {
-            powerLauncher.index();
+            powerLauncher.index(0.4);
             wait(0.3);
         }
     }
@@ -317,82 +325,92 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 
     public int moveInPhases(int phase) {
-        return moveInPhases(phase, 0.0, 2.5, 5.0); // TODO
+        return moveInPhases(phase, 1.0, 4.0, 5.0); // TODO
     }
 
     // Automated move to position function that uses phases and must be called repeatedly
     // This allows us to terminate the function early (because we can just set phase to be 0)
     public int moveInPhases(int phase, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
-        if (phase == 4) {
-            activateFieldLocalization();
-            phase--;
+        if (phase > 4) {
+            phase = 4;
         }
-        else if (phase == 3) {
-            if (camera.isStreaming() && camera.isWebcamReady()) {
-                phaseTimeStamp = elapsedSecs();
+        switch (phase) {
+            case 4:
+                activateFieldLocalization();
                 phase--;
-            }
-        }
-        else if (phase == 2) {
-            if ((!tower.isIdentified()
-                    || tower.getAbsErrorW() > 4 // TODO : TRY MAKING THESE SMALLER
-                    || tower.getAbsErrorX() > 8
-                    || getAbsoluteGyroError() > 4)
-                    && elapsedSecs() - phaseTimeStamp < maxBroadTuning) {
-                adjustPosition();
-            } else {
-                phaseTimeStamp = elapsedSecs();
-                tower.resetPIDs();
-                wall.resetPIDs();
-                phase--;
-            }
-        }
-        else if (phase == 1) {
-            if (elapsedSecs() - phaseTimeStamp < minFineTuning
-                    || (elapsedSecs() - phaseTimeStamp < maxFineTuning && driveMotorsRunning())) {
-                adjustPosition();
-            } else {
-                deactivateFieldLocalization();
-                phase--;
-            }
+                break;
+            case 3:
+                if (camera.isStreaming() && camera.isWebcamReady()) {
+                    phaseTimeStamp = elapsedSecs();
+                    phase--;
+                }
+                break;
+            case 2:
+                if ((!tower.isIdentified() || !tower.targetInRange(4) || getAbsoluteGyroError() > 4)
+                        && elapsedSecs() - phaseTimeStamp < maxBroadTuning) {
+                    adjustPosition();
+                }
+                else {
+                    phaseTimeStamp = elapsedSecs();
+                    phase--;
+                }
+                break;
+            case 1:
+                if (elapsedSecs() - phaseTimeStamp < minFineTuning
+                        || (elapsedSecs() - phaseTimeStamp < maxFineTuning && !tower.targetInRange(0))) {
+                    adjustPosition();
+                }
+                else {
+                    deactivateFieldLocalization();
+                    phase--;
+                }
+                break;
         }
         return phase;
     }
 
     public void moveToPos(int[] pos) {
-        moveToPos(pos, 0.0, 2.0, 5.0);
+        moveToPos(pos, 0.0, 2.0, 5.0, 2);
+    }
+
+    public void moveToPos(int[] pos, int tolerance) {
+        moveToPos(pos, 0.0, 2.0, 5.0, tolerance);
     }
 
     public void moveToPos(int[] pos, double maxFineTuning) {
-        moveToPos(pos, 0.0, maxFineTuning, 5.0);
+        moveToPos(pos, 0.0, maxFineTuning, 5.0, 2);
+    }
+
+    public void moveToPos(int[] pos, double maxFineTuning, int tolerance) {
+        moveToPos(pos, 0.0, maxFineTuning, 5.0, tolerance);
     }
 
     public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning) {
-        moveToPos(pos, minFineTuning, maxFineTuning, 5.0);
+        moveToPos(pos, minFineTuning, maxFineTuning, 5.0, 2);
+    }
+
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, int tolerance) {
+        moveToPos(pos, minFineTuning, maxFineTuning, 5.0, tolerance);
+    }
+
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
+        moveToPos(pos, minFineTuning, maxFineTuning, maxBroadTuning, 2);
     }
 
     // Makes the robot move to a certain position relative to the tower goal
-    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning) {
-        tower.activate();
-        wall.activate();
+    public void moveToPos(int[] pos, double minFineTuning, double maxFineTuning, double maxBroadTuning, int tolerance) {
         tower.setTargetXW(pos);
+        activateFieldLocalization(); // TODO : TEST
         rotateToPos(0.0, 0.0);
         double t = elapsedSecs();
-        while(  (!tower.isIdentified()
-                || tower.getAbsErrorW() > 8
-                || tower.getAbsErrorX() > 8
-                || getAbsoluteGyroError() > 4)
+
+        while((!tower.isIdentified() || !tower.targetInRange(4) || getAbsoluteGyroError() > 4)
                 && elapsedSecs() - t < maxBroadTuning) {
             adjustPosition();
         }
         t = elapsedSecs();
-
-        // Start fresh by resetting these
-        tower.resetPIDs();
-        wall.resetPIDs();
-
         while (elapsedSecs() - t < minFineTuning
-                || (elapsedSecs() - t < maxFineTuning && driveMotorsRunning())) {
+                || (elapsedSecs() - t < maxFineTuning && !tower.targetInRange(tolerance))) {
             adjustPosition();
         }
         stopDrive();
@@ -451,13 +469,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         double t = elapsedSecs();
         calculateDrivePowers(0, -0.3, 0);
         sendDrivePowers();
-        while (wall.h < 80 && elapsedSecs() - t < 1.7) { // TODO
+        while (wall.h < 90 && elapsedSecs() - t < 2.5) { // TODO
             calculateDrivePowers(0, -0.3, getGyroPIDValue());
             sendDrivePowers();
         }
         stopDrive();
         toggleClaw();
-        wait(0.5);
+        wait(0.9);
         if (finalArmPos.equals("up")) {
             turnArmUpFull();
         } else {
@@ -486,7 +504,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             }
         }
         else if (phase == 7) {
-            if (!tower.isIdentified() || tower.h > 38) {
+            if (!tower.isIdentified() || tower.h > 38 || getAbsoluteGyroError() > 20) {
                 adjustPosition();
             }
             else if (Math.abs(error) <= 20) {
@@ -540,47 +558,55 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         powerLauncher.setLaunchAngle(tower.findLaunchAngle(gyro.getAngle()));
     }
 
-    /*
     // Use when you are in the LEFT_POWERSHOT_POS
     public void shootPowerShots() {
         stopDrive();
         powerLauncher.setLaunchAnglePerfect();
-        powerLauncher.changeLaunchAngle(0.016);
-        powerLauncher.toggleOn(0.8);
+//        powerLauncher.changeLaunchAngle(0.010);
+//        double power = 0.95 - (batteryVoltage - 11.5) * 0.1;
+        double power = 0.85;
+        powerLauncher.toggleOn(power);
         wait(0.6);
         powerLauncher.index();
         move(0.6, 0, 0.7, true);
-//        rotateToPos(0, 0.5);
         powerLauncher.index();
         move(0.6, 0, 0.7, true);
-//        rotateToPos(0, 0.5);
         powerLauncher.index();
         wait(0.3);
         powerLauncher.toggleOff();
     }
 
-     */
-
-
-    // Use when you are in the LEFT_POWERSHOT_POS
-    public void shootPowerShots() {
+    // Use when you are in the LEFT_MOVING_POWERSHOT_POS
+    public void shootPowerShotsMoving() {
         stopDrive();
         powerLauncher.setLaunchAnglePerfect();
-        powerLauncher.changeLaunchAngle(0.016);
-        powerLauncher.toggleOn(0.85);
+        powerLauncher.changeLaunchAngle(0.010);
+
+        double power = 1.0 - (batteryVoltage - 11.5) * 0.08;
+
+        /*
+            Voltage         Power
+            11.5            1.0
+            12              0.9
+            12.5            0.85
+            13              0.8
+            13.5            0.75
+         */
+
+        powerLauncher.toggleOn(power);
         wait(0.8);
         powerLauncher.setIndexerForwardPos();
-        move(0.6, 0, 0.35, true);
+        move(0.6, 0, 0.33, true);
         powerLauncher.setIndexerBackPos();
-        move(0.6, 0, 0.3, true);
+        move(0.6, 0, 0.33, true);
         powerLauncher.setIndexerForwardPos();
-        move(0.6, 0, 0.3, true);
+        move(0.6, 0, 0.33, true);
         powerLauncher.setIndexerBackPos();
-        move(0.6, 0, 0.3, true);
+        move(0.6, 0, 0.33, true);
         powerLauncher.setIndexerForwardPos();
-        move(0.6, 0, 0.3, true);
+        move(0.6, 0, 0.33, true);
         powerLauncher.setIndexerBackPos();
-        move(0.6, 0, 0.3, true);
+        move(0.6, 0, 0.33, true);
         powerLauncher.toggleOff();
         stopDrive();
     }

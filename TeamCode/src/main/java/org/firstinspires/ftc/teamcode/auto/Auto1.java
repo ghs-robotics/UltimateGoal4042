@@ -20,7 +20,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         robot.initWithCV();
         robot.stack.activate();
-        robot.activateFieldLocalization();
+        robot.startUp();
 //        robot.towerXPID.setMinMax(-0.6, 0.6);
 //        robot.towerWPID.setMinMax(-0.6, 0.6);
 //        robot.towerXPID.k_P = 0.0400;
@@ -73,24 +73,27 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
     private void runZeroRingAuto() {
 
+        robot.towerXPID.setMinMax(-0.4, 0.4);
+        robot.towerWPID.setMinMax(-0.4, 0.4);
+
         // Shoot power shots with preloaded rings
-        robot.moveToPos(LEFT_POWERSHOT_POS, 0, 2.0, 5.0); // 1.0, 3.0
+        robot.moveToPos(LEFT_POWERSHOT_POS, 2.5, 3.0, 5.0, 0);
         robot.shootPowerShots();
 
         // Deliver first wobble goal
 //        robot.turnArmDownDrag();
-        robot.moveToPos(CONFIG_0_POS_I, 0, 1.0);
+        robot.moveToPos(CONFIG_0_POS_I, 0.5, 1.5);
         robot.turnArmDownDrag();
         robot.wait(0.5);
         dropWobble();
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 1.0, 3.0, 3.0); // TODO : IMPROVE
+        robot.moveToPos(SECOND_WOBBLE_POS, 2.5, 3.0, 4.0, 0); // TODO : IMPROVE
         robot.pickUpWobbleGoal("down");
 
         // Deliver 2nd wobble goal
         robot.moveToPos(PARK_0_POS, 0, 0, 1.0);
-        robot.moveToPos(CONFIG_0_POS_II, 0, 1.0);
+        robot.moveToPos(CONFIG_0_POS_II, 0.5, 1.5);
         dropWobble();
 
         // Move back to park over launch line
@@ -103,8 +106,8 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.turnArmDownDrag();
 
         // Shoot power shots with preloaded rings
-        robot.moveToPos(LEFT_POWERSHOT_POS, 0, 2.0, 5.0); // 1.0, 3.0
-        robot.shootPowerShots();
+        robot.moveToPos(LEFT_MOVING_POWERSHOT_POS, 0, 2.0, 5.0); // 1.0, 3.0
+        robot.shootPowerShotsMoving();
 
         robot.towerXPID.setMinMax(-0.7, 0.7);
         robot.towerWPID.setMinMax(-0.7, 0.7);
