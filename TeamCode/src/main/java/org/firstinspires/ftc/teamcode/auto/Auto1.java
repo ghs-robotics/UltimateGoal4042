@@ -73,11 +73,11 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
     private void runZeroRingAuto() {
 
-        robot.towerXPID.setMinMax(-0.4, 0.4);
-        robot.towerWPID.setMinMax(-0.4, 0.4);
+        robot.towerXPID.setMinMax(-0.7, 0.7);
+        robot.towerWPID.setMinMax(-0.7, 0.7);
 
         // Shoot power shots with preloaded rings
-        robot.moveToPos(LEFT_POWERSHOT_POS, 2.5, 3.0, 5.0, 0);
+        robot.moveToPos(LEFT_POWERSHOT_POS, 1.0, 3.0, 5.0, 1);
         robot.shootPowerShots();
 
         // Deliver first wobble goal
@@ -88,7 +88,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         dropWobble();
 
         // Grab 2nd wobble goal
-        robot.moveToPos(SECOND_WOBBLE_POS, 2.5, 3.0, 4.0, 0); // TODO : IMPROVE
+        robot.moveToPos(SECOND_WOBBLE_POS, 2.5, 3.0, 4.0, 1); // TODO : IMPROVE
         robot.pickUpWobbleGoal("down");
 
         // Deliver 2nd wobble goal
@@ -106,8 +106,8 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.turnArmDownDrag();
 
         // Shoot power shots with preloaded rings
-        robot.moveToPos(LEFT_MOVING_POWERSHOT_POS, 0, 2.0, 5.0); // 1.0, 3.0
-        robot.shootPowerShotsMoving();
+        robot.moveToPos(LEFT_POWERSHOT_POS, 1.0, 2.0, 5.0); // 1.0, 3.0
+        robot.shootPowerShots();
 
         robot.towerXPID.setMinMax(-0.7, 0.7);
         robot.towerWPID.setMinMax(-0.7, 0.7);
@@ -122,7 +122,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         // Load rings from starter stack
         robot.moveToPos(PERFECT_LAUNCH_POS, 0, 0);
         robot.powerLauncher.setLaunchAngleLoading();
-        robot.runIntake(0.8);
+        robot.runIntake(0.9);
 //        robot.move(0, -0.4, 1.0);
 
 

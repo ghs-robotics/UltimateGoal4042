@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
@@ -51,8 +52,8 @@ public class Tele2 extends OpMode implements FieldPositions {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.initWithCV();
-        robot.wobble.activate();
-        robot.wobble.setTargetH(50);
+        robot.powerLauncher.setLaunchAngleLoading();
+        robot.turnArmUpFull();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -109,6 +110,7 @@ public class Tele2 extends OpMode implements FieldPositions {
 
 
         if (chasing) {
+            CVDetectionPipeline.sleepTimeMS = 0;
             robot.chaseObject(robot.tower);
         } else {
             robot.updateDrive();

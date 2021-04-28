@@ -38,7 +38,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Robot variables and objects
     private double intakePower = 0;
     private double batteryVoltage;
-    public double armAngle = 0; // init position
+    public double armAngle = 0.05; // init position
     public double clawAngle = 0.92; // Closed position
 
     public DcMotor intakeMotor;
@@ -357,7 +357,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
                 break;
             case 1:
                 if (elapsedSecs() - phaseTimeStamp < minFineTuning
-                        || (elapsedSecs() - phaseTimeStamp < maxFineTuning && !tower.targetInRange(0))) {
+                        || (elapsedSecs() - phaseTimeStamp < maxFineTuning && !tower.targetInRange(1))) {
                     adjustPosition();
                 }
                 else {
@@ -568,9 +568,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         powerLauncher.toggleOn(power);
         wait(0.6);
         powerLauncher.index();
-        move(0.6, 0, 0.7, true);
+        move(0.6, 0, 0.68, true);
         powerLauncher.index();
-        move(0.6, 0, 0.7, true);
+        move(0.6, 0, 0.68, true);
         powerLauncher.index();
         wait(0.3);
         powerLauncher.toggleOff();
@@ -582,7 +582,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         powerLauncher.setLaunchAnglePerfect();
         powerLauncher.changeLaunchAngle(0.010);
 
-        double power = 1.0 - (batteryVoltage - 11.5) * 0.08;
+//        double power = 0.95 - (batteryVoltage - 11.5) * 0.1;
 
         /*
             Voltage         Power
@@ -592,6 +592,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             13              0.8
             13.5            0.75
          */
+        double power = 0.85;
 
         powerLauncher.toggleOn(power);
         wait(0.8);

@@ -73,8 +73,8 @@ public class PIDController {
         // Calculates the PID value to be sent to the motor
         double val = Range.clip(k_P * p_error + k_I * i_error + k_D * d_error, min, max);
         if (minAbsVal > 0) {
-            val = Math.signum(val) * (minAbsVal + Math.abs(val));
-//            val = Math.signum(val) * Math.max(minAbsVal, Math.abs(val));
+//            val = Math.signum(val) * (minAbsVal + Math.abs(val));
+            val = Math.signum(val) * Math.max(minAbsVal, Math.abs(val));
         }
         return val;
     }
