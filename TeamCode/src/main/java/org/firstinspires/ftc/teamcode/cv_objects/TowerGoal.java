@@ -14,6 +14,10 @@ public class TowerGoal extends CVObject {
         cover = 0;
     }
 
+    public int getLeftRightError(int offSet) {
+        return x - (320 + offSet - x - w);
+    }
+
     // Tests to make sure there is the slot for the high goal
     // Makes the object detection pretty bulletproof
     private boolean hasHatShape(int x, int y, int w, int h) {

@@ -39,7 +39,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     private double intakePower = 0;
     private double batteryVoltage;
     public double armAngle = 0.05; // init position
-    public double clawAngle = 0.92; // Closed position
+    public double clawAngle = 1.0; // Closed position
 
     public DcMotor intakeMotor;
     public Servo armServo;
@@ -130,8 +130,9 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     @Override
     public void addTelemetryData() {
 
-//        telemetry.addLine("Left side: " + tower.x);
-//        telemetry.addLine("Right side: " +  (320 - tower.x - tower.w));
+        telemetry.addLine("LeftRightError: " + tower.getLeftRightError(0));
+        telemetry.addLine("Left side: " + tower.x);
+        telemetry.addLine("Right side: " +  (320 - tower.x - tower.w));
         telemetry.addLine("sleepTimeMS: " + CVDetectionPipeline.sleepTimeMS);
         telemetry.addData("CURRENT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.launchAngle));
         telemetry.addData("PERFECT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.PERFECT_LAUNCH_ANGLE));
@@ -225,7 +226,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Toggles the wobble gripper/claw
     public void toggleClaw() {
         // Default angle is 0.15 (which means the gripper is closed)
-        clawAngle = (clawAngle == 0.55 ? 0.98 : 0.55);
+        clawAngle = (clawAngle == 0.55 ? 1.0 : 0.55);
         clawServo.setPosition(clawAngle);
     }
 
@@ -483,6 +484,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         }
     }
 
+    public void rotateToTower() {
+        int phase = 20;
+        while (phase > 0) {
+            phase = rotateToTowerInPhases(phase);
+        }
+    }
+
     // Automated move to position function that uses phases and must be called repeatedly
     // This allows us to terminate the function early (because we can just set phase to be 0)
     public int rotateToTowerInPhases(int phase) {
@@ -491,11 +499,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
         double error = tower.x - (334 - tower.x - tower.w); // TODO
 
-        if (phase == 9) {
+        if (phase >= 9) {
             activateFieldLocalization();
             tower.setTargetXW(PERFECT_LAUNCH_POS);
             targetGyroAngle = getReasonableGyroAngle(0);
-            phase--;
+            phase = 8;
         }
         else if (phase == 8) {
             if (camera.isStreaming() && camera.isWebcamReady()) {
@@ -564,7 +572,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         powerLauncher.setLaunchAnglePerfect();
 //        powerLauncher.changeLaunchAngle(0.010);
 //        double power = 0.95 - (batteryVoltage - 11.5) * 0.1;
-        double power = 0.85;
+        double power = 0.87;
         powerLauncher.toggleOn(power);
         wait(0.6);
         powerLauncher.index();
@@ -592,7 +600,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
             13              0.8
             13.5            0.75
          */
-        double power = 0.85;
+        double power = 0.87;
 
         powerLauncher.toggleOn(power);
         wait(0.8);
@@ -610,6 +618,89 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         move(0.6, 0, 0.33, true);
         powerLauncher.toggleOff();
         stopDrive();
+    }
+
+    public void rotateUsingCV(int offSet) {
+
+        double error = tower.getLeftRightError(offSet);
+
+        /*
+        while (Math.abs(error) > 20) {
+            error = tower.getLeftRightError(offSet);
+            calculateDrivePowers(0, 0, metaGyroPID.calcVal(0.3 * error));
+            sendDrivePowers();
+        }
+        phaseTimeStamp = elapsedSecs();
+
+        while (Math.abs(error) > 10 || getPhaseTimePassed() < 0.1) {
+            error = tower.getLeftRightError(offSet);
+            calculateDrivePowers(0, 0, (error > 0 ? 0.14 : -0.14));
+            sendDrivePowers();
+        }
+        phaseTimeStamp = elapsedSecs();
+
+        while (Math.abs(error) > 3 || getPhaseTimePassed() < 0.1) { // TODO : ADD MAX TIMER
+            error = tower.getLeftRightError(offSet);
+            calculateDrivePowers(0, 0, (error > 0 ? 0.12 : -0.10));
+            sendDrivePowers();
+        }
+
+         */
+        CVDetectionPipeline.sleepTimeMS = 0;
+        while (error > -5) {
+            CVDetectionPipeline.sleepTimeMS = 0;
+            error = tower.getLeftRightError(offSet);
+            calculateDrivePowers(0, 0, 0.2);
+            sendDrivePowers();
+        }
+        stopDrive();
+
+        while (error < 0) {
+            CVDetectionPipeline.sleepTimeMS = 0;
+            error = tower.getLeftRightError(offSet);
+            calculateDrivePowers(0, 0, -0.15);
+            sendDrivePowers();
+        }
+        stopDrive();
+
+        setAssistedLaunchAngle();
+        powerLauncher.changeLaunchAngle(-0.025);
+
+
+    }
+
+    public void shootPowerShotsRotated() {
+
+        // Setup
+        activateFieldLocalization();
+        tower.setTargetXW(PERFECT_LAUNCH_POS);
+        targetGyroAngle = getReasonableGyroAngle(0);
+
+        while (!tower.isIdentified() || tower.h > 38 || getAbsoluteGyroError() > 20) {
+            adjustPosition();
+        }
+
+        rotateUsingCV(-70);
+
+//        deactivateFieldLocalization();
+        setAssistedLaunchAngle();
+        powerLauncher.changeLaunchAngle(-0.025);
+        powerLauncher.toggleOn();
+        wait(0.6);
+        indexRings(1);
+        powerLauncher.toggleOff();
+
+        rotateUsingCV(-110);
+        powerLauncher.toggleOn();
+        wait(0.6);
+        indexRings(1);
+        powerLauncher.toggleOff();
+
+        rotateUsingCV(-150);
+        powerLauncher.toggleOn();
+        wait(0.6);
+        indexRings(1);
+        powerLauncher.toggleOff();
     }
 }
 

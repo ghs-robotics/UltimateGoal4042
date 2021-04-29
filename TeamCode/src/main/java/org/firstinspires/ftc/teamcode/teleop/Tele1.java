@@ -69,7 +69,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         waitForStart();
 //        robot.camera.webcam.pauseViewport();
         robot.activateFieldLocalization();
-//        telemetry.setMsTransmissionInterval(20); // TODO
+        telemetry.setMsTransmissionInterval(20); // TODO
 
         robot.resetGyroAngle();
         robot.resetElapsedTime();
@@ -171,22 +171,25 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             if (controller1.dpad_right.equals("pressed")) {
-                robot.tower.setTargetXW(LEFT_MOVING_POWERSHOT_POS);
+                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
                 movePhase = 4;
             }
             else if (controller1.dpad_up.equals("pressed")) {
-                movePhase = 0;
-                autoAimPhase = 0;
-                robot.shootPowerShotsMoving();
+//                movePhase = 0;
+//                autoAimPhase = 0;
+//                robot.shootPowerShots();
+                robot.rotateUsingCV(-70);
             }
             else if (controller1.dpad_left.equals("pressed")) {
-                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
-                movePhase = 4;
+//                robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+//                movePhase = 4;
+                robot.rotateUsingCV(-110);
             }
             else if (controller1.dpad_down.equals("pressed")) {
-                robot.camera.stopStreaming();
-                movePhase = 0;
-                autoAimPhase = 0;
+//                robot.camera.stopStreaming();
+//                movePhase = 0;
+//                autoAimPhase = 0;
+                robot.rotateUsingCV(-150);
             }
 
 

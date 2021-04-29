@@ -35,6 +35,6 @@ public interface FieldPositions {
     int[] PRE_CONFIG_4_POS_II = new int[]{157 + xOffset, 90};
     int CONFIG_4_WALL_HEIGHT = 24;
 
-    int[] SECOND_WOBBLE_POS = new int[]{136 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int[] SECOND_WOBBLE_POS = new int[]{138 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
     int SECOND_WOBBLE_WALL_HEIGHT = 75;
 }
