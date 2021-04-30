@@ -121,6 +121,7 @@ public class CameraManager implements HSVConstants {
             }
         });
         streaming = true;
+        elapsedTime.reset();
     }
 
     // Stream in the middle of a match

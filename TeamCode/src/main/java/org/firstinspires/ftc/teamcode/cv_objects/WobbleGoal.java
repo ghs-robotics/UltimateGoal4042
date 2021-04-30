@@ -12,13 +12,12 @@ public class WobbleGoal extends CVObject {
         super.coverBackground();
         lowerHSV = LOWER_WOBBLE_HSV;
         upperHSV = UPPER_WOBBLE_HSV;
-        cover = 0; // TODO : ADJUST
     }
 
     @Override
     protected void coverBackground() {
-        super.coverBackground();
-        Imgproc.rectangle(currentHSVMat, new Point(0, 200), new Point(320, 240), GREEN_BGR, -1); // TODO : CHECK
+        Imgproc.rectangle(currentHSVMat, new Point(0, 0), new Point(320, 40), GREEN_BGR, -1); // TODO : CHECK
+        Imgproc.rectangle(currentHSVMat, new Point(0, 60), new Point(320, 240), GREEN_BGR, -1);
     }
 
     // No depth PID
@@ -30,7 +29,8 @@ public class WobbleGoal extends CVObject {
     // Testing to make sure the detected object is a wobble goal
     @Override
     protected boolean isReasonable(int x, int y, int w, int h) {
-        return w < 30; // TODO : UPDATE
+//        return w < 30; // TODO : UPDATE
+        return true;
     }
 
     @Override

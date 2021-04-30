@@ -35,13 +35,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.Robot;
+import org.firstinspires.ftc.teamcode.robot_components.CVRobot;
 
 @TeleOp(name="Tele1", group="Linear Opmode")
 public class Tele1 extends LinearOpMode implements FieldPositions {
 
     // Declare OpMode members
-    Robot robot;
+    CVRobot robot;
     Controller controller1;
     Controller controller2;
 
@@ -50,7 +50,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
     public void runOpMode() {
 
         // Code to run ONCE when the driver hits INIT
-        robot = new Robot(hardwareMap, telemetry);
+        robot = new CVRobot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1); // Whoever presses start + a
         controller2 = new Controller(gamepad2); // Whoever presses start + b
 
@@ -70,6 +70,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         waitForStart();
 //        robot.camera.webcam.pauseViewport();
         robot.activateFieldLocalization();
+//        telemetry.setMsTransmissionInterval(20);
+        robot.wobble.activate();
 
         robot.resetGyroAngle();
         robot.resetElapsedTime();
@@ -98,7 +100,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
             else if (autoAimPhase > 0) {
                 CVDetectionPipeline.sleepTimeMS = 0;
-                autoAimPhase = robot.rotateToTowerInPhases(autoAimPhase);
+                autoAimPhase = robot.rotateAndShootInPhases(autoAimPhase);
+                robot.setAssistedLaunchAngle();
             }
             else {
                 CVDetectionPipeline.sleepTimeMS = 500;
@@ -146,12 +149,13 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Toggle speed
             if (controller1.x.equals("pressing")) {
-                robot.toggleSpeed();
+                intakeSetting = "normal";
+                robot.rotateToPos(0, 0.7);
+                autoAimPhase = 10;
             }
 
             // Terminate any automated functions and stop streaming
             if (controller1.y.equals("pressing")) {
-                robot.camera.stopStreaming();
                 movePhase = 0;
                 autoAimPhase = 0;
             }
@@ -171,7 +175,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             if (controller1.dpad_right.equals("pressed")) {
-                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
+                robot.tower.setTargetXW(MID_POWERSHOT_POS);
                 movePhase = 4;
             }
             else if (controller1.dpad_up.equals("pressed")) {
@@ -184,8 +188,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 movePhase = 4;
             }
             else if (controller1.dpad_down.equals("pressed")) {
-                intakeSetting = "normal";
-                autoAimPhase = 9;
+                robot.camera.stopStreaming();
+                movePhase = 0;
+                autoAimPhase = 0;
             }
 
 
@@ -246,7 +251,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             // Toggle launcher and set perfect launch angle
-            // Note: You can interrupt queues this way! TODO : EXPLAIN
+            // Note: You can interrupt queues this way!
             if (controller2.b.equals("pressing")) {
                 robot.powerLauncher.setLaunchAnglePerfect();
                 robot.powerLauncher.toggle();

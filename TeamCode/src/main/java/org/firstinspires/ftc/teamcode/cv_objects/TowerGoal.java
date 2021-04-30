@@ -14,6 +14,10 @@ public class TowerGoal extends CVObject {
         cover = 0;
     }
 
+    public int getLeftRightError(int offSet) {
+        return x - (320 + offSet - x - w);
+    }
+
     // Tests to make sure there is the slot for the high goal
     // Makes the object detection pretty bulletproof
     private boolean hasHatShape(int x, int y, int w, int h) {
@@ -54,6 +58,14 @@ public class TowerGoal extends CVObject {
         77      49
         110     45 (top of goal is out of view)
      */
+
+    public boolean onTarget() {
+        return getErrorX() == 0 && getErrorW() == 0;
+    }
+
+    public boolean targetInRange(int radius) {
+        return getAbsErrorX() <= radius && getAbsErrorW() <= radius;
+    }
 
     public double cvtH2VerticalDist() {
         return -0.0000270563 * Math.pow(h, 5) + 0.00422078 * Math.pow(h, 4)

@@ -131,7 +131,8 @@ public abstract class CVObject implements HSVConstants {
     public double getBreadthPIDValue() {
         if (identified) {
             return -breadthPID.calcVal(getErrorX());
-        } else {
+        }
+        else {
             return 0;
         }
     }
@@ -140,7 +141,8 @@ public abstract class CVObject implements HSVConstants {
     public double getDepthPIDValue() {
         if (identified) {
             return depthPID.calcVal(getErrorW());
-        } else {
+        }
+        else {
             return 0;
         }
     }

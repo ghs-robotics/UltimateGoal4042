@@ -33,26 +33,27 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.Robot;
+import org.firstinspires.ftc.teamcode.robot_components.CVRobot;
 
 // THIS CLASS IS FOR TESTING PURPOSES!!
 
 @TeleOp(name="Tele2", group="Iterative Opmode")
 public class Tele2 extends OpMode implements FieldPositions {
     //Declare OpMode members
-    Robot robot;
+    CVRobot robot;
     Controller controller1;
     boolean chasing = false;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, telemetry);
+        robot = new CVRobot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.initWithCV();
-        robot.wobble.activate();
-        robot.wobble.setTargetH(50);
+        robot.powerLauncher.setLaunchAngleLoading();
+        robot.turnArmUpFull();
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -85,31 +86,32 @@ public class Tele2 extends OpMode implements FieldPositions {
 
         if (controller1.a.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(35);
+            robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
         }
 
         if (controller1.b.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(50);
+            robot.tower.setTargetXW(CONFIG_0_POS_I);
         }
 
         if (controller1.y.equals("pressing")) {
             chasing = true;
-            robot.wall.setTargetH(91);
+            robot.tower.setTargetXW(SECOND_WOBBLE_POS);
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.wall.depthPID.k_P -= 0.005; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wall.depthPID.k_P += 0.005; }
+        if (controller1.left_bumper.equals("pressing")) { robot.tower.depthPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.tower.depthPID.k_P += 0.005; }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wall.depthPID.k_I -= 0.0005; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wall.depthPID.k_I += 0.0005; }
+        if (controller1.dpad_down.equals("pressing")) { robot.tower.depthPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.tower.depthPID.k_I += 0.0005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.wall.depthPID.k_D -= 0.0005; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wall.depthPID.k_D += 0.0005; }
+        if (controller1.dpad_left.equals("pressing")) { robot.tower.depthPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.tower.depthPID.k_D += 0.0005; }
 
 
         if (chasing) {
-            robot.chaseObject(robot.wall);
+            CVDetectionPipeline.sleepTimeMS = 0;
+            robot.chaseObject(robot.tower);
         } else {
             robot.updateDrive();
         }

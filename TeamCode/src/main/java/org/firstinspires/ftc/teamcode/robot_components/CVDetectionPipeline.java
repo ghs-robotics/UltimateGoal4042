@@ -4,7 +4,6 @@ import org.firstinspires.ftc.teamcode.cv_objects.CVObject;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
 import org.firstinspires.ftc.teamcode.data.MyScalar;
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvPipeline;
@@ -50,7 +49,8 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         }
 
         // Updates crosshairValue of center point
-        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV); // TODO : COMMENT OUT
+        /*
+        Imgproc.cvtColor(input, dst1, Imgproc.COLOR_BGR2HSV);
         crosshairHSV = findHSV(dst1, input.rows()/2, input.cols()/2).toString();
         Imgproc.rectangle(
                 input,
@@ -58,6 +58,11 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
                 new Point(input.cols()/2 + 5, input.rows()/2 + 5),
                 GREEN_BGR,
                 1);
+
+         */
+
+//        Imgproc.rectangle(currentMat, new Point(0, 0), new Point(320, 40), GREEN_BGR, -1);
+//        Imgproc.rectangle(currentMat, new Point(0, 60), new Point(320, 240), GREEN_BGR, -1);
 
         try {
             sleep(sleepTimeMS);

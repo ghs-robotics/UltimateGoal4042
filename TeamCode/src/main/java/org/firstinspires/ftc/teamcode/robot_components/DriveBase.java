@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -15,6 +16,8 @@ public class DriveBase {
     protected double rightFrontPower = 0;
     protected double leftRearPower = 0;
     protected double rightRearPower = 0;
+
+    protected double batteryVoltage;
 
     // Drive speed ranges from 0 to 1
     public double speed = 1;
@@ -35,11 +38,14 @@ public class DriveBase {
 
     // For displaying things on the DS phone
     public Telemetry telemetry;
+    public HardwareMap hardwareMap;
 
     public ElapsedTime elapsedTime;
 
     // Constructs a DriveBase object with four drive motors
     public DriveBase(HardwareMap hardwareMap, Telemetry telemetry) {
+
+        this.hardwareMap = hardwareMap;
 
         // These are the names to use in the phone config (in quotes below)
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFrontDrive");
@@ -72,6 +78,8 @@ public class DriveBase {
 
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
+
+        batteryVoltage = getBatteryVoltage();
     }
 
     // Displays drive motor powers on the DS phone
@@ -109,7 +117,7 @@ public class DriveBase {
     }
 
     // Internal helper method for completing drive power calculations
-    protected void calculateDrivePowers(double x, double y, double rot, boolean meta) {
+    public void calculateDrivePowers(double x, double y, double rot, boolean meta) {
         double r = Math.hypot(x, y);
         double angleOfMotion = Math.atan2(y, x) - Math.PI / 4;
         if (meta) {
@@ -124,6 +132,17 @@ public class DriveBase {
     // Returns how many seconds have passed since the timer was last reset
     public double elapsedSecs() {
         return elapsedTime.seconds();
+    }
+
+    // TODO : TEST THIS
+    double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) { result = Math.min(result, voltage);
+            }
+        }
+        return result;
     }
 
     // Finds an equivalent gyro angle (mod 360) within range of the actual current robot angle
@@ -153,6 +172,27 @@ public class DriveBase {
 
     public double getMetaGyroPIDValue() {
         return -metaGyroPID.calcVal(getGyroError());
+    }
+
+
+    // Hardcoded movement
+    public void move(double x, double y, double seconds) {
+        move(x, y, seconds, false);
+    }
+
+    public void move(double x, double y, double seconds, boolean gyro) {
+        if (gyro) {
+            double t = elapsedSecs();
+            while (elapsedSecs() - t < seconds) {
+                calculateDrivePowers(x, y, getGyroPIDValue());
+                sendDrivePowers();
+            }
+        } else {
+            calculateDrivePowers(x, y, 0);
+            sendDrivePowers();
+            wait(seconds);
+        }
+        stopDrive();
     }
 
     // Resets the timer
