@@ -15,7 +15,7 @@ public interface FieldPositions {
 
     int[] LEFT_MOVING_POWERSHOT_POS = new int[]{108, 58};
     int[] LEFT_POWERSHOT_POS = new int[]{97, 58};
-    int[] MID_POWERSHOT_POS = new int[]{77, 58};
+    int[] MID_POWERSHOT_POS = new int[]{80, 60};
     int[] RIGHT_POWERSHOT_POS = new int[]{67, 58}; // - 6.5 degrees
 
     // Park positions (where to park during autonomous)
@@ -35,6 +35,8 @@ public interface FieldPositions {
     int[] PRE_CONFIG_4_POS_II = new int[]{157 + xOffset, 90};
     int CONFIG_4_WALL_HEIGHT = 24;
 
-    int[] SECOND_WOBBLE_POS = new int[]{138 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int[] SECOND_WOBBLE_POS = new int[]{140 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
     int SECOND_WOBBLE_WALL_HEIGHT = 75;
+
+    int[] PRE_SECOND_WOBBLE_POS = new int[]{136, 52};
 }

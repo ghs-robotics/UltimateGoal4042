@@ -17,6 +17,8 @@ public class DriveBase {
     protected double leftRearPower = 0;
     protected double rightRearPower = 0;
 
+    protected double batteryVoltage;
+
     // Drive speed ranges from 0 to 1
     public double speed = 1;
 
@@ -76,6 +78,8 @@ public class DriveBase {
 
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
+
+        batteryVoltage = getBatteryVoltage();
     }
 
     // Displays drive motor powers on the DS phone
@@ -113,7 +117,7 @@ public class DriveBase {
     }
 
     // Internal helper method for completing drive power calculations
-    protected void calculateDrivePowers(double x, double y, double rot, boolean meta) {
+    public void calculateDrivePowers(double x, double y, double rot, boolean meta) {
         double r = Math.hypot(x, y);
         double angleOfMotion = Math.atan2(y, x) - Math.PI / 4;
         if (meta) {
@@ -168,6 +172,27 @@ public class DriveBase {
 
     public double getMetaGyroPIDValue() {
         return -metaGyroPID.calcVal(getGyroError());
+    }
+
+
+    // Hardcoded movement
+    public void move(double x, double y, double seconds) {
+        move(x, y, seconds, false);
+    }
+
+    public void move(double x, double y, double seconds, boolean gyro) {
+        if (gyro) {
+            double t = elapsedSecs();
+            while (elapsedSecs() - t < seconds) {
+                calculateDrivePowers(x, y, getGyroPIDValue());
+                sendDrivePowers();
+            }
+        } else {
+            calculateDrivePowers(x, y, 0);
+            sendDrivePowers();
+            wait(seconds);
+        }
+        stopDrive();
     }
 
     // Resets the timer

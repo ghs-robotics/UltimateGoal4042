@@ -35,21 +35,21 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
-import org.firstinspires.ftc.teamcode.robot_components.Robot;
+import org.firstinspires.ftc.teamcode.robot_components.CVRobot;
 
 // THIS CLASS IS FOR TESTING PURPOSES!!
 
 @TeleOp(name="Tele2", group="Iterative Opmode")
 public class Tele2 extends OpMode implements FieldPositions {
     //Declare OpMode members
-    Robot robot;
+    CVRobot robot;
     Controller controller1;
     boolean chasing = false;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, telemetry);
+        robot = new CVRobot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
         robot.initWithCV();
         robot.powerLauncher.setLaunchAngleLoading();
