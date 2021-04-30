@@ -8,11 +8,14 @@ import com.qualcomm.robotcore.util.Range;
 
 public class PowerLauncher {
 
-    // VELOCITY         PERFECT LAUNCH ANGLE (FROM PERFECT_LAUNCH_POSITION)
-    public static double PERFECT_LAUNCH_ANGLE = 0.135; // Default launch angle
-    public static double POWERSHOT_ANGLE = PERFECT_LAUNCH_ANGLE - 0.008; // Angle for hitting powershots
-    public static double MAX_LAUNCH_ANGLE = 0.140;
-    public static double HORIZONTAL_LAUNCH_ANGLE = 0.100; // TODO : CALIBRATE
+    // Launcher angles
+    public static double PERFECT_LAUNCH_ANGLE = 0.215; // Perfect launch angle
+
+    // Offsets are added to PERFECT LAUNCH ANGLE
+    public static double VERTICAL_OFFSET = 0.615;
+    public static double LOADING_OFFSET = -0.170;
+    public static double SECOND_PERFECT_OFFSET = -0.032; // 2 ft behind perfect launch pos
+    public static double THIRD_PERFECT_OFFSET = -0.038; // 4 ft behind perfect launch pos
 
     public static final double INDEXER_BACK_POS = 0.420;
     public static final double INDEXER_FORWARD_POS = 0.860;
@@ -24,13 +27,12 @@ public class PowerLauncher {
     public double leftPower = 0;
     public double rightPower = 0;
 
-    // launchAngle should range between 0.600 (horizontal) and 0.300 (very steep); launcher vertical at 0.010
-    public double launchAngle = HORIZONTAL_LAUNCH_ANGLE;
+    public double launchAngle = PERFECT_LAUNCH_ANGLE + VERTICAL_OFFSET; // Default starting position
     public double indexerAngle = INDEXER_BACK_POS;
 
     public boolean running = false; // If the launcher is running
 
-    private int queue = 0; // Keeps track of how many rings are "in line" to be launched
+    public int queue = 0; // Keeps track of how many rings are "in line" to be launched
 
     // Target speed for the two motors in ticks per second
     public double leftTargetVelocity = PERFECT_SHOOTER_VELOCITY; // Not currently used because encoder isn't working
@@ -42,7 +44,7 @@ public class PowerLauncher {
     private double prevLeftSeconds = 0;
     private double prevRightSeconds = 0;
     private double timeStamp = 0; // For regulating the speed of changing the incline
-    private double queueTimeStamp = 0; // For the queue
+    private double queueTimeStamp = 0; // For the queue of rings to be launched
 
     private ElapsedTime elapsedTime;
 
@@ -90,7 +92,7 @@ public class PowerLauncher {
     }
 
     public void changeLaunchAngleGradually(double change) {
-        if (elapsedTime.seconds() - timeStamp > 0.01) { // TODO : ADJUST
+        if (elapsedTime.seconds() - timeStamp > 0.01) {
             changeLaunchAngle(change);
             timeStamp = elapsedTime.seconds();
         }
@@ -119,36 +121,70 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
+    public double getTimePassed() {
+        return elapsedTime.seconds() - queueTimeStamp;
+    }
+
+    // Handle the queue of rings (only indexing
+    public int handleIndexQueue(int queue) {
+        if (getTimePassed() > 0.5) {
+            resetQueueTimeStamp();
+            queue--;
+        }
+        else if (getTimePassed() > 0.25) {
+            setIndexerAngle(INDEXER_BACK_POS);
+        }
+        else {
+            setIndexerAngle(INDEXER_FORWARD_POS);
+        }
+        if (queue == 0) { // Turn launcher off after indexing
+            toggleOff();
+        }
+        return queue;
+    }
+
+    public void resetQueueTimeStamp() {
+        queueTimeStamp = elapsedTime.seconds();
+    }
+
+    // Handle the queue of rings, including toggling launcher on
     public int handleQueue(int queue) {
-        this.queue = queue;
         if (!running) {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        if (elapsedTime.seconds() - queueTimeStamp > 1.4) { // TODO : ADJUST
+        else if (getTimePassed() > 1.2) {
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
-            this.queue--;
-            if (this.queue == 0) {
-                toggleOff();
-            }
-            return this.queue;
+            queue--;
         }
-        else if (elapsedTime.seconds() - queueTimeStamp > 0.7) { // TODO : ADJUST
+        else if (getTimePassed() > 1.0) {
             setIndexerAngle(INDEXER_FORWARD_POS);
         }
         return queue;
     }
 
+    public boolean hasLoadingLaunchAngle() {
+        return launchAngle == PERFECT_LAUNCH_ANGLE + LOADING_OFFSET;
+    }
+
     // Moves the indexer servo, which launches a ring
     public void index() {
         setIndexerAngle(INDEXER_FORWARD_POS);
-        wait(0.4); // TODO : CHANGE
+        wait(0.2);
+        setIndexerAngle(INDEXER_BACK_POS);
+    }
+
+    public void setIndexerForwardPos() {
+        setIndexerAngle(INDEXER_FORWARD_POS);
+    }
+
+    public void setIndexerBackPos() {
         setIndexerAngle(INDEXER_BACK_POS);
     }
 
     // Resets the encoder encoder position's of the motors to zero
-    public void resetMotors() { // TODO : USE???
+    public void resetMotors() {
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -158,7 +194,6 @@ public class PowerLauncher {
     // Rotate servos to default positions
     public void resetServos() {
         indexerAngle = INDEXER_BACK_POS;
-        launchAngle = PERFECT_LAUNCH_ANGLE;
         indexerServo.setPosition(indexerAngle);
         launchAngleServo.setPosition(launchAngle);
     }
@@ -191,50 +226,68 @@ public class PowerLauncher {
 
     // Sets a launch angle
     public void setLaunchAngle(double angle) {
-        launchAngle = angle;
-        launchAngleServo.setPosition(launchAngle);
+        if (launchAngle != angle) {
+            launchAngle = angle;
+            launchAngleServo.setPosition(launchAngle);
+        }
     }
 
-    // Sets launcher to horizontal
-    public void setLaunchAngleHorizontal() {
-        setLaunchAngle(HORIZONTAL_LAUNCH_ANGLE);
-    }
-
-    // Sets launcher to hit powershots
-    public void setLaunchAnglePowershot() {
-        setLaunchAngle(POWERSHOT_ANGLE);
-    }
-
-    // Sets launcher to vertical
-    public void setLaunchAngleMax() {
-        setLaunchAngle(MAX_LAUNCH_ANGLE);
+    // Sets launcher to loading position
+    public void setLaunchAngleLoading() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + LOADING_OFFSET);
     }
 
     // Sets a launch angle
-    public void setPerfectLaunchAngle() {
+    public void setLaunchAnglePerfect() {
         setLaunchAngle(PERFECT_LAUNCH_ANGLE);
+    }
+
+    // Sets launcher to shoot from 2 ft behind perfect launch pos
+    public void setLaunchAngle2ndPerfect() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + SECOND_PERFECT_OFFSET);
+    }
+
+    // Sets launcher to shoot from 4 ft behind perfect launch pos
+    public void setLaunchAngle3rdPerfect() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + THIRD_PERFECT_OFFSET);
+    }
+
+    // Sets launcher to vertical
+    public void setLaunchAngleVertical() {
+        setLaunchAngle(PERFECT_LAUNCH_ANGLE + VERTICAL_OFFSET);
     }
 
     // Toggles the two launcher motors between off and full power
     public void toggle() {
-        if (leftPower != 0 || rightPower != 0) {
-            sendPowers(0);
+        if (running) {
+            toggleOff();
         } else {
-            sendPowers(1.0);
+            toggleOn();
         }
-        running = !running;
     }
 
     // Turn launcher off
     public void toggleOff() {
-        sendPowers(0.0);
-        running = false;
+        if (running) {
+            sendPowers(0.0);
+            running = false;
+        }
     }
 
     // Turn launcher on
     public void toggleOn() {
-        sendPowers(0.85);
+        toggleOn(1.0);
+    }
+
+    // Turn launcher on
+    public void toggleOn(double power) {
+        sendPowers(power);
         running = true;
+    }
+
+    // Make the current angle the SECOND_PERFECT_OFFSET
+    public void updateSecondPerfectOffset() {
+        SECOND_PERFECT_OFFSET = launchAngle - PERFECT_LAUNCH_ANGLE;
     }
 
     // Makes the robot wait (i.e. do nothing) for a specified number of seconds

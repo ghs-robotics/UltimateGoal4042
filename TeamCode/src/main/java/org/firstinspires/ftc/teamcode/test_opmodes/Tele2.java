@@ -32,28 +32,28 @@ package org.firstinspires.ftc.teamcode.test_opmodes;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.robot_components.Controller;
 import org.firstinspires.ftc.teamcode.robot_components.Robot;
 
 // THIS CLASS IS FOR TESTING PURPOSES!!
 
 @TeleOp(name="Tele2", group="Iterative Opmode")
-public class Tele2 extends OpMode {
+public class Tele2 extends OpMode implements FieldPositions {
     //Declare OpMode members
     Robot robot;
     Controller controller1;
-    //Controller controller2;
-    String target = "none";
+    boolean chasing = false;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
         robot = new Robot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.init();
-        robot.setIntakeSideToBeForward();
+        robot.initWithCV();
+        robot.wobble.activate();
+        robot.wobble.setTargetH(50);
 
-        robot.setTargetToRing();
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -71,7 +71,6 @@ public class Tele2 extends OpMode {
     public void loop() {
         //Registers controller input
         controller1.update();
-        robot.updateObjectValues();
 
         //Mecanum wheel drive
         robot.calculateDrivePowers(
@@ -81,38 +80,39 @@ public class Tele2 extends OpMode {
         );
 
         if (controller1.x.equals("pressing")) {
-            target = "none";
+            chasing = false;
         }
 
         if (controller1.a.equals("pressing")) {
-            target = "ring";
-            robot.setTargetToRing(33, 80);
-        }
-
-        if (controller1.y.equals("pressing")) {
-            target = "ring";
-            robot.setTargetToRing(33, 80);
+            chasing = true;
+            robot.wall.setTargetH(35);
         }
 
         if (controller1.b.equals("pressing")) {
-            target = "ring";
-            robot.setTargetToRing(63, 60);
+            chasing = true;
+            robot.wall.setTargetH(50);
         }
 
-        if (controller1.left_bumper.equals("pressing")) { robot.wPID.k_P -= 0.005; }
-        if (controller1.right_bumper.equals("pressing")) { robot.wPID.k_P += 0.005; }
+        if (controller1.y.equals("pressing")) {
+            chasing = true;
+            robot.wall.setTargetH(91);
+        }
 
-        if (controller1.dpad_down.equals("pressing")) { robot.wPID.k_I -= 0.0005; }
-        if (controller1.dpad_up.equals("pressing")) { robot.wPID.k_I += 0.0005; }
+        if (controller1.left_bumper.equals("pressing")) { robot.wall.depthPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.wall.depthPID.k_P += 0.005; }
 
-        if (controller1.dpad_left.equals("pressing")) { robot.wPID.k_D -= 0.0005; }
-        if (controller1.dpad_right.equals("pressing")) { robot.wPID.k_D += 0.0005; }
+        if (controller1.dpad_down.equals("pressing")) { robot.wall.depthPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.wall.depthPID.k_I += 0.0005; }
+
+        if (controller1.dpad_left.equals("pressing")) { robot.wall.depthPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.wall.depthPID.k_D += 0.0005; }
 
 
-        if (target.equals("none")){ robot.updateDrive(); }
-        if (target.equals("wobble")){ robot.chaseWobble(); }
-        if (target.equals("ring")){ robot.chaseRing(); }
-        if (target.equals("tower")){ robot.chaseTower(); }
+        if (chasing) {
+            robot.chaseObject(robot.wall);
+        } else {
+            robot.updateDrive();
+        }
     }
 
     //Code to run ONCE after the driver hits STOP
