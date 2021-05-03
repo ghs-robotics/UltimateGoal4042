@@ -23,7 +23,9 @@ public class DriveBase {
     public double speed = 1;
 
     // For meta-drive
-    public int metaOffset = 90; // Specifies the direction of meta mode; 90 is optimal for driver
+    // Specifies the direction of meta mode
+    // 90 degrees is optimal for when the driver is standing on side of field
+    public int metaOffset = 90;
 
     // Mecanum wheel drive motors
     public DcMotor leftFrontDrive;
@@ -32,7 +34,7 @@ public class DriveBase {
     public DcMotor rightRearDrive;
 
     public Gyro gyro; // Keeps track of robot's angle
-    public PIDController gyroPID; // Controls the angle
+    public PIDController gyroPID; // Controls the angle for automated functions
     public PIDController metaGyroPID; // Controls the angle in meta mode
     public double targetGyroAngle = 0; // gyroscope will target this angle
 
@@ -76,6 +78,7 @@ public class DriveBase {
         // Initializes telemetry
         this.telemetry = telemetry;
 
+        // For keeping track of time
         elapsedTime = new ElapsedTime();
         elapsedTime.reset();
 
@@ -91,7 +94,7 @@ public class DriveBase {
         telemetry.update();
     }
 
-    // Turns the robot to a desired angle (if called repeatedly)
+    // Turns the robot to a desired target angle (if called repeatedly)
     public void adjustAngle() {
         calculateDrivePowers(0, 0, getGyroPIDValue());
         sendDrivePowers();
@@ -116,7 +119,7 @@ public class DriveBase {
         calculateDrivePowers(x1, y1, rot, true);
     }
 
-    // Internal helper method for completing drive power calculations
+    // Helper method for completing drive power calculations
     public void calculateDrivePowers(double x, double y, double rot, boolean meta) {
         double r = Math.hypot(x, y);
         double angleOfMotion = Math.atan2(y, x) - Math.PI / 4;
@@ -134,8 +137,8 @@ public class DriveBase {
         return elapsedTime.seconds();
     }
 
-    // TODO : TEST THIS
-    double getBatteryVoltage() {
+    // Finds the current battery voltage
+    public double getBatteryVoltage() {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : hardwareMap.voltageSensor) {
             double voltage = sensor.getVoltage();
@@ -146,6 +149,7 @@ public class DriveBase {
     }
 
     // Finds an equivalent gyro angle (mod 360) within range of the actual current robot angle
+    // Useful if you don't want your robot to spin in circles a bunch of times when calling rotateToPos
     public double getReasonableGyroAngle(double desiredAngle) {
         double actualAngle = gyro.getAngle();
         while (Math.abs(actualAngle - desiredAngle)  > 190) {
@@ -175,11 +179,12 @@ public class DriveBase {
     }
 
 
-    // Hardcoded movement
+    // Hardcoded movement based on time
     public void move(double x, double y, double seconds) {
         move(x, y, seconds, false);
     }
 
+    // Hardcoded movement based on time; if gyro is true, the robot will maintain it's current angle
     public void move(double x, double y, double seconds, boolean gyro) {
         if (gyro) {
             double t = elapsedSecs();
@@ -206,6 +211,7 @@ public class DriveBase {
     }
 
     // Makes the robot rotate to a certain angle
+    // maxFineTuning is the max number of seconds the robot can spend fine tuning to the correct angle
     public void rotateToPos(double angle, double maxFineTuning) {
         setTargetGyroAngle(angle);
         gyroPID.resetValues();
@@ -230,6 +236,7 @@ public class DriveBase {
         rightRearDrive.setPower(rightRearPower);
     }
 
+    // Sends specific driver powers to drive motors
     public void sendDrivePowers(double x, double y, double rot) {
         calculateDrivePowers(x, y, rot);
         sendDrivePowers();
@@ -240,6 +247,7 @@ public class DriveBase {
         this.speed = speed;
     }
 
+    // Update the targetGyroAngle (before calling, say, an automated function that uses rotation)
     public void setTargetGyroAngle(double angle) {
         targetGyroAngle = getReasonableGyroAngle(angle);
     }

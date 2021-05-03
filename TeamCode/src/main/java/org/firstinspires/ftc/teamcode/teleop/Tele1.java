@@ -187,7 +187,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 movePhase = 4;
             }
             else if (controller1.dpad_down.equals("pressed")) {
-                robot.camera.stopStreaming();
+                robot.cameras.stopStreaming();
                 movePhase = 0;
                 autoAimPhase = 0;
             }

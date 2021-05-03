@@ -12,8 +12,8 @@ public class PowerLauncher {
     public static double PERFECT_LAUNCH_ANGLE = 0.303; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
-    public static double VERTICAL_OFFSET = 0.615;
-    public static double LOADING_OFFSET = -0.175;
+    public static double VERTICAL_OFFSET = 0.615; // When launcher is vertical at start of auto
+    public static double LOADING_OFFSET = -0.175; // When robot is loading/intaking rings
     public static double SECOND_PERFECT_OFFSET = -0.032; // 2 ft behind perfect launch pos
     public static double THIRD_PERFECT_OFFSET = -0.038; // 4 ft behind perfect launch pos
 
@@ -121,17 +121,18 @@ public class PowerLauncher {
         return (deltaTicks / deltaTime);
     }
 
+    // Number of seconds since the queueTimeStamp was last reset
     public double getTimePassed() {
         return elapsedTime.seconds() - queueTimeStamp;
     }
 
-    // Handle the queue of rings (only indexing
+    // Handle the queue of rings (only indexing)
     public int handleIndexQueue(int queue) {
         if (getTimePassed() > 0.5) {
             resetQueueTimeStamp();
             queue--;
         }
-        else if (getTimePassed() > 0.25) {
+        else if (getTimePassed() > 0.2) { // TODO : WAS 0.25
             setIndexerAngle(INDEXER_BACK_POS);
         }
         else {
@@ -164,13 +165,14 @@ public class PowerLauncher {
         return queue;
     }
 
+    // Returns whether launcher is in the loading position
     public boolean hasLoadingLaunchAngle() {
         return launchAngle == PERFECT_LAUNCH_ANGLE + LOADING_OFFSET;
     }
 
     // Moves the indexer servo, which launches a ring
     public void index() {
-        index(0.25); // TODO : was 0.2, plz test
+        index(0.25);
     }
 
     public void index(double time) {

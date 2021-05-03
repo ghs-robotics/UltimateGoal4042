@@ -15,6 +15,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.List;
 
+// Generic object that can be detected using OpenCV
 public abstract class CVObject implements HSVConstants {
 
     public String name = "unspecified";
@@ -51,6 +52,8 @@ public abstract class CVObject implements HSVConstants {
     public PIDController breadthPID; // Controls side to side motion of robot
     public PIDController depthPID; // Controls forward and backward motion of the robot
 
+    // CVObject constructor
+    // Used by its child class (through the keyword "super")
     public CVObject(String name, CVDetectionPipeline pipeline) {
         this.name = name;
         this.pipeline = pipeline;
@@ -65,6 +68,8 @@ public abstract class CVObject implements HSVConstants {
         this.depthPID = depthPID;
     }
 
+    // Add to list of objects that are continually updated in the pipeline
+    // Objects should be active before they can be used in a meaningful way
     public void activate() {
         if (!pipeline.activeObjects.contains(this)) {
             pipeline.activeObjects.add(this);
@@ -82,6 +87,7 @@ public abstract class CVObject implements HSVConstants {
         );
     }
 
+    // Remove from list of objects that are continually updated in the pipeline
     public void deactivate() {
         if (pipeline.activeObjects.contains(this)) {
             pipeline.activeObjects.remove(this);
@@ -147,6 +153,7 @@ public abstract class CVObject implements HSVConstants {
         }
     }
 
+    // True if val is between min and max
     public boolean inRange(double val, double min, double max) {
         return (min <= val && val <= max);
     }
@@ -159,6 +166,8 @@ public abstract class CVObject implements HSVConstants {
         return identified;
     }
 
+    // A test to verify the approximate size of an object
+    // Should be different for each child class
     abstract boolean isReasonable(int x, int y, int w, int h);
 
     // Should be overridden in subclasses having fewer than two PIDs
@@ -201,6 +210,7 @@ public abstract class CVObject implements HSVConstants {
         identified = false;
     }
 
+    // This displays a bunch of useful information for telemetry
     @Override
     public String toString() {
         String s = name.toUpperCase() + " (x = " + x + ", y = " + y + ", w = " + w + ", h = " + h + ")";
@@ -215,6 +225,7 @@ public abstract class CVObject implements HSVConstants {
 
     // Updates coordinates and identified boolean
     // ONLY CALL THIS FROM WITHIN THE PIPELINE
+    // This method is constantly called by the object's pipeline as long as it is active
     public void updateData() {
         Mat input = pipeline.currentMat; // Edits to this Mat will display on the phone screen
 

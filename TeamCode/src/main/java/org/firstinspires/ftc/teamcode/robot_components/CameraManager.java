@@ -12,10 +12,14 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
+// Manages the cameras on the robot (in this case the internal phone camera and one webcam)
+// IMPORTANT NOTE: WHILE CAMERAS ARE STREAMING, THERE MAY BE LOTS OF LAG IN TELEOP!!
+// That lag can be avoided by either not streaming or setting the waitTime higher in
+// our pipelines (thus decreasing FPS)
 public class CameraManager implements HSVConstants {
 
     private int cameraMonitorViewId;
-    private boolean streaming = false;
+    private boolean streaming = false; // true if cameras are streaming image input
 
     // Cameras
     public OpenCvCamera phoneCam;
@@ -42,6 +46,8 @@ public class CameraManager implements HSVConstants {
 
 
         // Uncomment ONE of the below statements ONLY
+        // These determine what you will be able to see on the DS phone but do not affect CV functionality
+
 //        setUpDualPort(hardwareMap);
 //        setUpSinglePhonePort(hardwareMap);
         setUpSingleWebcamPort(hardwareMap);
@@ -55,9 +61,12 @@ public class CameraManager implements HSVConstants {
         phoneCamPipeline = new CVDetectionPipeline();
         webcamPipeline = new CVDetectionPipeline();
 
-        phoneCamPipeline.activeObjects = new CopyOnWriteArrayList<>(); // Initializes the ArrayLists in each pipeline
+        // Initializes the ArrayLists in each pipeline
+        // We use CopyOnWriteArrayLists to avoid any ConcurrentModificationExceptions
+        phoneCamPipeline.activeObjects = new CopyOnWriteArrayList<>();
         webcamPipeline.activeObjects = new CopyOnWriteArrayList<>();
 
+        // Choose the pipelines in which image processing will occur for each respective camera
         phoneCam.setPipeline(phoneCamPipeline);
         webcam.setPipeline(webcamPipeline);
     }
@@ -67,14 +76,17 @@ public class CameraManager implements HSVConstants {
         startStreaming();
     }
 
+    // Returns true if cameras are streaming
     public boolean isStreaming() {
         return streaming;
     }
 
+    // Webcam takes some time to boot up
     public boolean isWebcamReady() {
         return elapsedTime.seconds() > 1.7;
     }
 
+    // Displays both webcam and phoneCam streams on the DS phone
     private void setUpDualPort(HardwareMap hardwareMap) {
         int[] viewportContainerIds = OpenCvCameraFactory.getInstance()
                 .splitLayoutForMultipleViewports(cameraMonitorViewId, // The container we're splitting
@@ -88,6 +100,7 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.get(WebcamName.class,"Webcam 1"), viewportContainerIds[1]);
     }
 
+    // Displays nothing on the DS phone
     private void setUpNoStreamPort(HardwareMap hardwareMap) {
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK);
@@ -95,6 +108,7 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.get(WebcamName.class,"Webcam 1"));
     }
 
+    // Displays only the phoneCam stream on the DS phone
     private void setUpSinglePhonePort(HardwareMap hardwareMap) {
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
@@ -102,6 +116,7 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.get(WebcamName.class,"Webcam 1"));
     }
 
+    // Displays only the webcam stream on the DS phone
     private void setUpSingleWebcamPort(HardwareMap hardwareMap) {
         phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(
                 OpenCvInternalCamera.CameraDirection.BACK);
@@ -109,7 +124,7 @@ public class CameraManager implements HSVConstants {
                 hardwareMap.get(WebcamName.class,"Webcam 1"), cameraMonitorViewId);
     }
 
-    // Starts streaming frames on the phone camera
+    // Starts streaming frames on both cameras
     public void startStreaming() {
         phoneCam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);
@@ -124,7 +139,10 @@ public class CameraManager implements HSVConstants {
         elapsedTime.reset();
     }
 
-    // Stream in the middle of a match
+    // Start streaming in the middle of a match
+    // Ideally you won't need to use this because starting a stream takes a lot of time
+    // A way around this is to never stop streaming in the first place but instead
+    // increase the waitTime in CVDetectionPipeline whenever CV is not actively being used
     public void startMidStream() {
         if (!streaming) {
             phoneCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_RIGHT);

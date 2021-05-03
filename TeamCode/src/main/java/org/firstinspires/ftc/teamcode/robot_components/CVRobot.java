@@ -13,9 +13,10 @@ import org.firstinspires.ftc.teamcode.cv_objects.WobbleGoal;
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
 
+// The lowest class in the inheritance hierarchy; any OpModes should extend CVRobot
 public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
-    public CameraManager camera; // Manages the webcam and phone camera
+    public CameraManager cameras; // Manages the webcam and phone camera
 
     // Objects to be detected through CV
     public CVObject target;
@@ -26,28 +27,27 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     public TowerGoal tower;
     public WobbleGoal wobble;
 
-    // Used in several methods for regulating motor powers for in automated functions
-    protected double x = 0;
-    protected double y = 0;
+    // Used in several methods for regulating motor powers in automated functions
+    protected double x = 0; // strafe power to be sent
+    protected double y = 0; // forward-backward power to be sent
 
-    // Stores data for automated functions in TeleOp
-    protected double phaseTimeStamp = 0;
+    protected double phaseTimeStamp = 0; // stores data for automated functions in TeleOp
 
     // PID controllers
-    public PIDController towerXPID; // For the x-position of the tower goal
-    public PIDController towerWPID; // For the width of the tower goal
+    public PIDController towerXPID; // For the x-position of the robot relative to tower goal x
+    public PIDController towerWPID; // For the y-position of the robot relative to tower goal width
     public PIDController xPID;
-    public PIDController wPID; // For the y-position of the robot
+    public PIDController wPID;
 
-    // Constructs a robot that uses CV
+    // Constructs a CVRobot object that uses computer vision (CV)
     public CVRobot(HardwareMap hardwareMap, Telemetry telemetry) {
 
-        // Calls the constructor in DriveBase, which handles all the drive base motors
+        // Calls the constructor in Robot, which handles all motors/servos/etc.
         super(hardwareMap, telemetry);
 
-        camera = new CameraManager(hardwareMap);
+        cameras = new CameraManager(hardwareMap); // Sets up the phone camera and webcam
 
-        // Initializing PID objects
+        // Initializing PID objects for each CV target object
 
         // When working together with wPID, having Ki and Kd be zero works best
         towerXPID = new PIDController(0.0400, 0.0015, 0.0000, 0, 0.26);
@@ -58,8 +58,8 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         xPID = new PIDController(0.0200, 0.0000, 0.0000, 1); // Could be better
         wPID = new PIDController(0.0250, 0.0000, 0.0000, 1); // Could be better
 
-        CVDetectionPipeline web = camera.webcamPipeline;
-        CVDetectionPipeline phone = camera.phoneCamPipeline;
+        CVDetectionPipeline web = cameras.webcamPipeline; // temporary
+        CVDetectionPipeline phone = cameras.phoneCamPipeline; // temporary
 
         floor = new FieldFloor(phone, new PIDController(0.0600, 0.0035, 0.0020, 1)); // yPID
         wall = new FieldWall(phone, new PIDController(0.0300, 0.0020, 0.0000, 0, 0.115)); // hPID
@@ -83,8 +83,8 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     // Call before using CV for field localization
     public void activateFieldLocalization() {
         startUp();
-        camera.startMidStream(); // start streaming image input
-        camera.webcam.resumeViewport(); // show webcam images on phone in real time
+        cameras.startMidStream(); // start streaming image input
+        cameras.webcam.resumeViewport(); // show webcam images on phone in real time
     }
 
     // Displays a bunch of useful values on the DS phone
@@ -116,8 +116,9 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         telemetry.update();
     }
 
+    // Add certain optional data to telemetry
     private void addCVTelemetryData() {
-        telemetry.addLine("STREAMING: " + camera.isStreaming());
+        telemetry.addLine("STREAMING: " + cameras.isStreaming());
         telemetry.addLine("CONFIG: " + identifyRingConfig());
 
         telemetry.addLine("LeftRightError: " + tower.getLeftRightError(0));
@@ -130,6 +131,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         telemetry.addData("Kd", target.depthPID.k_D);
     }
 
+    // Number of seconds since the phaseTimeStamp variable was reset
     public double getPhaseTimePassed() {
         return elapsedSecs() - phaseTimeStamp;
     }
@@ -140,7 +142,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 //        tower.deactivate();
 //        wall.deactivate();
         CVDetectionPipeline.sleepTimeMS = 500;
-        camera.webcam.pauseViewport(); // stop displaying webcam stream on phone
+        cameras.webcam.pauseViewport(); // stop displaying webcam stream on phone
     }
 
     // Classifies the starter stack
@@ -151,19 +153,21 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     // To use at the start of each OpMode that uses CV
     public void initWithCV() {
         stopDrive();
-        camera.initCamera();
+        cameras.initCamera();
         resetServos();
         resetGyroAngle();
         tower.activate();
         wall.activate();
     }
 
+    // Use at the start of each OpMode that does not use CV
     public void initWithoutCV() {
         initWithCV();
-        camera.stopStreaming();
-        camera.stopStreaming();
+        cameras.stopStreaming();
+        cameras.stopStreaming();
     }
 
+    // Helper method for setting up
     public void startUp() {
         stopDrive();
         tower.activate();
@@ -227,7 +231,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                 phase--;
                 break;
             case 3:
-                if (camera.isStreaming() && camera.isWebcamReady()) {
+                if (cameras.isStreaming() && cameras.isWebcamReady()) {
                     phaseTimeStamp = elapsedSecs();
                     phase--;
                 }
@@ -380,6 +384,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         }
     }
 
+    // Shoot from anywhere on field in auto
     public void rotateAndShoot() {
         int phase = 20;
         while (phase > 0) {
@@ -404,7 +409,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
         switch (phase) {
             case 9:
-                if (camera.isStreaming() && camera.isWebcamReady()) {
+                if (cameras.isStreaming() && cameras.isWebcamReady()) {
                     phaseTimeStamp = elapsedSecs();
                     phase--;
                 }
@@ -457,15 +462,16 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         return phase;
     }
 
+    // Calculate and set correct launch angle from anywhere on the field
     public void setAssistedLaunchAngle() {
         powerLauncher.setLaunchAngle(tower.findLaunchAngle(gyro.getAngle()));
-        if (powerLauncher.launchAngle > powerLauncher.PERFECT_LAUNCH_ANGLE + 0.100) {
+        if (powerLauncher.launchAngle > powerLauncher.PERFECT_LAUNCH_ANGLE + 0.50) {
             powerLauncher.setLaunchAnglePerfect();
         }
     }
 
     // Rotate in place using the tower goal coordinates
-    public void rotateUsingCV(int offSet) {
+    public void rotateUsingCV(int offSet) { // TODO : OPTIMIZE
         targetGyroAngle = getReasonableGyroAngle(0);
         if (getAbsoluteGyroError() > 10) {
             rotateToPos(0, 0.4);
@@ -494,7 +500,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     }
 
     // Go to MID_POWERSHOT_POS before calling this
-    public void shootPowerShots() {
+    public void shootPowerShots() { // TODO : OPTIMIZE
 
         // Setup
         activateFieldLocalization();
@@ -523,6 +529,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         powerLauncher.toggleOff();
     }
 
+    // Strafe left and right until aligned with wobble goal
     public void alignToWobble() {
 //        wobble.activate();
 //        while (wobble.isIdentified()) {

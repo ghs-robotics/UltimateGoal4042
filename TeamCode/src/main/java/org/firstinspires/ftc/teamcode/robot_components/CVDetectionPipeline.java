@@ -13,24 +13,26 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.lang.Thread.sleep;
 
+// Pipeline for image processing
 public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants {
 
     // The amount of time between image processing should take
     // The higher this value, the lower the lag during teleOp
+    // Generally, letting this value be 0 during CV functions and 500 otherwise works rather well
     public static long sleepTimeMS = 0;
 
-    // Stores the most recent frame
+    // Stores the most recent input frame (so we can access it from CVObjects)
     public Mat currentMat = new Mat();
 
     // Auxiliary Mat objects for temporarily storing data
     private static Mat dst1 = new Mat();
 
-    public CopyOnWriteArrayList<CVObject> activeObjects;
+    public CopyOnWriteArrayList<CVObject> activeObjects; // list of objects to be updated continuously
 
     // For sampling HSV values of individual pixels
     public String crosshairHSV = "";
 
-    // This method is called in the background (not by us)
+    // This method is called (once?) in the background (not by us)
     @Override
     public void init(Mat firstFrame) {}
 
@@ -43,7 +45,9 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         // Resizes image to make processing more uniform
         Imgproc.resize(input, input, new Size(320, 240));
 
-        currentMat = input;
+        currentMat = input; // store the current frame in this class
+
+        // Iterate through all the objects that are being analyzed continuously
         for (CVObject obj : activeObjects) {
             obj.updateData();
         }
@@ -61,9 +65,11 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
 
          */
 
+        // Draw some rectangles
 //        Imgproc.rectangle(currentMat, new Point(0, 0), new Point(320, 40), GREEN_BGR, -1);
 //        Imgproc.rectangle(currentMat, new Point(0, 60), new Point(320, 240), GREEN_BGR, -1);
 
+        // If sleepTimeMS > 0, the program will wait, thereby decreasing FPS and reducing lag during TeleOp
         try {
             sleep(sleepTimeMS);
         } catch (InterruptedException e) {

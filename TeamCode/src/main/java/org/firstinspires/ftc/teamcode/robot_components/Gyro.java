@@ -8,9 +8,11 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+// Class that access the IMU (inertial measurement unit) and reports the robot's angle
+// relative to the starting position
 public class Gyro {
     BNO055IMU gyro;
-    Orientation lastAngles = new Orientation ();
+    Orientation lastAngles = new Orientation();
     double globalAngle;
 
     // Constructs a gyro object which keeps track of the robot's angle
@@ -24,24 +26,11 @@ public class Gyro {
         gyro.initialize(parameters);
     }
 
-    // Sets angle to zero degrees; call at the begin of any opmode
+    // Sets angle to zero degrees; call at the begin of any OpMode
     public void resetAngle () {
         lastAngles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         globalAngle = 0;
     }
-
-//    // Returns an angle between -90 and 270 degrees
-//    public double getAngle () {
-//        double angle = getOverallAngle();
-//        while (angle < -110 || angle > 290) {
-//            if (angle < -110) {
-//                angle += 360;
-//            } else {
-//                angle -= 360;
-//            }
-//        }
-//        return angle;
-//    }
 
     // Returns the overall angle in degrees (not taken mod 360)
     public double getAngle() {

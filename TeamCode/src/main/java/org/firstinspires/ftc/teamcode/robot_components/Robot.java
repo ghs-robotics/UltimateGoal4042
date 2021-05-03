@@ -8,6 +8,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
 
+// Robot class with more functionality than just the DriveBase
+// Contains all of the motors/servos/sensors specific to this year's challenge
 public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Robot variables and objects
@@ -19,22 +21,22 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     public Servo armServo;
     public Servo clawServo;
 
-    public PowerLauncher powerLauncher;
+    public PowerLauncher powerLauncher; // Controls launching and indexing
 
     // Constructs a robot with the mechanical functions specific to this year's competition
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
-        super(hardwareMap, telemetry);
+
+        super(hardwareMap, telemetry); // Calls the DriveBase constructor, which handles drive motors
 
         // These are the names to use in the phone config (in quotes below)
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
 
-        // Initializes some other useful tools/objects for our robot
-        powerLauncher = new PowerLauncher(hardwareMap);
+        powerLauncher = new PowerLauncher(hardwareMap); // Initializes powerLauncher
     }
 
-    // Launches a ring by moving the shooterServo
+    // Launches a ring by moving the indexerServo; this method is SLOW intentionally
     public void indexRings(int rings) {
         for (int i = 0; i < rings; i++) {
             powerLauncher.index(0.4);
@@ -42,7 +44,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         }
     }
 
-    // Sets servos to starting positions
+    // Sets servos to starting positions in init
     public void resetServos() {
         clawServo.setPosition(clawAngle);
         wait(0.6);

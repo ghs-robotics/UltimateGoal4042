@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-
+// Our custom controller class that gives us more control (no pun intended)
 public class Controller {
     Gamepad gamepad;
 
@@ -31,6 +31,7 @@ public class Controller {
     public double left_trigger;
     public double right_trigger;
 
+    // Use for each controller in TeleOp
     public Controller(Gamepad gamepad) {
         this.gamepad = gamepad;
 
@@ -60,6 +61,7 @@ public class Controller {
         right_trigger = 0;
     }
 
+    // Update controller input
     public void update() {
         a = check(a, gamepad.a);
         b = check(b, gamepad.b);
@@ -94,19 +96,20 @@ public class Controller {
         right_trigger = gamepad.right_trigger;
     }
 
+    // Helper method for updating controller input
     private String check(String previous, Boolean current) {
         String state;
         if (current) {
             if (previous.equals("released")) {
-                state = "pressing";
+                state = "pressing"; // The button is about to be pressed down
             } else {
-                state = "pressed";
+                state = "pressed"; // The button is held down
             }
         } else {
             if (previous.equals("pressed")) {
-                state = "releasing";
+                state = "releasing"; // The button is about to be released
             } else {
-                state = "released";
+                state = "released"; // The button is not being pushed
             }
         }
         return state;

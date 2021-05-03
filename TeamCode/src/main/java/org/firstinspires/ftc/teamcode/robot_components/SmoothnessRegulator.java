@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.robot_components;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 // For use in TeleOp; allows you to toggle between smooth and choppy driving
+// NOTE: For Ultimate Goal, this wasn't particularly useful, so we didn't use it
 public class SmoothnessRegulator {
 
     public static boolean smooth = false; // Whether the drive mode should be smooth or choppy
