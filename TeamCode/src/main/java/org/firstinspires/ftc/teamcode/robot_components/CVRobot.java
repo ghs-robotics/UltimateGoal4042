@@ -529,6 +529,43 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         powerLauncher.toggleOff();
     }
 
+    public void shootPowerShotsStrafe() {
+        // Setup
+        activateFieldLocalization();
+        targetGyroAngle = getReasonableGyroAngle(0);
+
+        moveToPos(RIGHT_POWERSHOT_POS);
+
+        setAssistedLaunchAngle();
+        powerLauncher.setLaunchAnglePerfect();
+//        powerLauncher.changeLaunchAngle(-0.020);
+        powerLauncher.toggleOn(0.9);
+        rotateUsingCV(-160);
+        powerLauncher.setIndexerForwardPos();
+        wait(0.12);
+
+        calculateDrivePowers(0, -0.6, 0, true);
+        sendDrivePowers();
+
+        wait(0.12);
+        powerLauncher.setIndexerBackPos();
+
+        wait(0.25);
+        powerLauncher.setIndexerForwardPos();
+        wait(0.25);
+        powerLauncher.setIndexerBackPos();
+
+        wait(0.25);
+        powerLauncher.setIndexerForwardPos();
+        wait(0.25);
+        powerLauncher.setIndexerBackPos();
+        wait(0.25);
+
+
+        powerLauncher.toggleOff();
+        stopDrive();
+    }
+
     // Strafe left and right until aligned with wobble goal
     public void alignToWobble() {
 //        wobble.activate();

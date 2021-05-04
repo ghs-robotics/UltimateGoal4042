@@ -174,13 +174,13 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             if (controller1.dpad_right.equals("pressed")) {
-                robot.tower.setTargetXW(MID_POWERSHOT_POS);
+                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
                 movePhase = 4;
             }
             else if (controller1.dpad_up.equals("pressed")) {
                 movePhase = 0;
                 autoAimPhase = 0;
-                robot.shootPowerShots();
+                robot.shootPowerShotsStrafe();
             }
             else if (controller1.dpad_left.equals("pressed")) {
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
