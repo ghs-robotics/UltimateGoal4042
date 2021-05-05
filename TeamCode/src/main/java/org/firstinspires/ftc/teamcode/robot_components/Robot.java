@@ -16,10 +16,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     protected double intakePower = 0;
     public double armAngle = 0.15; // init position
     public double clawAngle = 0.80; // Closed position
+    public double whiskerAngle = 0;
 
     public DcMotor intakeMotor;
     public Servo armServo;
     public Servo clawServo;
+    public Servo hybridIntakeServo;
+    public Servo whiskerServo;
 
     public PowerLauncher powerLauncher; // Controls launching and indexing
 
@@ -32,6 +35,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
+//        hybridIntakeServo = hardwareMap.get(Servo.class, "hybridIntakeServo");
+//        whiskerServo = hardwareMap.get(Servo.class, "whiskerServo");
 
         powerLauncher = new PowerLauncher(hardwareMap); // Initializes powerLauncher
     }
@@ -97,4 +102,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         setArmAngle(0.42);
     }
 
+    public void turnWhiskerServo() {
+        whiskerAngle = (whiskerAngle != 0 ? 0 : 1.0);
+        whiskerServo.setPosition(whiskerAngle);
+    }
 }

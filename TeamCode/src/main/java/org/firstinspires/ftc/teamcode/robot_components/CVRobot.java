@@ -404,7 +404,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
             activateFieldLocalization();
             tower.setTargetXW(PERFECT_LAUNCH_POS);
             targetGyroAngle = getReasonableGyroAngle(0);
-            phase = 8;
+            phase = 9;
         }
 
         switch (phase) {
@@ -415,7 +415,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                 }
                 break;
             case 8:
-                if (!tower.isIdentified() || tower.h > 37 || getAbsoluteGyroError() > 20) {
+                if (!tower.isIdentified() || tower.h > 39 || getAbsoluteGyroError() > 25) {
                     adjustPosition();
                 } else if (Math.abs(error) <= 20) {
                     phaseTimeStamp = elapsedSecs();
@@ -430,7 +430,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                     phaseTimeStamp = elapsedSecs();
                     phase--;
                 } else if (tower.isIdentified()) {
-                    calculateDrivePowers(0, 0, (error > 0 ? 0.14 : -0.14));
+                    calculateDrivePowers(0, 0, (error > 0 ? 0.17 : -0.17)); // 0.14
                     sendDrivePowers();
                 }
                 break;
@@ -442,7 +442,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                     phaseTimeStamp = elapsedSecs();
                     phase--;
                 } else if (tower.isIdentified()) {
-                    calculateDrivePowers(0, 0, (error > 0 ? 0.10 : -0.10));
+                    calculateDrivePowers(0, 0, (error > 0 ? 0.12 : -0.12)); // 0.10
                     sendDrivePowers();
                 }
                 break;
@@ -465,8 +465,8 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     // Calculate and set correct launch angle from anywhere on the field
     public void setAssistedLaunchAngle() {
         powerLauncher.setLaunchAngle(tower.findLaunchAngle(gyro.getAngle()));
-        if (powerLauncher.launchAngle > powerLauncher.PERFECT_LAUNCH_ANGLE + 0.50) {
-            powerLauncher.setLaunchAnglePerfect();
+        if (powerLauncher.launchAngle > powerLauncher.PERFECT_LAUNCH_ANGLE + 0.25) {
+            powerLauncher.setLaunchAngle(powerLauncher.PERFECT_LAUNCH_ANGLE + 0.25);
         }
     }
 
@@ -534,32 +534,35 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         activateFieldLocalization();
         targetGyroAngle = getReasonableGyroAngle(0);
 
-        moveToPos(RIGHT_POWERSHOT_POS);
+        moveToPos(LEFT_POWERSHOT_POS);
 
         setAssistedLaunchAngle();
         powerLauncher.setLaunchAnglePerfect();
 //        powerLauncher.changeLaunchAngle(-0.020);
         powerLauncher.toggleOn(0.9);
-        rotateUsingCV(-160);
+        rotateUsingCV(-66);
         powerLauncher.setIndexerForwardPos();
         wait(0.12);
 
-        calculateDrivePowers(0, -0.6, 0, true);
+        calculateDrivePowers(0, 0.6, 0, true);
         sendDrivePowers();
 
         wait(0.12);
         powerLauncher.setIndexerBackPos();
 
-        wait(0.25);
+
+        powerLauncher.toggleOn(0.92);
+        wait(0.2);
         powerLauncher.setIndexerForwardPos();
-        wait(0.25);
+        wait(0.3);
         powerLauncher.setIndexerBackPos();
 
+        powerLauncher.toggleOn(0.94);
         wait(0.25);
         powerLauncher.setIndexerForwardPos();
         wait(0.25);
         powerLauncher.setIndexerBackPos();
-        wait(0.25);
+        wait(0.5);
 
 
         powerLauncher.toggleOff();

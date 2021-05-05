@@ -115,7 +115,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 }
                 else {
                     // Always rotate to face tower goal
-                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
+//                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
+                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 0.9511, 0.3090); // face 16 degrees
                 }
 
                 if (controller1.left_trigger > 0.1) {
@@ -148,9 +149,15 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Toggle speed
             if (controller1.x.equals("pressing")) {
+//                intakeSetting = "normal";
+//                robot.rotateToPos(0, 0.7);
+//                autoAimPhase = 10;
                 intakeSetting = "normal";
-                robot.rotateToPos(0, 0.7);
-                autoAimPhase = 10;
+                robot.powerLauncher.toggleOn();
+                robot.powerLauncher.setLaunchAnglePerfect();
+                robot.wait(0.5);
+                robot.indexRings(3);
+                robot.powerLauncher.toggleOff();
             }
 
             // Terminate any automated functions and stop streaming
@@ -174,8 +181,11 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             if (controller1.dpad_right.equals("pressed")) {
-                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
-                movePhase = 4;
+//                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
+//                movePhase = 4;
+                intakeSetting = "normal";
+                robot.rotateToPos(0, 0.7);
+                autoAimPhase = 10;
             }
             else if (controller1.dpad_up.equals("pressed")) {
                 movePhase = 0;
@@ -206,6 +216,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
                 queue = robot.powerLauncher.handleIndexQueue(queue);
+                if (queue == 0) { // Turn launcher off after indexing
+                    robot.powerLauncher.toggleOff();
+                }
             }
 
             // Intake stuff
