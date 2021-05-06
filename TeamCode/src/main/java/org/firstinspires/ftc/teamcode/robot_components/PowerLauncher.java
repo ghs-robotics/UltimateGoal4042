@@ -128,11 +128,15 @@ public class PowerLauncher {
 
     // Handle the queue of rings (only indexing)
     public int handleIndexQueue(int queue) {
-        if (getTimePassed() > 0.5) {
+        if (queue >= 4) {
+            resetQueueTimeStamp();
+            queue = 3;
+        }
+        else if (getTimePassed() > (queue == 3 ? 0.8 : 0.4)) {
             resetQueueTimeStamp();
             queue--;
         }
-        else if (getTimePassed() > 0.2) { // TODO : WAS 0.25
+        else if (getTimePassed() > (queue == 3 ? 0.4 : 0.2)) {
             setIndexerAngle(INDEXER_BACK_POS);
         }
         else {
@@ -154,7 +158,7 @@ public class PowerLauncher {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        else if (getTimePassed() > 1.5) {
+        else if (getTimePassed() > 1.2) {
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             queue--;

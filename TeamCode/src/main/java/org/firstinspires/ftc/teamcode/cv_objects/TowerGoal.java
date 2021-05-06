@@ -14,6 +14,10 @@ public class TowerGoal extends CVObject {
         cover = 0;
     }
 
+    public double getAdjustedWidth(double degrees) {
+        return 1.0 * w / Math.cos(Math.toRadians(degrees)); // TODO : TEST
+    }
+
     public int getLeftRightError(int offSet) {
         return x - (320 + offSet - x - w);
     }

@@ -115,8 +115,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 }
                 else {
                     // Always rotate to face tower goal
-//                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
-                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 0.9511, 0.3090); // face 16 degrees
+                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
+//                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 0.9511, 0.3090); // face 16 degrees
                 }
 
                 if (controller1.left_trigger > 0.1) {
@@ -136,6 +136,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 } else {
                     intakeSetting = "in";
                 }
+//                robot.turnWhiskerServo();
             }
 
             //
@@ -156,8 +157,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.powerLauncher.toggleOn();
                 robot.powerLauncher.setLaunchAnglePerfect();
                 robot.wait(0.5);
-                robot.indexRings(3);
-                robot.powerLauncher.toggleOff();
+                queue = 10; // Shoot three rings
             }
 
             // Terminate any automated functions and stop streaming
@@ -216,9 +216,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
                 queue = robot.powerLauncher.handleIndexQueue(queue);
-                if (queue == 0) { // Turn launcher off after indexing
-                    robot.powerLauncher.toggleOff();
-                }
             }
 
             // Intake stuff
@@ -258,8 +255,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Index 3 rings
             if (controller2.a.equals("pressing")) {
-                robot.powerLauncher.resetQueueTimeStamp();
-                queue = 3;
+//                robot.powerLauncher.resetQueueTimeStamp();
+                queue = 10;
             }
 
             // Toggle launcher and set perfect launch angle
