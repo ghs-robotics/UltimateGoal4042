@@ -27,27 +27,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="MotorTest", group="Iterative Opmode")
-public class MotorTest extends OpMode
-{
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.CVDetectionPipeline;
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.CVRobot;
+
+// THIS CLASS IS FOR TESTING PURPOSES!!
+
+@TeleOp(name="Tele2", group="Iterative Opmode")
+public class Tele2 extends OpMode implements FieldPositions {
     //Declare OpMode members
-    Robot robot;
+    CVRobot robot;
     Controller controller1;
+    boolean chasing = false;
 
     //Code to run ONCE when the driver hits INIT
     @Override
     public void init() {
-        robot = new Robot(hardwareMap, telemetry);
+        robot = new CVRobot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.resetServos();
+        robot.initWithCV();
+        robot.powerLauncher.setLaunchAngleLoading();
+        robot.turnArmUpFull();
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
-        robot.speed = 0.5;
     }
 
     //Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -64,27 +73,56 @@ public class MotorTest extends OpMode
         //Registers controller input
         controller1.update();
 
-        // shooter Servo: 0.58 (regular back) to 0.46 (forward)
-        if (controller1.dpad_up.equals("pressing")) {
-            robot.shooterAngle += 0.02;
-            robot.shooterServo.setPosition(robot.shooterAngle);
-        }
-        if (controller1.dpad_down.equals("pressing")) {
-            robot.shooterAngle -= 0.02;
-            robot.shooterServo.setPosition(robot.shooterAngle);
+        //Mecanum wheel drive
+        robot.calculateDrivePowers(
+                controller1.left_stick_x,
+                controller1.left_stick_y,
+                controller1.right_stick_x
+        );
+
+        if (controller1.x.equals("pressing")) {
+            chasing = false;
         }
 
-        // grab Servo: 0.15 (closed) to 0.48 (open)
-        if (controller1.dpad_right.equals("pressing")) {
-            robot.grabAngle += 0.02;
-            robot.grabServo.setPosition(robot.grabAngle);
+        if (controller1.a.equals("pressing")) {
+            chasing = true;
+            robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+        }
+
+        if (controller1.b.equals("pressing")) {
+            chasing = true;
+            robot.tower.setTargetXW(CONFIG_0_POS_I);
+        }
+
+        if (controller1.y.equals("pressing")) {
+            chasing = true;
+            robot.tower.setTargetXW(SECOND_WOBBLE_POS);
+        }
+
+        if (controller1.left_bumper.equals("pressing")) { robot.tower.depthPID.k_P -= 0.005; }
+        if (controller1.right_bumper.equals("pressing")) { robot.tower.depthPID.k_P += 0.005; }
+
+        if (controller1.dpad_down.equals("pressing")) { robot.tower.depthPID.k_I -= 0.0005; }
+        if (controller1.dpad_up.equals("pressing")) { robot.tower.depthPID.k_I += 0.0005; }
+
+        if (controller1.dpad_left.equals("pressing")) { robot.tower.depthPID.k_D -= 0.0005; }
+        if (controller1.dpad_right.equals("pressing")) { robot.tower.depthPID.k_D += 0.0005; }
+
+
+        if (chasing) {
+            CVDetectionPipeline.sleepTimeMS = 0;
+            robot.chaseObject(robot.tower);
+        } else {
+            robot.updateDrive();
         }
         if (controller1.dpad_left.equals("pressing")) {
-            robot.grabAngle -= 0.02;
-            robot.grabServo.setPosition(robot.grabAngle);
+            robot.mode = (robot.mode == 0) ? 1 : 0;
         }
-
-        robot.updateDrive();
+        if (controller1.dpad_right.equals("pressing")) {
+            robot.metaOffset += (robot.metaOffset < 270) ? 90 : -270;
+        }
+        //End of loop here
+        }
     }
 
     //Code to run ONCE after the driver hits STOP

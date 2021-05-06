@@ -19,30 +19,35 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.test_opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.data.FieldPositions;
+import org.firstinspires.ftc.teamcode.robot_components.Controller;
+import org.firstinspires.ftc.teamcode.robot_components.CVRobot;
+
 @TeleOp
-public class ChaseWobble extends LinearOpMode
+public class ChaseObject extends LinearOpMode implements FieldPositions
 {
-    Robot robot;
+    CVRobot robot;
     Controller controller1;
 
     @Override
     public void runOpMode()
     {
-        robot = new Robot(hardwareMap, telemetry);
+        robot = new CVRobot(hardwareMap, telemetry);
         controller1 = new Controller(gamepad1);
-        robot.init();
-        robot.setTargetToWobble();
+        robot.initWithCV();
+        robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
+        robot.floor.setTargetY(200);
 
         waitForStart();
 
         while (opModeIsActive())
         {
-            robot.chaseWobble();
+            robot.adjustPosition();
 
             // Don't burn CPU cycles busy-looping in this sample
             sleep(50);

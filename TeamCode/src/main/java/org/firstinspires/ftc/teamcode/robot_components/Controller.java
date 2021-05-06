@@ -1,35 +1,38 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-
-class Controller {
+// Our custom controller class that gives us more control (no pun intended)
+public class Controller {
     Gamepad gamepad;
 
-    String a;
-    String b;
-    String x;
-    String y;
-    String dpad_right;
-    String dpad_up;
-    String dpad_left;
-    String dpad_down;
-    String back;
-    String guide;
-    String start;
-    String left_stick_button;
-    String right_stick_button;
-    String left_bumper;
-    String right_bumper;
+    public String a;
+    public String b;
+    public String x;
+    public String y;
+    public String dpad_right;
+    public String dpad_up;
+    public String dpad_left;
+    public String dpad_down;
+    public String back;
+    public String guide;
+    public String start;
+    public String left_stick_button;
+    public String right_stick_button;
+    public String left_bumper;
+    public String right_bumper;
+    public String left_trigger_state;
+    public String right_trigger_state;
 
-    double left_stick_x;
-    double left_stick_y;
-    double right_stick_x;
-    double right_stick_y;
-    double left_trigger;
-    double right_trigger;
+    public double left_stick_x;
+    public double left_stick_y;
+    public double right_stick_x;
+    public double right_stick_y;
+    public double left_trigger;
+    public double right_trigger;
 
-    Controller(Gamepad gamepad) {
+    // Use for each controller in TeleOp
+    public Controller(Gamepad gamepad) {
         this.gamepad = gamepad;
 
         a = "released";
@@ -47,6 +50,8 @@ class Controller {
         right_stick_button = "released";
         left_bumper = "released";
         right_bumper = "released";
+        left_trigger_state = "released"; // pretending the triggers are buttons (with >0.95 counting as being pressed)
+        right_trigger_state = "released";
 
         left_stick_x = 0;
         left_stick_y = 0;
@@ -56,7 +61,8 @@ class Controller {
         right_trigger = 0;
     }
 
-    void update() {
+    // Update controller input
+    public void update() {
         a = check(a, gamepad.a);
         b = check(b, gamepad.b);
         x = check(x, gamepad.x);
@@ -66,6 +72,9 @@ class Controller {
         dpad_up    = check(dpad_up,    gamepad.dpad_up);
         dpad_left  = check(dpad_left,  gamepad.dpad_left);
         dpad_down  = check(dpad_down,  gamepad.dpad_down);
+
+        left_trigger_state  = check(left_trigger_state, gamepad.left_trigger > 0.95);
+        right_trigger_state = check(right_trigger_state,    gamepad.right_trigger > 0.95);
 
         back  = check(back,  gamepad.back);
         guide = check(guide, gamepad.guide);
@@ -87,19 +96,20 @@ class Controller {
         right_trigger = gamepad.right_trigger;
     }
 
-    String check(String previous, Boolean current) {
+    // Helper method for updating controller input
+    private String check(String previous, Boolean current) {
         String state;
         if (current) {
             if (previous.equals("released")) {
-                state = "pressing";
+                state = "pressing"; // The button is about to be pressed down
             } else {
-                state = "pressed";
+                state = "pressed"; // The button is held down
             }
         } else {
             if (previous.equals("pressed")) {
-                state = "releasing";
+                state = "releasing"; // The button is about to be released
             } else {
-                state = "released";
+                state = "released"; // The button is not being pushed
             }
         }
         return state;

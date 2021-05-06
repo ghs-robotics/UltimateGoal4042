@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.robot_components;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -8,12 +8,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+// Class that access the IMU (inertial measurement unit) and reports the robot's angle
+// relative to the starting position
 public class Gyro {
     BNO055IMU gyro;
-    Orientation lastAngles = new Orientation ();
+    Orientation lastAngles = new Orientation();
     double globalAngle;
 
-    Gyro(HardwareMap hardwareMap) {
+    // Constructs a gyro object which keeps track of the robot's angle
+    public Gyro(HardwareMap hardwareMap) {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -23,12 +26,14 @@ public class Gyro {
         gyro.initialize(parameters);
     }
 
+    // Sets angle to zero degrees; call at the begin of any OpMode
     public void resetAngle () {
         lastAngles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         globalAngle = 0;
     }
 
-    public double getAngle () {
+    // Returns the overall angle in degrees (not taken mod 360)
+    public double getAngle() {
         Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
         if (deltaAngle < -180) { deltaAngle += 360; }
