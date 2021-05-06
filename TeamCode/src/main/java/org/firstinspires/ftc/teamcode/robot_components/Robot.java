@@ -15,9 +15,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Robot variables and objects
     protected double intakePower = 0;
     public double armAngle = 0.15; // init position
-    public double clawAngle = 0.80; // Closed position
+    public double clawAngle = 0.80;// Closed position
+    private double horizMultip = 90;
 
-    public DcMotor intakeMotor;
+    public DcMotor vertIntakeMotor;
+    public CRServo horizIntakeMotor;
     public Servo armServo;
     public Servo clawServo;
 
@@ -29,7 +31,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         super(hardwareMap, telemetry); // Calls the DriveBase constructor, which handles drive motors
 
         // These are the names to use in the phone config (in quotes below)
-        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        vertIntakeMotor = hardwareMap.get(DcMotor.class, "vertIntakeMotor");
+        horizIntakeMotor = hardwareMap.get(CRServo.class, "horizIntakeMotor");
         armServo = hardwareMap.get(Servo.class, "armServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
 
@@ -55,7 +58,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Run intake with specified power; negative values make intake run backward
     public void runIntake(double power) {
         intakePower = power;
-        intakeMotor.setPower(intakePower);
+        vertIntakeMotor.setPower(intakePower);
+        horizIntakeMotor.setPower((intakePower + 1) * horizMultip)
+        //^^ 0 full back, 90 stopped, 180 full forwards
+    }
+
+    public void changeHorizDirection() {
+        horizMultip *= -1;
     }
 
     // Turn arm to specified position
