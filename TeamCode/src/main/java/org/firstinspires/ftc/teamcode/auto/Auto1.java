@@ -54,7 +54,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
                 runOneRingAuto();
                 break;
             case 4:
-                runFourRingAuto();
+                runFourRingAutoNew();
                 break;
         }
 
@@ -156,35 +156,45 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
     private void runFourRingAutoNew() {
 
         // Move forward but avoid starter stack
-        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0, 0, 2.0);
+        robot.moveToPos(MID_POWERSHOT_POS, 0, 0, 2.0);
 
         // Shoot 3 preloaded rings
         robot.autoShoot();
+        robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0, 0, 0.3);
 
         // Load 1 or 2 rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
         robot.moveToPos(PRE_CONFIG_1_POS_I, 0, 0, 0.5);
-        robot.runIntake(0.9);
+        robot.runIntake(0.7);
         robot.moveToPos(PERFECT_LAUNCH_POS, 0.2, 0.8, 2.0);
         robot.move(0, -0.4, 0.8);
 
         // Deliver first wobble goal
+
+        robot.towerXPID.setMinMax(-0.5, 0.5);
+        robot.towerWPID.setMinMax(-0.5, 0.5);
+
         robot.moveToPos(PRE_CONFIG_4_POS_I, 0.1, 0.7, 2.0);
+
+        robot.towerXPID.setMinMax(-1, 1);
+        robot.towerWPID.setMinMax(-1, 1);
 
         double t = robot.elapsedSecs();
         while (robot.elapsedSecs() - t < 0.4) {
-            robot.calculateDrivePowers(-1.0, 0, -0.3, true);
+            robot.calculateDrivePowers(-1.0, 0, 0.35, true);
             robot.sendDrivePowers();
         }
 
 //        robot.rotateToPos(-70, 0.3);
         robot.runIntake(0.0);
+        robot.turnArmDownDrag();
+        robot.wait(0.3);
         dropWobble();
 
         t = robot.elapsedSecs();
         robot.powerLauncher.toggleOn();
-        while (robot.elapsedSecs() - t < 0.4) {
-            robot.calculateDrivePowers(1.0, 0.5, 0.3, true);
+        while (robot.elapsedSecs() - t < 0.6) {
+            robot.calculateDrivePowers(1.0, 0.5, -0.3, true);
             robot.sendDrivePowers();
         }
 
@@ -195,7 +205,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         // Load remaining rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
-        robot.runIntake(0.9);
+        robot.runIntake(0.8);
         robot.move(0, -0.4, 0.8);
 
         // Grab 2nd wobble goal
@@ -260,7 +270,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
 
         // Load remaining rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
-        robot.runIntake(0.9);
+        robot.runIntake(0.8);
         robot.move(0, -0.3, 2.8);
 
         // Shoot remaining rings

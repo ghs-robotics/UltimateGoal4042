@@ -67,9 +67,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-//        robot.cameras.webcam.pauseViewport();
+        robot.cameras.webcam.pauseViewport();
         robot.activateFieldLocalization();
-        telemetry.setMsTransmissionInterval(20); // TODO
+//        telemetry.setMsTransmissionInterval(20);
         robot.wobble.activate();
 
         robot.resetGyroAngle();
@@ -104,7 +104,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
             else {
                 if (!controller1.right_bumper.equals("pressed")) {
-//                    CVDetectionPipeline.sleepTimeMS = 500; TODO
+                    CVDetectionPipeline.sleepTimeMS = 500;
                     // Mecanum wheel drive in meta mode
                     robot.calculateDrivePowers(
                             controller1.left_stick_x,
@@ -115,15 +115,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 }
                 else {
                     CVDetectionPipeline.sleepTimeMS = 0;
+
                     // Always rotate to face tower goal
-//                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
-
-
                     if (robot.tower.isIdentified() && robot.tower.isActive()) {
-                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14), true);
+                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14, 10), true);
                     } else {
                         robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
-//                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 0.9511, 0.3090); // face 16 degrees
                     }
 
 

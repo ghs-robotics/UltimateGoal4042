@@ -11,7 +11,7 @@ public class TowerGoal extends CVObject {
 
     public TowerGoal(CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
         super("tower", pipeline, xPID, wPID);
-        rotPID = new PIDController(0.0030, 0.0000, 0.0003, 10, 0.12);
+        rotPID = new PIDController(0.0030, 0.0000, 0.0003, 0, 0.14);
         lowerHSV = LOWER_BLUE_TOWER_HSV;
         upperHSV = UPPER_BLUE_TOWER_HSV;
         cover = 0;
@@ -31,9 +31,10 @@ public class TowerGoal extends CVObject {
         return Math.abs(getLeftRightError(offSet));
     }
 
-    public double getRotPIDVal(int offSet) {
-        if (identified) {
-            return rotPID.calcVal(getLeftRightError(offSet));
+    public double getRotPIDVal(int offSet, int tolerance) {
+        int error = getLeftRightError(offSet);
+        if (identified && Math.abs(error) > tolerance) {
+            return rotPID.calcVal(error);
         } else {
             return 0;
         }
@@ -69,7 +70,7 @@ public class TowerGoal extends CVObject {
     protected boolean isReasonable(int x, int y, int w, int h) {
         double r = 1.0 * w / h; // ratio is usually about 1.5
         // width 34 is back of the field, closest is 150
-        return (20 < w && w < 130 && 12 < h && h < 65 && r > 1.0) /* && hasHatShape(x, y, w, h)*/;
+        return (10 < w && w < 130 && 8 < h && h < 65 && r > 1.0) /* && hasHatShape(x, y, w, h)*/;
         // Unfortunately, the hasHatShape method is being finicky right now
     }
     /*

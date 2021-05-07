@@ -143,6 +143,8 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         stopDrive();
 //        tower.deactivate();
 //        wall.deactivate();
+        tower.setToNotIdentified();
+        wall.setToNotIdentified();
         CVDetectionPipeline.sleepTimeMS = 500;
         cameras.webcam.pauseViewport(); // stop displaying webcam stream on phone
     }
@@ -209,6 +211,88 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         else {
             chaseObject(tower);
         }
+    }
+
+    // Shoot from anywhere on field in auto
+    public void autoShoot() {
+        int phase = 20;
+        while (phase > 0) {
+            phase = autoShootInPhases(phase);
+        }
+    }
+
+    // Automated move to position function that uses phases and must be called repeatedly
+    // This allows us to terminate the function early (because we can just set phase to be 0)
+    public int autoShootInPhases(int phase) { // TODO : OPTIMIZE
+
+        // Distance between tower goal and left side of screen: tower.x
+        // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
+        double error = tower.getLeftRightError(14);
+
+        if (phase >= 10) {
+            activateFieldLocalization();
+            tower.setTargetXW(LEFT_POWERSHOT_POS);
+            targetGyroAngle = getReasonableGyroAngle(0);
+            phase = 9;
+        }
+
+        switch (phase) {
+            case 9:
+                if (cameras.isStreaming() && cameras.isWebcamReady()) {
+                    phase--;
+                }
+                break;
+            case 8:
+                if (getAbsoluteGyroError() < 35 && tower.isIdentified()) {
+                    resetPhaseTimeStamp();
+                    powerLauncher.toggleOn();
+                    phase--;
+                } else {
+                    adjustPosition();
+                }
+                break;
+            case 7:
+                if (Math.abs(error) <= 40 && getPhaseTimePassed() > 0.1) {
+                    resetPhaseTimeStamp();
+                    phase--;
+                } else {
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14, 5));
+                    sendDrivePowers();
+                }
+                break;
+            case 6:
+                if (Math.abs(error) <= 10 && getPhaseTimePassed() > 0.1) {
+                    resetPhaseTimeStamp();
+                    phase--;
+                } else {
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14, 4));
+                    if (tower.isIdentified() && Math.abs(error) < 20) {
+                        setAssistedLaunchAngle();
+                    }
+                    sendDrivePowers();
+                }
+                break;
+            case 5:
+                if (Math.abs(error) <= (tower.h > 32 ? 10 : 5) && getPhaseTimePassed() > 0.1) {
+                    stopDrive();
+                    phase--;
+                } else {
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14, 3));
+                    setAssistedLaunchAngle();
+                    sendDrivePowers();
+                }
+                break;
+        }
+
+        if (0 < phase && phase < 5) {
+            phase = powerLauncher.handleIndexQueue(phase);
+            if (phase == 0) {
+                powerLauncher.toggleOff(); // Turn launcher off after indexing
+                deactivateFieldLocalization();
+            }
+        }
+
+        return phase;
     }
 
     // Makes the robot chase the target object (if called repeatedly)
@@ -376,7 +460,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         double t = elapsedSecs();
         calculateDrivePowers(0, -0.3, 0);
         sendDrivePowers();
-        while ( wall.h < 86 &&  elapsedSecs() - t < 2.0) { // TODO
+        while ( wall.h < 90 &&  elapsedSecs() - t < 2.0) { // TODO
             calculateDrivePowers(0, -0.3, getGyroPIDValue());
             sendDrivePowers();
         }
@@ -390,140 +474,14 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         }
     }
 
-    // Shoot from anywhere on field in auto
-    public void autoShoot() {
-        int phase = 20;
-        while (phase > 0) {
-            phase = autoShootInPhases(phase);
-        }
-    }
-
-    // Automated move to position function that uses phases and must be called repeatedly
-    // This allows us to terminate the function early (because we can just set phase to be 0)
-    public int autoShootInPhases(int phase) { // TODO : OPTIMIZE
-
-        // Distance between tower goal and left side of screen: tower.x
-        // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
-        double error = tower.getLeftRightError(14);
-
-        if (phase >= 10) {
-            activateFieldLocalization();
-            tower.setTargetXW(LEFT_POWERSHOT_POS);
-            targetGyroAngle = getReasonableGyroAngle(0);
-            phase = 9;
-        }
-
-        switch (phase) {
-            case 9:
-                if (cameras.isStreaming() && cameras.isWebcamReady()) {
-                    phase--;
-                }
-                break;
-            case 8:
-                if (getAbsoluteGyroError() < 35 && tower.isIdentified()) {
-                    resetPhaseTimeStamp();
-                    phase--;
-                } else {
-                    adjustPosition();
-                }
-                break;
-            case 7:
-                if (Math.abs(error) <= 40 && getPhaseTimePassed() > 0.1) {
-                    powerLauncher.toggleOn();
-                    resetPhaseTimeStamp();
-                    phase--;
-                } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14));
-                    sendDrivePowers();
-                }
-                break;
-            case 6:
-                if (Math.abs(error) <= 20 && getPhaseTimePassed() > 0.2) {
-                    resetPhaseTimeStamp();
-                    phase--;
-                } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14));
-                    setAssistedLaunchAngle();
-                    sendDrivePowers();
-                }
-                break;
-            case 5:
-                if (Math.abs(error) <= 10 && getPhaseTimePassed() > 0.2) {
-                    stopDrive();
-                    phase--;
-                } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14));
-                    setAssistedLaunchAngle();
-                    sendDrivePowers();
-                }
-                break;
-        }
-
-        /*
-        switch (phase) {
-            case 9:
-                if (cameras.isStreaming() && cameras.isWebcamReady()) {
-                    phaseTimeStamp = elapsedSecs();
-                    phase--;
-                }
-                break;
-            case 8:
-                if (!tower.isIdentified() || tower.getAdjustedWidth(gyro.getAngle()) > 58 || getAbsoluteGyroError() > 35) { // TODO : tower.h might not be accurate bc what if the robot can't see the whole tower goal?
-                    adjustPosition();
-                } else if (Math.abs(error) <= 20) {
-                    phaseTimeStamp = elapsedSecs();
-                    phase--;
-                } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14)); // TODO
-                    sendDrivePowers();
-                }
-                break;
-            case 7:
-                if (Math.abs(error) <= 10 && getPhaseTimePassed() > 0.1) {
-                    phaseTimeStamp = elapsedSecs();
-                    powerLauncher.toggleOn(); // TODO
-                    phaseTimeStamp = elapsedSecs(); // TODO
-                    phase--;
-                } else if (tower.isIdentified()) {
-                    calculateDrivePowers(0, 0, (error > 0 ? 0.17 : -0.17)); // 0.14
-                    sendDrivePowers();
-                }
-                break;
-            case 6:
-                if (Math.abs(error) <= 3 && getPhaseTimePassed() > 0.1) {
-                    stopDrive();
-//                    powerLauncher.toggleOn();
-                    setAssistedLaunchAngle();
-//                    phaseTimeStamp = elapsedSecs();
-                    phase--;
-                } else if (tower.isIdentified()) {
-                    calculateDrivePowers(0, 0, (error > 0 ? 0.12 : -0.12)); // 0.10
-                    sendDrivePowers();
-                }
-                break;
-            case 5:
-                if (elapsedSecs() - phaseTimeStamp > 0.6) {
-                    phase--;
-                }
-        }
-
-         */
-
-        if (0 < phase && phase < 5) {
-            phase = powerLauncher.handleIndexQueue(phase);
-            if (phase == 0) {
-                powerLauncher.toggleOff(); // Turn launcher off after indexing
-            }
-        }
-
-        return phase;
-    }
-
     // Calculate and set correct launch angle from anywhere on the field
     public void setAssistedLaunchAngle() {
         powerLauncher.setLaunchAngle(tower.findLaunchAngle(gyro.getAngle()));
-        if (powerLauncher.launchAngle > powerLauncher.PERFECT_LAUNCH_ANGLE + 0.25) {
-            powerLauncher.setLaunchAngle(powerLauncher.PERFECT_LAUNCH_ANGLE + 0.25);
+        if (powerLauncher.launchAngle > powerLauncher.PERFECT_LAUNCH_ANGLE + 0.050) {
+            powerLauncher.setLaunchAngle(powerLauncher.PERFECT_LAUNCH_ANGLE + 0.050);
+        }
+        if (powerLauncher.launchAngle < powerLauncher.PERFECT_LAUNCH_ANGLE - 0.060) {
+            powerLauncher.setLaunchAngle(powerLauncher.PERFECT_LAUNCH_ANGLE - 0.060);
         }
     }
 
@@ -554,6 +512,10 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
             sendDrivePowers();
         }
         stopDrive();
+    }
+
+    public void rotateUsingCVInPhases() {
+
     }
 
     // Go to MID_POWERSHOT_POS before calling this
@@ -593,25 +555,24 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
 //        moveToPos(LEFT_POWERSHOT_POS);
 
-        setAssistedLaunchAngle();
         powerLauncher.setLaunchAnglePerfect();
 //        powerLauncher.changeLaunchAngle(-0.020);
         powerLauncher.toggleOn(0.9);
-        rotateUsingCV(-66);
+        rotateUsingCV(-60);
         powerLauncher.setIndexerForwardPos();
-        wait(0.12);
+        wait(0.1);
 
         calculateDrivePowers(0, 0.6, 0, true);
         sendDrivePowers();
 
-        wait(0.12);
+        wait(0.1);
         powerLauncher.setIndexerBackPos();
 
 
         powerLauncher.toggleOn(0.92);
         wait(0.2);
         powerLauncher.setIndexerForwardPos();
-        wait(0.3);
+        wait(0.25);
         powerLauncher.setIndexerBackPos();
 
         powerLauncher.toggleOn(0.94);
