@@ -46,6 +46,9 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         // Resizes image to make processing more uniform
         Imgproc.resize(input, input, new Size(320, 240));
 
+        // Creates Gaussian blur on image; makes things easier to detect
+        Imgproc.GaussianBlur(input, input, new Size(5, 5), 80, 80);
+
         currentMat = input; // store the current frame in this class
 
         // Iterate through all the objects that are being analyzed continuously
@@ -84,57 +87,4 @@ public class CVDetectionPipeline extends OpenCvPipeline implements HSVConstants 
         double[] val = input.get(row, col); // double[] array with HSV values
         return new MyScalar((int) val[0], (int) val[1], (int) val[2]);
     }
-
-    /*
-
-    // A comprehensive backup
-    public int[] findObjectCoordinates2(Mat src) {
-        Scalar GREEN = new Scalar(0, 255, 0);
-
-        Imgproc.resize(src, src, new Size(320, 240));
-
-        //convert color from BGR to HSV
-        Imgproc.cvtColor(src, dst, Imgproc.COLOR_BGR2HSV);
-        //create Gaussian blur on image
-        Imgproc.GaussianBlur(dst, dst, new Size(5, 5), 80, 80);
-
-        //adding a mask to the dst mat
-        //filters colors within certain color range
-        Core.inRange(dst, lowerHSV, upperHSV, dst);
-
-        //dilate the ring to make it easier to detect
-        //kernel determines how much you are changing the pixel
-        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(5, 5));
-        Imgproc.dilate(dst, dst, kernel);
-
-        //get the contours of the ring
-        List<MatOfPoint> contours = new ArrayList<>();
-        Imgproc.findContours(dst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-
-        //draw a contour on the src image
-        Imgproc.drawContours(src, contours, -1, GREEN, 2, Imgproc.LINE_8, hierarchy, 2, new Point());
-
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
-
-            //don't draw a square around a spot that's too small
-            //to avoid false detections
-            //if (rect.area() > 7_000) { Imgproc.rectangle(src, rect, GREEN, 5); }
-        }
-
-        Rect largest = new Rect();
-        for (int i = 0; i < contours.size(); i++) {
-            Rect rect = Imgproc.boundingRect(contours.get(i));
-            if (largest.area() < rect.area()) {
-                largest = rect;
-            }
-        }
-
-        //draws largest rect
-        Imgproc.rectangle(src, largest, GREEN, 5);
-
-        return new int[]{largest.x, largest.y, largest.width, largest.height};
-    }
-
-     */
 }

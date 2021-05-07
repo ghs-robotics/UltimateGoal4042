@@ -116,9 +116,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 else {
                     CVDetectionPipeline.sleepTimeMS = 0;
                     // Always rotate to face tower goal
-                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
+//                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
 
-                    /*
+
                     if (robot.tower.isIdentified() && robot.tower.isActive()) {
                         robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14), true);
                     } else {
@@ -126,7 +126,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 //                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 0.9511, 0.3090); // face 16 degrees
                     }
 
-                     */
+
                 }
 
                 if (controller1.left_trigger > 0.1) {

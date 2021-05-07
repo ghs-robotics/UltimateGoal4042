@@ -38,7 +38,11 @@ public class TowerGoal extends CVObject {
 //        } else {
 //            return (getLeftRightError(offSet) > 0 ? 0.12 : -0.12);
 //        }
-        return rotPID.calcVal(getLeftRightError(offSet));
+        if (identified) {
+            return rotPID.calcVal(getLeftRightError(offSet));
+        } else {
+            return 0;
+        }
     }
 
     // Tests to make sure there is the slot for the high goal
@@ -47,13 +51,13 @@ public class TowerGoal extends CVObject {
         int row = y + (int) (0.8 * h); // 80% of the way down from top of blue tower goal
 
         // Left flap has to be blue
-        MyScalar scalar = findHSV(row, x + (int) (0.1 * w));
+        MyScalar scalar = findHSV(row, x + (int) (0.07 * w));
         if (!scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
             return false;
         }
 
         // Right flap has to be blue
-        scalar = findHSV(row, x + (int) (0.9 * w));
+        scalar = findHSV(row, x + (int) (0.93 * w));
         if (!scalar.inRange(LOWER_BLUE_TOWER_HSV, UPPER_BLUE_TOWER_HSV)) {
             return false;
         }
@@ -71,7 +75,8 @@ public class TowerGoal extends CVObject {
     protected boolean isReasonable(int x, int y, int w, int h) {
         double r = 1.0 * w / h; // ratio is usually about 1.5
         // width 34 is back of the field, closest is 150
-        return (30 < w && w < 130 && 18 < h && h < 65 && r > 1.3) /*&& hasHatShape(x, y, w, h)*/; // TODO
+//        return (30 < w && w < 130 && 18 < h && h < 65 && r > 1.0) /* && hasHatShape(x, y, w, h)*/;
+        return (20 < w && w < 130 && 12 < h && h < 65 && r > 1.0);
     }
     /*
         Some values for reference:

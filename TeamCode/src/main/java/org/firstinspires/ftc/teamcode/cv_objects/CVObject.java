@@ -29,6 +29,7 @@ public abstract class CVObject implements HSVConstants {
     protected Mat currentHSVMat;
     protected Mat currentHSVMask; // Stores the mask
     protected Mat hierarchy; // Auxiliary
+    protected Mat kernel; // Auxiliary
 
     protected Scalar lowerHSV;
     protected Scalar upperHSV;
@@ -257,7 +258,7 @@ public abstract class CVObject implements HSVConstants {
         }
 
         // Draws largest rect on src image
-        Imgproc.rectangle(input, largestRect, GREEN_BGR, 1);
+        Imgproc.rectangle(input, largestRect, GREEN_BGR, 2);
 
         // Updates coordinates
         this.x = largestRect.x;

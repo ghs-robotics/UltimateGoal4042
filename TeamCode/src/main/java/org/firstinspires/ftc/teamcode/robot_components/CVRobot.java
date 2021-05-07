@@ -417,7 +417,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                 }
                 break;
             case 8:
-                if (!tower.isIdentified() || tower.getAdjustedWidth(gyro.getAngle()) > 58 || getAbsoluteGyroError() > 25) { // TODO : tower.h might not be accurate bc what if the robot can't see the whole tower goal?
+                if (!tower.isIdentified() || tower.getAdjustedWidth(gyro.getAngle()) > 58 || getAbsoluteGyroError() > 35) { // TODO : tower.h might not be accurate bc what if the robot can't see the whole tower goal?
                     adjustPosition();
                 } else if (Math.abs(error) <= 20) {
                     phaseTimeStamp = elapsedSecs();
