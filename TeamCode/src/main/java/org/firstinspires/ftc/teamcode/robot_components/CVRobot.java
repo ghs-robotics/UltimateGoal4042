@@ -169,6 +169,10 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         cameras.stopStreaming();
     }
 
+    public void resetPhaseTimeStamp() {
+        phaseTimeStamp = elapsedSecs();
+    }
+
     // Helper method for setting up
     public void startUp() {
         stopDrive();
@@ -387,16 +391,16 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     }
 
     // Shoot from anywhere on field in auto
-    public void rotateAndShoot() {
+    public void autoShoot() {
         int phase = 20;
         while (phase > 0) {
-            phase = rotateAndShootInPhases(phase);
+            phase = autoShootInPhases(phase);
         }
     }
 
     // Automated move to position function that uses phases and must be called repeatedly
     // This allows us to terminate the function early (because we can just set phase to be 0)
-    public int rotateAndShootInPhases(int phase) { // TODO : OPTIMIZE
+    public int autoShootInPhases(int phase) { // TODO : OPTIMIZE
 
         // Distance between tower goal and left side of screen: tower.x
         // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
@@ -404,11 +408,58 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
         if (phase >= 10) {
             activateFieldLocalization();
-            tower.setTargetXW(PERFECT_LAUNCH_POS);
+            tower.setTargetXW(LEFT_POWERSHOT_POS);
             targetGyroAngle = getReasonableGyroAngle(0);
             phase = 9;
         }
 
+        switch (phase) {
+            case 9:
+                if (cameras.isStreaming() && cameras.isWebcamReady()) {
+                    phase--;
+                }
+                break;
+            case 8:
+                if (getAbsoluteGyroError() < 35 && tower.isIdentified()) {
+                    resetPhaseTimeStamp();
+                    phase--;
+                } else {
+                    adjustPosition();
+                }
+                break;
+            case 7:
+                if (Math.abs(error) <= 40 && getPhaseTimePassed() > 0.1) {
+                    powerLauncher.toggleOn();
+                    resetPhaseTimeStamp();
+                    phase--;
+                } else {
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14));
+                    sendDrivePowers();
+                }
+                break;
+            case 6:
+                if (Math.abs(error) <= 20 && getPhaseTimePassed() > 0.2) {
+                    resetPhaseTimeStamp();
+                    phase--;
+                } else {
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14));
+                    setAssistedLaunchAngle();
+                    sendDrivePowers();
+                }
+                break;
+            case 5:
+                if (Math.abs(error) <= 10 && getPhaseTimePassed() > 0.2) {
+                    stopDrive();
+                    phase--;
+                } else {
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14));
+                    setAssistedLaunchAngle();
+                    sendDrivePowers();
+                }
+                break;
+        }
+
+        /*
         switch (phase) {
             case 9:
                 if (cameras.isStreaming() && cameras.isWebcamReady()) {
@@ -455,6 +506,8 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                     phase--;
                 }
         }
+
+         */
 
         if (0 < phase && phase < 5) {
             phase = powerLauncher.handleIndexQueue(phase);

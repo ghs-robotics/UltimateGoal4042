@@ -99,7 +99,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
             else if (autoAimPhase > 0) {
                 CVDetectionPipeline.sleepTimeMS = 0;
-                autoAimPhase = robot.rotateAndShootInPhases(autoAimPhase);
+                autoAimPhase = robot.autoShootInPhases(autoAimPhase);
                 robot.setAssistedLaunchAngle();
             }
             else {

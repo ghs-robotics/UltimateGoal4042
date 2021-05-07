@@ -159,7 +159,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.moveToPos(NEXT_TO_STARTER_STACK_POS, 0, 0, 2.0);
 
         // Shoot 3 preloaded rings
-        robot.rotateAndShoot();
+        robot.autoShoot();
 
         // Load 1 or 2 rings from starter stack
         robot.powerLauncher.setLaunchAngleLoading();
@@ -207,7 +207,7 @@ public class Auto1 extends LinearOpMode implements FieldPositions {
         robot.powerLauncher.toggleOn();
         robot.moveToPos(PERFECT_LAUNCH_POS, 0.3, 0.5, 4.0, 1, true);
         robot.runIntake(0.0);
-        robot.rotateAndShoot();
+        robot.autoShoot();
 
         // Deliver 2nd wobble goal
 //        robot.moveToPos(PRE_CONFIG_4_POS_II, 0.5, 1.0, 3.0);

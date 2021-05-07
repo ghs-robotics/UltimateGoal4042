@@ -11,7 +11,6 @@ public class TowerGoal extends CVObject {
 
     public TowerGoal(CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
         super("tower", pipeline, xPID, wPID);
-        // 0.0030, 0.0000, 0.0004
         rotPID = new PIDController(0.0030, 0.0000, 0.0003, 10, 0.12);
         lowerHSV = LOWER_BLUE_TOWER_HSV;
         upperHSV = UPPER_BLUE_TOWER_HSV;
