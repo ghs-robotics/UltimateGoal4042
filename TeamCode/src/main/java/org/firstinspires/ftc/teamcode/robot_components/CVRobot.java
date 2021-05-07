@@ -91,7 +91,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     @Override
     public void addTelemetryData() {
 
-//        addCVTelemetryData();
+        addCVTelemetryData();
 
         telemetry.addData("CURRENT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.launchAngle));
         telemetry.addData("PERFECT LAUNCH ANGLE", "" + Math.round(1000 * powerLauncher.PERFECT_LAUNCH_ANGLE));
@@ -108,8 +108,6 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         telemetry.addLine("" + target.toString());
 
         telemetry.addLine();
-//        telemetry.addData("phonecam crosshair: ", camera.phoneCamPipeline.crosshairHSV);
-//        telemetry.addData("webcam crosshair: ", camera.webcamPipeline.crosshairHSV);
 
         telemetry.addData("TOWER", "" + tower.toString());
         telemetry.addData("WALL", "" + wall.toString());
@@ -118,6 +116,10 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
     // Add certain optional data to telemetry
     private void addCVTelemetryData() {
+        telemetry.addData("phonecam crosshair: ", cameras.phoneCamPipeline.crosshairHSV);
+        telemetry.addData("webcam crosshair: ", cameras.webcamPipeline.crosshairHSV);
+        telemetry.addLine();
+
         telemetry.addLine("STREAMING: " + cameras.isStreaming());
         telemetry.addLine("CONFIG: " + identifyRingConfig());
 
@@ -398,7 +400,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
         // Distance between tower goal and left side of screen: tower.x
         // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
-        double error = tower.x - (334 - tower.x - tower.w);
+        double error = tower.getLeftRightError(14);
 
         if (phase >= 10) {
             activateFieldLocalization();
@@ -415,19 +417,21 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                 }
                 break;
             case 8:
-                if (!tower.isIdentified() || tower.h > 39 || getAbsoluteGyroError() > 25) { // TODO : tower.h might not be accurate bc what if the robot can't see the whole tower goal?
+                if (!tower.isIdentified() || tower.getAdjustedWidth(gyro.getAngle()) > 58 || getAbsoluteGyroError() > 25) { // TODO : tower.h might not be accurate bc what if the robot can't see the whole tower goal?
                     adjustPosition();
                 } else if (Math.abs(error) <= 20) {
                     phaseTimeStamp = elapsedSecs();
                     phase--;
                 } else {
-                    calculateDrivePowers(0, 0, metaGyroPID.calcVal(0.3 * error));
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14)); // TODO
                     sendDrivePowers();
                 }
                 break;
             case 7:
                 if (Math.abs(error) <= 10 && getPhaseTimePassed() > 0.1) {
                     phaseTimeStamp = elapsedSecs();
+                    powerLauncher.toggleOn(); // TODO
+                    phaseTimeStamp = elapsedSecs(); // TODO
                     phase--;
                 } else if (tower.isIdentified()) {
                     calculateDrivePowers(0, 0, (error > 0 ? 0.17 : -0.17)); // 0.14
@@ -436,10 +440,10 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
                 break;
             case 6:
                 if (Math.abs(error) <= 3 && getPhaseTimePassed() > 0.1) {
-                    powerLauncher.toggleOn();
+                    stopDrive();
+//                    powerLauncher.toggleOn();
                     setAssistedLaunchAngle();
-                    powerLauncher.resetQueueTimeStamp();
-                    phaseTimeStamp = elapsedSecs();
+//                    phaseTimeStamp = elapsedSecs();
                     phase--;
                 } else if (tower.isIdentified()) {
                     calculateDrivePowers(0, 0, (error > 0 ? 0.12 : -0.12)); // 0.10
@@ -480,7 +484,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         double error = tower.getLeftRightError(offSet - 5);
         CVDetectionPipeline.sleepTimeMS = 0;
 
-        while (error > -25) {
+        while (error > -10) { // TODO : WAS -25
             CVDetectionPipeline.sleepTimeMS = 0;
             error = tower.getLeftRightError(offSet - 5);
             calculateDrivePowers(0, 0, 0.2);
@@ -534,7 +538,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         activateFieldLocalization();
         targetGyroAngle = getReasonableGyroAngle(0);
 
-        moveToPos(LEFT_POWERSHOT_POS);
+//        moveToPos(LEFT_POWERSHOT_POS);
 
         setAssistedLaunchAngle();
         powerLauncher.setLaunchAnglePerfect();

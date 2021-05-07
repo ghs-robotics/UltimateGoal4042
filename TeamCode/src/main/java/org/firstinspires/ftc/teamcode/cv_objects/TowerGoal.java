@@ -7,8 +7,12 @@ import org.firstinspires.ftc.teamcode.robot_components.PowerLauncher;
 
 public class TowerGoal extends CVObject {
 
+    public PIDController rotPID;
+
     public TowerGoal(CVDetectionPipeline pipeline, PIDController xPID, PIDController wPID) {
         super("tower", pipeline, xPID, wPID);
+        // 0.0030, 0.0000, 0.0004
+        rotPID = new PIDController(0.0030, 0.0000, 0.0000, 10, 0.12);
         lowerHSV = LOWER_BLUE_TOWER_HSV;
         upperHSV = UPPER_BLUE_TOWER_HSV;
         cover = 0;
@@ -19,7 +23,22 @@ public class TowerGoal extends CVObject {
     }
 
     public int getLeftRightError(int offSet) {
+        // Distance between tower goal and left side of screen: x
+        // Distance between tower goal and right side of screen: 320 - x - w
         return x - (320 + offSet - x - w);
+    }
+
+    public int getAbsLeftRightError(int offSet) {
+        return Math.abs(getLeftRightError(offSet));
+    }
+
+    public double getRotPIDVal(int offSet) { // TODO
+//        if (getAbsLeftRightError(offSet) > 40) {
+//            return rotPID.calcVal(getLeftRightError(offSet));
+//        } else {
+//            return (getLeftRightError(offSet) > 0 ? 0.12 : -0.12);
+//        }
+        return rotPID.calcVal(getLeftRightError(offSet));
     }
 
     // Tests to make sure there is the slot for the high goal
@@ -52,7 +71,7 @@ public class TowerGoal extends CVObject {
     protected boolean isReasonable(int x, int y, int w, int h) {
         double r = 1.0 * w / h; // ratio is usually about 1.5
         // width 34 is back of the field, closest is 150
-        return (30 < w && w < 130 && 18 < h && h < 65 && r > 1.3) /* && hasHatShape(x, y, w, h)*/;
+        return (30 < w && w < 130 && 18 < h && h < 65 && r > 1.3) /*&& hasHatShape(x, y, w, h)*/; // TODO
     }
     /*
         Some values for reference:

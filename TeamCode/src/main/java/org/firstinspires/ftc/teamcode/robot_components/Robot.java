@@ -12,19 +12,19 @@ import org.firstinspires.ftc.teamcode.data.HSVConstants;
 // Contains all of the motors/servos/sensors specific to this year's challenge
 public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
+    public static final double DOWN_WHISKER_ANGLE = 0.4;
+    public static final double UP_WHISKER_ANGLE = 0.02;
+
     // Robot variables and objects
     protected double intakePower = 0;
     public double armAngle = 0.15; // init position
     public double clawAngle = 0.80;// Closed position
-    private double horizMultip = 90;
-    public double clawAngle = 0.80; // Closed position
-    public double whiskerAngle = 0;
+    public double whiskerAngle = UP_WHISKER_ANGLE; // Whisker is up
 
-    public DcMotor vertIntakeMotor;
-    public CRServo horizIntakeMotor;
+    public DcMotor intakeMotor;
+//    public CRServo intakeCRServo;
     public Servo armServo;
     public Servo clawServo;
-    public Servo hybridIntakeServo;
     public Servo whiskerServo;
 
     public PowerLauncher powerLauncher; // Controls launching and indexing
@@ -35,12 +35,11 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
         super(hardwareMap, telemetry); // Calls the DriveBase constructor, which handles drive motors
 
         // These are the names to use in the phone config (in quotes below)
-        vertIntakeMotor = hardwareMap.get(DcMotor.class, "vertIntakeMotor");
-        horizIntakeMotor = hardwareMap.get(CRServo.class, "horizIntakeMotor");
+        intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+//        intakeCRServo = hardwareMap.get(CRServo.class, "intakeCRServo");
         armServo = hardwareMap.get(Servo.class, "armServo");
         clawServo = hardwareMap.get(Servo.class, "clawServo");
-//        hybridIntakeServo = hardwareMap.get(Servo.class, "hybridIntakeServo");
-//        whiskerServo = hardwareMap.get(Servo.class, "whiskerServo");
+        whiskerServo = hardwareMap.get(Servo.class, "whiskerServo");
 
         powerLauncher = new PowerLauncher(hardwareMap); // Initializes powerLauncher
     }
@@ -56,6 +55,7 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Sets servos to starting positions in init
     public void resetServos() {
         clawServo.setPosition(clawAngle);
+        whiskerServo.setPosition(whiskerAngle);
         wait(0.6);
         armServo.setPosition(armAngle);
         powerLauncher.resetServos();
@@ -64,13 +64,8 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     // Run intake with specified power; negative values make intake run backward
     public void runIntake(double power) {
         intakePower = power;
-        vertIntakeMotor.setPower(intakePower);
-        horizIntakeMotor.setPower((intakePower + 1) * horizMultip)
-        //^^ 0 full back, 90 stopped, 180 full forwards
-    }
-
-    public void changeHorizDirection() {
-        horizMultip *= -1;
+        intakeMotor.setPower(intakePower);
+//        intakeCRServo.setPower(-intakePower * 0.5);
     }
 
     // Turn arm to specified position
@@ -113,7 +108,17 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
     }
 
     public void turnWhiskerServo() {
-        whiskerAngle = (whiskerAngle != 0 ? 0 : 1.0);
+        whiskerAngle = (whiskerAngle != UP_WHISKER_ANGLE ? UP_WHISKER_ANGLE : DOWN_WHISKER_ANGLE);
+        whiskerServo.setPosition(whiskerAngle);
+    }
+
+    public void turnWhiskerUp() {
+        whiskerAngle = UP_WHISKER_ANGLE;
+        whiskerServo.setPosition(whiskerAngle);
+    }
+
+    public void turnWhiskerDown() {
+        whiskerAngle = DOWN_WHISKER_ANGLE;
         whiskerServo.setPosition(whiskerAngle);
     }
 }

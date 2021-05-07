@@ -67,9 +67,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
-//        robot.camera.webcam.pauseViewport();
+//        robot.cameras.webcam.pauseViewport();
         robot.activateFieldLocalization();
-//        telemetry.setMsTransmissionInterval(20);
+        telemetry.setMsTransmissionInterval(20); // TODO
         robot.wobble.activate();
 
         robot.resetGyroAngle();
@@ -103,8 +103,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.setAssistedLaunchAngle();
             }
             else {
-                CVDetectionPipeline.sleepTimeMS = 500;
                 if (!controller1.right_bumper.equals("pressed")) {
+//                    CVDetectionPipeline.sleepTimeMS = 500; TODO
                     // Mecanum wheel drive in meta mode
                     robot.calculateDrivePowers(
                             controller1.left_stick_x,
@@ -114,16 +114,26 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                     );
                 }
                 else {
+                    CVDetectionPipeline.sleepTimeMS = 0;
                     // Always rotate to face tower goal
                     robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
+
+                    /*
+                    if (robot.tower.isIdentified() && robot.tower.isActive()) {
+                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14), true);
+                    } else {
+                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
 //                    robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 0.9511, 0.3090); // face 16 degrees
+                    }
+
+                     */
                 }
 
                 if (controller1.left_trigger > 0.1) {
-                    robot.calculateDrivePowers(0, 0, -0.25 * controller1.left_trigger);
+                    robot.calculateDrivePowers(0, 0, -0.3 * controller1.left_trigger);
                 }
                 else if (controller1.right_trigger > 0.1) {
-                    robot.calculateDrivePowers(0, 0, 0.25 * controller1.right_trigger);
+                    robot.calculateDrivePowers(0, 0, 0.3 * controller1.right_trigger);
                 }
 
                 robot.updateDrive(); // Also updates telemetry
@@ -136,7 +146,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 } else {
                     intakeSetting = "in";
                 }
-//                robot.turnWhiskerServo();
             }
 
             //
@@ -150,20 +159,21 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
             // Toggle speed
             if (controller1.x.equals("pressing")) {
-//                intakeSetting = "normal";
-//                robot.rotateToPos(0, 0.7);
-//                autoAimPhase = 10;
                 intakeSetting = "normal";
-                robot.powerLauncher.toggleOn();
-                robot.powerLauncher.setLaunchAnglePerfect();
-                robot.wait(0.5);
-                queue = 10; // Shoot three rings
+//                robot.rotateToPos(0, 0.7);
+                autoAimPhase = 10;
+//                intakeSetting = "normal";
+//                robot.powerLauncher.toggleOn();
+//                robot.powerLauncher.setLaunchAnglePerfect();
+//                robot.wait(0.5);
+//                queue = 10; // Shoot three rings
             }
 
             // Terminate any automated functions and stop streaming
             if (controller1.y.equals("pressing")) {
                 movePhase = 0;
                 autoAimPhase = 0;
+                robot.turnWhiskerUp();
             }
 
             // Reset gyro in case of emergency
@@ -181,11 +191,11 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             if (controller1.dpad_right.equals("pressed")) {
-//                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
-//                movePhase = 4;
-                intakeSetting = "normal";
-                robot.rotateToPos(0, 0.7);
-                autoAimPhase = 10;
+                robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
+                movePhase = 4;
+//                intakeSetting = "normal";
+//                robot.rotateToPos(0, 0.7);
+//                autoAimPhase = 10;
             }
             else if (controller1.dpad_up.equals("pressed")) {
                 movePhase = 0;
@@ -279,13 +289,13 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
 
             //
-            if (controller2.left_trigger_state.equals("pressing")) {
-                robot.powerLauncher.setLaunchAngle2ndPerfect();
+            if (controller2.left_trigger > 0.7) {
+                robot.turnWhiskerUp();
             }
 
             //
-            if (controller2.right_trigger_state.equals("pressing")) {
-                robot.powerLauncher.setLaunchAngle3rdPerfect();
+            if (controller2.right_trigger > 0.7) {
+                robot.turnWhiskerDown();
             }
 
             // Angle the launcher down a tiny bit

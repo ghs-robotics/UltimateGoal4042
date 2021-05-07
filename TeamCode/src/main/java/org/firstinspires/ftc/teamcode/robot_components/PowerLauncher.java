@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.228; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.293; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
     public static double VERTICAL_OFFSET = 0.615; // When launcher is vertical at start of auto
@@ -132,11 +132,11 @@ public class PowerLauncher {
             resetQueueTimeStamp();
             queue = 3;
         }
-        else if (getTimePassed() > (queue == 3 ? 0.8 : 0.4)) {
+        else if (getTimePassed() > (queue == 3 ? 0.7 : 0.5)) {
             resetQueueTimeStamp();
             queue--;
         }
-        else if (getTimePassed() > (queue == 3 ? 0.4 : 0.2)) {
+        else if (getTimePassed() > (queue == 3 ? 0.35 : 0.25)) {
             setIndexerAngle(INDEXER_BACK_POS);
         }
         else {
