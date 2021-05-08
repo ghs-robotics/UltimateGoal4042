@@ -56,6 +56,8 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         int queue = 0; // Keeps track of how many rings are "in line" to be shot
         int movePhase = 0; // 0 is normal; not 0 means robot will perform an automated function
         int autoAimPhase = 0; // 0 is normal; not 0 means robot will perform an automated function
+        int rotatePhase = 0; // 0 is normal; not 0 means robot will perform an automated function
+        int offSet = 14; // offset from the tower goal for automated rotation
         String intakeSetting = "normal"; // "normal," "in," "out"
 
         robot.initWithCV();
@@ -102,6 +104,10 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 autoAimPhase = robot.autoShootInPhases(autoAimPhase);
                 robot.setAssistedLaunchAngle();
             }
+//            else if (rotatePhase > 0) {
+//                CVDetectionPipeline.sleepTimeMS = 0;
+//                rotatePhase = robot.rotateWithCVInPhases(rotatePhase, offSet);
+//            }
             else {
                 if (!controller1.right_bumper.equals("pressed")) {
                     CVDetectionPipeline.sleepTimeMS = 500;
@@ -114,14 +120,14 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                     );
                 }
                 else {
-                    CVDetectionPipeline.sleepTimeMS = 0;
+//                    CVDetectionPipeline.sleepTimeMS = 0;
 
                     // Always rotate to face tower goal
-                    if (robot.tower.isIdentified() && robot.tower.isActive()) {
-                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14, 10), true);
-                    } else {
+//                    if (robot.tower.isIdentified() && robot.tower.isActive()) {
+//                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14, 10), true);
+//                    } else {
                         robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
-                    }
+//                    }
 
 
                 }
@@ -157,19 +163,14 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Toggle speed
             if (controller1.x.equals("pressing")) {
                 intakeSetting = "normal";
-//                robot.rotateToPos(0, 0.7);
                 autoAimPhase = 10;
-//                intakeSetting = "normal";
-//                robot.powerLauncher.toggleOn();
-//                robot.powerLauncher.setLaunchAnglePerfect();
-//                robot.wait(0.5);
-//                queue = 10; // Shoot three rings
             }
 
             // Terminate any automated functions and stop streaming
             if (controller1.y.equals("pressing")) {
                 movePhase = 0;
                 autoAimPhase = 0;
+//                rotatePhase = 0;
                 robot.turnWhiskerUp();
             }
 
@@ -183,6 +184,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.speed = 1;
                 movePhase = 0;
                 autoAimPhase = 0;
+//                rotatePhase = 0;
                 CVDetectionPipeline.sleepTimeMS = 500;
                 robot.powerLauncher.toggleOff();
             }
@@ -190,9 +192,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             if (controller1.dpad_right.equals("pressed")) {
                 robot.tower.setTargetXW(LEFT_POWERSHOT_POS);
                 movePhase = 4;
-//                intakeSetting = "normal";
-//                robot.rotateToPos(0, 0.7);
-//                autoAimPhase = 10;
             }
             else if (controller1.dpad_up.equals("pressed")) {
                 movePhase = 0;

@@ -158,12 +158,12 @@ public class PowerLauncher {
             toggleOn();
             queueTimeStamp = elapsedTime.seconds();
         }
-        else if (getTimePassed() > 1.2) {
+        else if (getTimePassed() > 1.1) {
             setIndexerAngle(INDEXER_BACK_POS);
             queueTimeStamp = elapsedTime.seconds();
             queue--;
         }
-        else if (getTimePassed() > 1.0) {
+        else if (getTimePassed() > 0.8) {
             setIndexerAngle(INDEXER_FORWARD_POS);
         }
         return queue;
