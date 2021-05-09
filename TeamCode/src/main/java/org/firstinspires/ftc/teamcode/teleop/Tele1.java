@@ -193,15 +193,15 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Intake stuff
             if (intakeSetting.equals("in")) {
                 robot.powerLauncher.setLaunchAngleLoading();
-                robot.runIntake(0.85);
+                robot.runIntake(0.9);
             }
             else if (intakeSetting.equals("out")) {
                 robot.powerLauncher.setLaunchAngleLoading();
-                robot.runIntake(-0.85);
+                robot.runIntake(-0.9);
             }
             else {
-                // Run intake with right joystick
-                robot.runIntake(-0.9 * controller2.right_stick_y);
+                // Run intake with right joystick TODO
+                robot.runIntake((controller2.right_stick_y < 0 ? -0.6 : -1.0) * controller2.right_stick_y);
             }
 
             // Set loading launch angle if the intake is running
