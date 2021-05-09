@@ -91,14 +91,25 @@ public class TowerGoal extends CVObject {
     }
 
     public double cvtH2VerticalDist() {
+        return 0.0000291538 * Math.pow(h, 3) + 0.00202572 * Math.pow(h, 2) - 0.462133 * h + 19.3251;
+        /*
         return -0.0000270563 * Math.pow(h, 5) + 0.00422078 * Math.pow(h, 4)
                 - 0.260795 * Math.pow(h, 3) + 7.98312 * Math.pow(h, 2) - 121.456 * h + 747;
+         */
     }
 
     public double cvtFt2LaunchOffset(double ft) {
+        if (ft > 9) {
+            return -0.045;
+        }
+        double val = -0.599327 * Math.pow(ft, 3) + 16.7893 * Math.pow(ft, 2)  - 165.815 * ft + 524.146;
+        return val / 1000.0;
+        /*
         double val = -0.557143 * Math.pow(ft, 5) + 21.2024 * Math.pow(ft, 4)
                 - 319.119 * Math.pow(ft, 3) + 2377.3 * Math.pow(ft, 2) - 8789.82 * ft + 12939.5;
         return val / 1000.0;
+
+         */
     }
 
     public double findLaunchAngle(double angle) {

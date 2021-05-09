@@ -45,6 +45,15 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
     Controller controller1;
     Controller controller2;
 
+    int queue;  // Keeps track of how many rings are "in line" to be shot
+    int movePhase; // 0 is normal; not 0 means robot will perform an automated function
+    int autoAimPhase; // 0 is normal; not 0 means robot will perform an automated function
+    int offSet; // offset from the tower goal for automated rotation
+
+    double timeStamp;
+
+    String intakeSetting; // "normal," "in," "out"
+
     @Override
     public void runOpMode() {
 
@@ -53,12 +62,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
         controller1 = new Controller(gamepad1); // Whoever presses start + a
         controller2 = new Controller(gamepad2); // Whoever presses start + b
 
-        int queue = 0; // Keeps track of how many rings are "in line" to be shot
-        int movePhase = 0; // 0 is normal; not 0 means robot will perform an automated function
-        int autoAimPhase = 0; // 0 is normal; not 0 means robot will perform an automated function
-        int rotatePhase = 0; // 0 is normal; not 0 means robot will perform an automated function
-        int offSet = 14; // offset from the tower goal for automated rotation
-        String intakeSetting = "normal"; // "normal," "in," "out"
+        queue = 0;
+        movePhase = 0;
+        autoAimPhase = 0;
+        offSet = 14;
+        timeStamp = 0;
+        intakeSetting = "normal";
 
         robot.initWithCV();
         robot.powerLauncher.setLaunchAngleLoading();
@@ -94,55 +103,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // NOTE: TO USE THESE FUNCTIONS PRESS START A
 
 
-            // Checks if the robot should be performing an automated move function
-            if (movePhase > 0) {
-                CVDetectionPipeline.sleepTimeMS = 0;
-                movePhase = robot.moveInPhases(movePhase);
-            }
-            else if (autoAimPhase > 0) {
-                CVDetectionPipeline.sleepTimeMS = 0;
-                autoAimPhase = robot.autoShootInPhases(autoAimPhase);
-                robot.setAssistedLaunchAngle();
-            }
-//            else if (rotatePhase > 0) {
-//                CVDetectionPipeline.sleepTimeMS = 0;
-//                rotatePhase = robot.rotateWithCVInPhases(rotatePhase, offSet);
-//            }
-            else {
-                if (!controller1.right_bumper.equals("pressed")) {
-                    CVDetectionPipeline.sleepTimeMS = 500;
-                    // Mecanum wheel drive in meta mode
-                    robot.calculateDrivePowers(
-                            controller1.left_stick_x,
-                            controller1.left_stick_y,
-                            controller1.right_stick_x,
-                            controller1.right_stick_y
-                    );
-                }
-                else {
-//                    CVDetectionPipeline.sleepTimeMS = 0;
+            applyController1Joysticks();
 
-                    // Always rotate to face tower goal
-//                    if (robot.tower.isIdentified() && robot.tower.isActive()) {
-//                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14, 10), true);
-//                    } else {
-                        robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
-//                    }
-
-
-                }
-
-                if (controller1.left_trigger > 0.1) {
-                    robot.calculateDrivePowers(0, 0, -0.3 * controller1.left_trigger);
-                }
-                else if (controller1.right_trigger > 0.1) {
-                    robot.calculateDrivePowers(0, 0, 0.3 * controller1.right_trigger);
-                }
-
-                robot.updateDrive(); // Also updates telemetry
-            }
-
-            //
+            // Toggle intake on/off
             if (controller1.a.equals("pressing")) {
                 if (intakeSetting.equals("in")) {
                     intakeSetting = "normal";
@@ -151,7 +114,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 }
             }
 
-            //
+            // Toggle intake backward/off
             if (controller1.b.equals("pressing")) {
                 if (intakeSetting.equals("out")) {
                     intakeSetting = "normal";
@@ -160,18 +123,19 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 }
             }
 
-            // Toggle speed
+            // Auto aim and shoot
             if (controller1.x.equals("pressing")) {
                 intakeSetting = "normal";
-                autoAimPhase = 10;
+                robot.powerLauncher.toggleOn();
+                autoAimPhase = 15;
             }
 
             // Terminate any automated functions and stop streaming
             if (controller1.y.equals("pressing")) {
                 movePhase = 0;
                 autoAimPhase = 0;
-//                rotatePhase = 0;
                 robot.turnWhiskerUp();
+                robot.powerLauncher.toggleOff();
             }
 
             // Reset gyro in case of emergency
@@ -184,7 +148,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
                 robot.speed = 1;
                 movePhase = 0;
                 autoAimPhase = 0;
-//                rotatePhase = 0;
                 CVDetectionPipeline.sleepTimeMS = 500;
                 robot.powerLauncher.toggleOff();
             }
@@ -196,7 +159,7 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             else if (controller1.dpad_up.equals("pressed")) {
                 movePhase = 0;
                 autoAimPhase = 0;
-                robot.shootPowerShotsStrafe();
+                robot.shootPowerShotsStrafeCV();
             }
             else if (controller1.dpad_left.equals("pressed")) {
                 robot.tower.setTargetXW(PERFECT_LAUNCH_POS);
@@ -222,6 +185,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Checks if any rings need to be shot and takes care of indexing
             if (queue > 0) {
                 queue = robot.powerLauncher.handleIndexQueue(queue);
+                if (queue == 0) {
+                    robot.powerLauncher.toggleOff(); // toggle launcher off after indexing
+                }
             }
 
             // Intake stuff
@@ -324,6 +290,77 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             if (controller2.left_stick_button.equals("pressing")) {
                 robot.powerLauncher.setLaunchAnglePerfect();
             }
+        }
+    }
+
+    private void applyController1Joysticks() {
+
+        // Regular driving
+        if (movePhase == 0 && autoAimPhase == 0) {
+            CVDetectionPipeline.sleepTimeMS = 500;
+            runDriveFunctions(false);
+        }
+
+        // Stuff that happens during automated functions
+        else {
+            CVDetectionPipeline.sleepTimeMS = 0;
+
+            // Interrupting an automated function without terminating it
+            if (controller1.joyStickApplied()) {
+                runDriveFunctions(true);
+            }
+
+            // Checks if the robot should be performing an automated move function
+            else if (movePhase > 0) {
+                movePhase = robot.moveInPhases(movePhase);
+            }
+
+            // Checks if the robot should be performing an automated shoot function
+            else if (autoAimPhase > 0 && controller2.right_stick_y == 0) {
+                autoAimPhase = robot.autoShootInPhases(autoAimPhase);
+                robot.setAssistedLaunchAngle();
+            }
+
+            // Makes sure the launcher gets powered off TODO
+            if (autoAimPhase == 1 || autoAimPhase == 2) {
+                autoAimPhase = robot.autoShootInPhases(autoAimPhase);
+            }
+        }
+
+        robot.updateDrive(); // Also updates telemetry
+    }
+
+    private void runDriveFunctions(boolean autoTurret) {
+
+        // Regular meta drive for mecanum wheel drivebase
+        if (!controller1.right_bumper.equals("pressed")) {
+            robot.calculateDrivePowers(
+                    controller1.left_stick_x,
+                    controller1.left_stick_y,
+                    controller1.right_stick_x,
+                    controller1.right_stick_y
+            );
+        }
+
+        // Adjust angle if we're holding down the right bumper
+        else if (autoTurret && robot.tower.isIdentified() && robot.tower.isActive()) {
+            // Always rotate to face tower goal
+            CVDetectionPipeline.sleepTimeMS = 0;
+            if (controller2.right_stick_y == 0) {
+                robot.setAssistedLaunchAngle();
+            }
+            robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, robot.tower.getRotPIDVal(14, 10), true);
+        }
+        else {
+            robot.calculateDrivePowers(controller1.left_stick_x, controller1.left_stick_y, 1.0, 0);
+        }
+
+        // Micro-adjust robot's angle
+        if (controller1.left_trigger > 0.1) {
+            robot.calculateDrivePowers(0, 0, -0.35 * controller1.left_trigger);
+        }
+        else if (controller1.right_trigger > 0.1) {
+            robot.calculateDrivePowers(0, 0, 0.35 * controller1.right_trigger);
         }
     }
 }

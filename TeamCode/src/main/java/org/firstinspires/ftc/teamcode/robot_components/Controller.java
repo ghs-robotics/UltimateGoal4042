@@ -114,4 +114,9 @@ public class Controller {
         }
         return state;
     }
+
+    // Returns true if any of the joysticks are being applied
+    public boolean joyStickApplied() {
+        return (right_stick_x != 0 || right_stick_y != 0 || left_stick_x != 0 || left_stick_y != 0);
+    }
 }

@@ -132,18 +132,15 @@ public class PowerLauncher {
             resetQueueTimeStamp();
             queue = 3;
         }
-        else if (getTimePassed() > (queue == 3 ? 0.64 : 0.44)) {
+        else if (getTimePassed() > (queue == 3 ? 0.64 : 0.50)) {
             resetQueueTimeStamp();
             queue--;
         }
-        else if (getTimePassed() > (queue == 3 ? 0.32 : 0.22)) {
+        else if (getTimePassed() > (queue == 3 ? 0.31 : 0.24)) { // TODO
             setIndexerAngle(INDEXER_BACK_POS);
         }
         else {
             setIndexerAngle(INDEXER_FORWARD_POS);
-        }
-        if (queue == 0) { // Turn launcher off after indexing
-            toggleOff();
         }
         return queue;
     }

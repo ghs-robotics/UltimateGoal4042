@@ -226,71 +226,76 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     // This allows us to terminate the function early (because we can just set phase to be 0)
     public int autoShootInPhases(int phase) {
 
+        int offSet = 0;
+
         // Distance between tower goal and left side of screen: tower.x
         // Distance between tower goal and right side of screen: 320 - tower.x - tower.w
-        double error = tower.getLeftRightError(14);
+        double error = tower.getLeftRightError(offSet);
 
-        if (phase >= 10) {
+        if (phase >= 11) {
             activateFieldLocalization();
             tower.setTargetXW(LEFT_POWERSHOT_POS);
             targetGyroAngle = getReasonableGyroAngle(0);
-            phase = 9;
+            phase = 10;
         }
 
         switch (phase) {
-            case 9:
+            case 10:
                 if (cameras.isStreaming() && cameras.isWebcamReady()) {
                     phase--;
                 }
+                powerLauncher.toggleOn();
                 break;
-            case 8:
+            case 9:
                 if (getAbsoluteGyroError() < 35 && tower.isIdentified()) {
                     resetPhaseTimeStamp();
-                    powerLauncher.toggleOn();
                     phase--;
                 } else {
                     adjustPosition();
                 }
                 break;
-            case 7:
+            case 8:
                 if (Math.abs(error) <= 40 && getPhaseTimePassed() > 0.1) {
                     resetPhaseTimeStamp();
                     phase--;
                 } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14, 5));
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(offSet, 5));
                     sendDrivePowers();
                 }
                 break;
-            case 6:
+            case 7:
                 if (Math.abs(error) <= 10 && getPhaseTimePassed() > 0.1) {
                     resetPhaseTimeStamp();
                     phase--;
                 } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14, 4));
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(offSet, 4));
                     if (tower.isIdentified() && Math.abs(error) < 20) {
                         setAssistedLaunchAngle();
                     }
                     sendDrivePowers();
                 }
                 break;
-            case 5:
+            case 6:
                 if (Math.abs(error) <= (tower.h > 32 ? 10 : 3) && getPhaseTimePassed() > 0.1) {
                     stopDrive();
                     phase--;
                 } else {
-                    calculateDrivePowers(0, 0, tower.getRotPIDVal(14, 3));
+                    calculateDrivePowers(0, 0, tower.getRotPIDVal(offSet, 3));
                     setAssistedLaunchAngle();
                     sendDrivePowers();
                 }
                 break;
         }
 
-        if (0 < phase && phase < 5) {
-            phase = powerLauncher.handleIndexQueue(phase);
-            if (phase == 0) {
-                powerLauncher.toggleOff(); // Turn launcher off after indexing
-                deactivateFieldLocalization();
-            }
+        if (1 < phase && phase < 6) {
+            phase = powerLauncher.handleIndexQueue(phase - 1) + 1;
+            resetPhaseTimeStamp();
+        }
+
+        else if (phase == 1 && getPhaseTimePassed() > 0.5) {
+            powerLauncher.toggleOff(); // Turn launcher off after indexing
+            deactivateFieldLocalization();
+            phase--;
         }
 
         return phase;
@@ -604,6 +609,38 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         powerLauncher.toggleOff();
     }
 
+    public void shootPowerShotsAngled() {
+        // Setup
+        activateFieldLocalization();
+        targetGyroAngle = getReasonableGyroAngle(0);
+
+        powerLauncher.setLaunchAnglePerfect();
+        powerLauncher.toggleOn(0.85);
+        rotateWithCV(-80);
+        powerLauncher.setIndexerForwardPos();
+        wait(0.2);
+        powerLauncher.setIndexerBackPos();
+
+        calculateDrivePowers(0, 0.6, 0, true);
+        sendDrivePowers();
+
+        powerLauncher.toggleOn(0.87);
+        wait(0.24);
+        powerLauncher.setIndexerForwardPos();
+        wait(0.2);
+        powerLauncher.setIndexerBackPos();
+
+        powerLauncher.toggleOn(0.89);
+        wait(0.24);
+        powerLauncher.setIndexerForwardPos();
+        wait(0.3);
+        powerLauncher.setIndexerBackPos();
+        wait(0.5);
+
+        powerLauncher.toggleOff();
+        stopDrive();
+    }
+
     public void shootPowerShotsStrafe() {
         // Setup
         activateFieldLocalization();
@@ -611,7 +648,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
         powerLauncher.setLaunchAnglePerfect();
 //        powerLauncher.changeLaunchAngle(-0.020);
-        powerLauncher.toggleOn(0.9);
+        powerLauncher.toggleOn(0.85);
         rotateWithCV(-60);
         powerLauncher.setIndexerForwardPos();
         wait(0.2);
@@ -628,7 +665,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         powerLauncher.setIndexerBackPos();
 
         powerLauncher.toggleOn(0.94);
-        wait(0.25);
+        wait(0.28);
         powerLauncher.setIndexerForwardPos();
         wait(0.25);
         powerLauncher.setIndexerBackPos();
@@ -646,7 +683,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
         powerLauncher.setLaunchAnglePerfect();
         powerLauncher.changeLaunchAngle(0.015);
-        powerLauncher.toggleOn(0.84);
+        powerLauncher.toggleOn(0.85);
         rotateWithCV(-73);
 
         powerLauncher.setIndexerForwardPos();
@@ -655,9 +692,10 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         movePowerShot();
         wait(0.25);
 
-        powerLauncher.toggleOn(0.84);
+        powerLauncher.toggleOn(0.87);
 
-        while (tower.getLeftRightError(-104) > 20) {
+        while (tower.getLeftRightError(-104) > 15) {
+            CVDetectionPipeline.sleepTimeMS = 0;
             movePowerShot();
         }
 
@@ -668,14 +706,15 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         wait(0.25);
 
         resetPhaseTimeStamp();
-        powerLauncher.toggleOn(0.84);
+        powerLauncher.toggleOn(0.87);
 
-        while (tower.getLeftRightError(-148) > 30) {
+        while (tower.getLeftRightError(-148) > 15) {
+            CVDetectionPipeline.sleepTimeMS = 0;
             movePowerShot();
         }
 
         powerLauncher.setIndexerForwardPos();
-        wait(0.25);
+        wait(0.5);
         powerLauncher.setIndexerBackPos();
 
         powerLauncher.toggleOff();
