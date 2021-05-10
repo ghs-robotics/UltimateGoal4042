@@ -14,7 +14,7 @@ public interface FieldPositions {
     int[] NEXT_TO_STARTER_STACK_POS = new int[]{94 + xOffset, 67}; // Where to go to avoid first starter stack
 
     int[] LEFT_MOVING_POWERSHOT_POS = new int[]{108, 58};
-    int[] LEFT_POWERSHOT_POS = new int[]{97, 58};
+    int[] LEFT_POWERSHOT_POS = new int[]{97, 60};
     int[] MID_POWERSHOT_POS = new int[]{80, 58};
     int[] RIGHT_POWERSHOT_POS = new int[]{67, 58}; // - 6.5 degrees
 
@@ -24,18 +24,18 @@ public interface FieldPositions {
     int[] PARK_4_POS = new int[]{96 + xOffset, 74};
 
     // Position pertaining to the wobble goals
-    int[] CONFIG_0_POS_I = new int[]{174 + xOffset, 85}; // Where to drop first wobble goal
-    int[] CONFIG_0_POS_II = new int[]{154 + xOffset, 85}; // Where to drop second wobble goal
+    int[] CONFIG_0_POS_I = new int[]{170 + xOffset, 85}; // Where to drop first wobble goal
+    int[] CONFIG_0_POS_II = new int[]{150 + xOffset, 85}; // Where to drop second wobble goal
 
-    int[] PRE_CONFIG_1_POS_I = new int[]{93 + xOffset, 85};
-    int[] PRE_CONFIG_1_POS_II = new int[]{66 + xOffset, 85};
+    int[] PRE_CONFIG_1_POS_I = new int[]{90 + xOffset, 85};
+    int[] PRE_CONFIG_1_POS_II = new int[]{63 + xOffset, 85};
     int CONFIG_1_WALL_HEIGHT = 24;
 
     int[] PRE_CONFIG_4_POS_I = new int[]{180 + xOffset, 90};
     int[] PRE_CONFIG_4_POS_II = new int[]{157 + xOffset, 90};
     int CONFIG_4_WALL_HEIGHT = 24;
 
-    int[] SECOND_WOBBLE_POS = new int[]{140 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
+    int[] SECOND_WOBBLE_POS = new int[]{136 + xOffset, 45}; // Where to go before moving forward and grabbing 2nd wobble
     int SECOND_WOBBLE_WALL_HEIGHT = 75;
 
     int[] PRE_SECOND_WOBBLE_POS = new int[]{136, 52};

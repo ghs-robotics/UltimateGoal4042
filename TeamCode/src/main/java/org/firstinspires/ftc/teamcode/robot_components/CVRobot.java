@@ -288,6 +288,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         }
 
         if (1 < phase && phase < 6) {
+            stopDrive();
             phase = powerLauncher.handleIndexQueue(phase - 1) + 1;
             resetPhaseTimeStamp();
         }
@@ -580,7 +581,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     }
 
     // Go to MID_POWERSHOT_POS before calling this
-    public void shootPowerShots() { // TODO : OPTIMIZE
+    public void shootPowerShots() {
 
         // Setup
         activateFieldLocalization();
@@ -590,7 +591,6 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         powerLauncher.changeLaunchAngle(-0.015);
         rotateWithCV(-148);
 
-        // TODO
         powerLauncher.toggleOn(0.94);
         wait(0.4);
         indexRings(1);
@@ -682,9 +682,8 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         targetGyroAngle = getReasonableGyroAngle(0);
 
         powerLauncher.setLaunchAnglePerfect();
-        powerLauncher.changeLaunchAngle(0.015);
-        powerLauncher.toggleOn(0.85);
-        rotateWithCV(-73);
+        powerLauncher.toggleOn(0.84);
+        rotateWithCV(-80);
 
         powerLauncher.setIndexerForwardPos();
         wait(0.25);
@@ -692,7 +691,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         movePowerShot();
         wait(0.25);
 
-        powerLauncher.toggleOn(0.87);
+        powerLauncher.toggleOn(0.85);
 
         while (tower.getLeftRightError(-104) > 15) {
             CVDetectionPipeline.sleepTimeMS = 0;
@@ -706,7 +705,7 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
         wait(0.25);
 
         resetPhaseTimeStamp();
-        powerLauncher.toggleOn(0.87);
+        powerLauncher.toggleOn(0.86);
 
         while (tower.getLeftRightError(-148) > 15) {
             CVDetectionPipeline.sleepTimeMS = 0;
@@ -729,22 +728,10 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
     // Strafe left and right until aligned with wobble goal
     public void alignToWobble() {
-//        wobble.activate();
-//        while (wobble.isIdentified()) {
-//            CVDetectionPipeline.sleepTimeMS = 0;
-//            calculateDrivePowers(-0.3, 0, 0, true);
-//            sendDrivePowers();
-//        }
-
-        while (tower.x > 135) {
+        while (tower.x > 130) {
             calculateDrivePowers(0.3, 0, getGyroPIDValue());
             sendDrivePowers();
         }
-//        while (tower.x < 135) {
-//            calculateDrivePowers(-0.3, 0, getGyroPIDValue());
-//            sendDrivePowers();
-//        }
-
         stopDrive();
     }
 }

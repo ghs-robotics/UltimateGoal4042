@@ -201,7 +201,12 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             }
             else {
                 // Run intake with right joystick TODO
-                robot.runIntake((controller2.right_stick_y < 0 ? -0.6 : -1.0) * controller2.right_stick_y);
+                if (controller2.right_stick_y > 0) {
+                    robot.runIntake(-0.9 * controller2.right_stick_y);
+                }
+                else {
+                    robot.runIntake((controller2.right_stick_button.equals("pressed") ? -0.9 : -0.6) * controller2.right_stick_y);
+                }
             }
 
             // Set loading launch angle if the intake is running
@@ -303,7 +308,6 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
 
         // Stuff that happens during automated functions
         else {
-            CVDetectionPipeline.sleepTimeMS = 0;
 
             // Interrupting an automated function without terminating it
             if (controller1.joyStickApplied()) {
@@ -324,6 +328,9 @@ public class Tele1 extends LinearOpMode implements FieldPositions {
             // Makes sure the launcher gets powered off TODO
             if (autoAimPhase == 1 || autoAimPhase == 2) {
                 autoAimPhase = robot.autoShootInPhases(autoAimPhase);
+                CVDetectionPipeline.sleepTimeMS = 500;
+            } else {
+                CVDetectionPipeline.sleepTimeMS = 0;
             }
         }
 

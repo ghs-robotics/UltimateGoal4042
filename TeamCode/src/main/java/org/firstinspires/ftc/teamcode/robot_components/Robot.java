@@ -46,9 +46,13 @@ public class Robot extends DriveBase implements HSVConstants, FieldPositions {
 
     // Launches a ring by moving the indexerServo; this method is SLOW intentionally
     public void indexRings(int rings) {
+        double time = 0.4;
+        if (rings >= 2) {
+            time = 0.25;
+        }
         for (int i = 0; i < rings; i++) {
-            powerLauncher.index(0.4);
-            wait(0.3);
+            powerLauncher.index(time);
+            wait(time);
         }
     }
 

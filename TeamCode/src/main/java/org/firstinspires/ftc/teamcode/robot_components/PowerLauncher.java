@@ -9,10 +9,10 @@ import com.qualcomm.robotcore.util.Range;
 public class PowerLauncher {
 
     // Launcher angles
-    public static double PERFECT_LAUNCH_ANGLE = 0.270; // Perfect launch angle
+    public static double PERFECT_LAUNCH_ANGLE = 0.250; // Perfect launch angle
 
     // Offsets are added to PERFECT LAUNCH ANGLE
-    public static double VERTICAL_OFFSET = 0.615; // When launcher is vertical at start of auto
+    public static double VERTICAL_OFFSET = 0.575; // When launcher is vertical at start of auto
     public static double LOADING_OFFSET = -0.175; // When robot is loading/intaking rings
     public static double SECOND_PERFECT_OFFSET = -0.032; // 2 ft behind perfect launch pos
     public static double THIRD_PERFECT_OFFSET = -0.038; // 4 ft behind perfect launch pos
