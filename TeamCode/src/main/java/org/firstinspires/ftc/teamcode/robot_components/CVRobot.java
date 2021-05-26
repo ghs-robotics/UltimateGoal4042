@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.cv_objects.WobbleGoal;
 import org.firstinspires.ftc.teamcode.data.FieldPositions;
 import org.firstinspires.ftc.teamcode.data.HSVConstants;
 
+// "extends" means child class of Robot (has all functions of Robot)
 public class CVRobot extends Robot implements HSVConstants, FieldPositions {
 
     public CameraManager camera; // Manages the webcam and phone camera
@@ -27,10 +28,12 @@ public class CVRobot extends Robot implements HSVConstants, FieldPositions {
     public WobbleGoal wobble;
 
     // Used in several methods for regulating motor powers for in automated functions
+    // Protected is an access modifier, "protected" means any other class in the package can change/access the value
     protected double x = 0;
     protected double y = 0;
 
     // Stores data for automated functions in TeleOp
+    // Recording of the elapsed time at a certain point in a phase
     protected double phaseTimeStamp = 0;
 
     // PID controllers
